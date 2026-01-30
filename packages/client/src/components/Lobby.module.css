@@ -1,0 +1,89 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 60px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.header h2 {
+  font-size: 2rem;
+  margin-bottom: 16px;
+}
+
+.code {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.code span {
+  font-family: monospace;
+  font-size: 1.5rem;
+  color: #667eea;
+  font-weight: bold;
+  letter-spacing: 4px;
+}
+
+.players {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 32px;
+}
+
+.players h3 {
+  margin-bottom: 16px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.players ul {
+  list-style: none;
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.player:last-child {
+  border-bottom: none;
+}
+
+.playerColor {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.playerName {
+  flex: 1;
+  font-weight: 500;
+}
+
+.disconnected {
+  font-size: 0.8rem;
+  color: #e74c3c;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.waiting {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 12px;
+}

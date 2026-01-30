@@ -1,0 +1,142 @@
+.container {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+}
+
+.label {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.registers {
+  margin-bottom: 8px;
+}
+
+.registerSlots {
+  display: flex;
+  gap: 8px;
+}
+
+.register {
+  flex: 1;
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  font-size: 0.7rem;
+  text-align: center;
+  padding: 4px;
+}
+
+.register.clickable {
+  cursor: pointer;
+  border-color: #667eea;
+}
+
+.register.clickable:hover {
+  background: rgba(102, 126, 234, 0.2);
+}
+
+.register.filled {
+  background: rgba(102, 126, 234, 0.2);
+  border-style: solid;
+  border-color: #667eea;
+}
+
+.registerNumber {
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.2);
+  font-weight: bold;
+}
+
+.hand {
+  flex: 1;
+  overflow: auto;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.card {
+  background: linear-gradient(135deg, #2d3436 0%, #1a1a2e 100%);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.card:hover:not(.disabled):not(.used) {
+  border-color: #667eea;
+  transform: translateY(-2px);
+}
+
+.card.selected {
+  border-color: #667eea;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+  box-shadow: 0 0 12px rgba(102, 126, 234, 0.4);
+}
+
+.card.used {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.card.disabled {
+  cursor: not-allowed;
+}
+
+.cardType {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.priority {
+  display: block;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.clearBtn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: rgba(231, 76, 60, 0.8);
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.clearBtn:hover {
+  background: #e74c3c;
+}

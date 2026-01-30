@@ -1,0 +1,83 @@
+.container {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.playerColor {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+.playerName {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.stat:last-child {
+  margin-bottom: 0;
+}
+
+.label {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}
+
+.value {
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.healthBar {
+  position: relative;
+  width: 120px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.healthFill {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.healthText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.lives {
+  display: flex;
+  gap: 8px;
+}
+
+.life {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.lifeActive {
+  color: #e74c3c;
+}
