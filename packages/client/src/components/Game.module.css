@@ -20,6 +20,8 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  max-height: 100%;
+  overflow-y: auto;
 }
 
 .loading {
@@ -49,8 +51,4 @@
 .winner h2 {
   color: #2ecc71;
   margin-bottom: 8px;
-}
-
-.leaveBtn {
-  margin-top: auto;
 }

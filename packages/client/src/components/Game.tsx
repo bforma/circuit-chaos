@@ -1,5 +1,4 @@
 import { useGameStore } from '../stores/gameStore';
-import { useSocket } from '../hooks/useSocket';
 import { GameBoard } from '../game/GameBoard';
 import { ProgrammingPanel } from './ProgrammingPanel';
 import { PlayerHUD } from './PlayerHUD';
@@ -9,7 +8,6 @@ import styles from './Game.module.css';
 
 export function Game() {
   const { gameState, getCurrentPlayer } = useGameStore();
-  const { leaveGame } = useSocket();
   const currentPlayer = getCurrentPlayer();
 
   if (!gameState || !currentPlayer) {
@@ -44,10 +42,6 @@ export function Game() {
             </p>
           </div>
         )}
-
-        <button className={`btn btn-secondary ${styles.leaveBtn}`} onClick={leaveGame}>
-          Leave Game
-        </button>
       </div>
 
       <DisconnectVoteModal />
