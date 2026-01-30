@@ -56,4 +56,17 @@ test.describe('Create Game', () => {
     expect(gameCode).toBeTruthy();
     expect(gameCode).toHaveLength(4);
   });
+
+  test('returns to menu when leaving game', async ({ page }) => {
+    await page.getByPlaceholder('Your name').fill('Host');
+    await page.getByRole('button', { name: 'Create' }).click();
+
+    await expect(page.getByText('Game Lobby')).toBeVisible({ timeout: 5000 });
+
+    await page.getByRole('button', { name: 'Leave Game' }).click();
+
+    // Should return to main menu
+    await expect(page.getByRole('button', { name: 'Create Game' })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('button', { name: 'Join Game' })).toBeVisible();
+  });
 });

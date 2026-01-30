@@ -85,7 +85,7 @@ export function useSocket() {
 
   const leaveGame = () => {
     socket?.emit('game:leave');
-    reset();
+    useGameStore.getState().reset();
   };
 
   const startGame = () => {
