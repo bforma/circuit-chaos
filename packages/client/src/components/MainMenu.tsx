@@ -3,6 +3,27 @@ import { useGameStore } from '../stores/gameStore';
 import { useSocket } from '../hooks/useSocket';
 import styles from './MainMenu.module.css';
 
+const MAX_NAME_LENGTH = 20;
+const MIN_NAME_LENGTH = 2;
+
+function validateName(name: string): string | null {
+  const trimmed = name.trim();
+  if (!trimmed) {
+    return 'Please enter your name';
+  }
+  if (trimmed.length < MIN_NAME_LENGTH) {
+    return `Name must be at least ${MIN_NAME_LENGTH} characters`;
+  }
+  if (trimmed.length > MAX_NAME_LENGTH) {
+    return `Name cannot exceed ${MAX_NAME_LENGTH} characters`;
+  }
+  // Check for at least one letter or number
+  if (!/[a-zA-Z0-9]/.test(trimmed)) {
+    return 'Name must contain at least one letter or number';
+  }
+  return null;
+}
+
 export function MainMenu() {
   const [name, setName] = useState('');
   const [gameCode, setGameCode] = useState('');
@@ -19,16 +40,33 @@ export function MainMenu() {
     }
   }, [gameIdToJoin]);
 
+  const handleNameChange = (value: string) => {
+    setName(value);
+    if (error) setError(null);
+  };
+
   const handleCreateGame = () => {
-    if (!name.trim()) return;
+    const nameError = validateName(name);
+    if (nameError) {
+      setError(nameError);
+      return;
+    }
     setError(null);
-    createGame(name);
+    createGame(name.trim());
   };
 
   const handleJoinGame = () => {
-    if (!name.trim() || !gameCode.trim()) return;
+    const nameError = validateName(name);
+    if (nameError) {
+      setError(nameError);
+      return;
+    }
+    if (!gameCode.trim()) {
+      setError('Please enter a game code');
+      return;
+    }
     setError(null);
-    joinGame(gameCode.toUpperCase(), name);
+    joinGame(gameCode.toUpperCase(), name.trim());
   };
 
   const handleBack = () => {
@@ -57,12 +95,13 @@ export function MainMenu() {
 
       {mode === 'create' && (
         <div className={styles.form}>
+          {error && <p className={styles.error}>{error}</p>}
           <input
             type="text"
             placeholder="Your name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
-            maxLength={20}
+            onChange={(e) => handleNameChange(e.target.value)}
+            maxLength={MAX_NAME_LENGTH}
             autoFocus
           />
           <div className={styles.buttons}>
@@ -88,8 +127,8 @@ export function MainMenu() {
             type="text"
             placeholder="Your name"
             value={name}
-            onChange={(e) => setName(e.target.value)}
-            maxLength={20}
+            onChange={(e) => handleNameChange(e.target.value)}
+            maxLength={MAX_NAME_LENGTH}
             autoFocus
           />
           {!gameIdToJoin && (
@@ -97,7 +136,10 @@ export function MainMenu() {
               type="text"
               placeholder="Game code"
               value={gameCode}
-              onChange={(e) => setGameCode(e.target.value.toUpperCase())}
+              onChange={(e) => {
+                setGameCode(e.target.value.toUpperCase());
+                if (error) setError(null);
+              }}
               maxLength={6}
             />
           )}

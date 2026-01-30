@@ -39,4 +39,46 @@ test.describe('Main Menu', () => {
     await expect(page.getByRole('button', { name: 'Create Game' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Join Game' })).toBeVisible();
   });
+
+  test('shows error for empty name when creating game', async ({ page }) => {
+    await page.getByRole('button', { name: 'Create Game' }).click();
+    await page.getByRole('button', { name: 'Create' }).click();
+
+    await expect(page.getByText('Please enter your name')).toBeVisible();
+  });
+
+  test('shows error for name too short when creating game', async ({ page }) => {
+    await page.getByRole('button', { name: 'Create Game' }).click();
+    await page.getByPlaceholder('Your name').fill('A');
+    await page.getByRole('button', { name: 'Create' }).click();
+
+    await expect(page.getByText('Name must be at least 2 characters')).toBeVisible();
+  });
+
+  test('shows error for name with only special characters', async ({ page }) => {
+    await page.getByRole('button', { name: 'Create Game' }).click();
+    await page.getByPlaceholder('Your name').fill('!!!');
+    await page.getByRole('button', { name: 'Create' }).click();
+
+    await expect(page.getByText('Name must contain at least one letter or number')).toBeVisible();
+  });
+
+  test('clears error when typing in name field', async ({ page }) => {
+    await page.getByRole('button', { name: 'Create Game' }).click();
+    await page.getByRole('button', { name: 'Create' }).click();
+
+    await expect(page.getByText('Please enter your name')).toBeVisible();
+
+    await page.getByPlaceholder('Your name').fill('T');
+
+    await expect(page.getByText('Please enter your name')).not.toBeVisible();
+  });
+
+  test('shows error for empty game code when joining', async ({ page }) => {
+    await page.getByRole('button', { name: 'Join Game' }).click();
+    await page.getByPlaceholder('Your name').fill('TestPlayer');
+    await page.getByRole('button', { name: 'Join' }).click();
+
+    await expect(page.getByText('Please enter a game code')).toBeVisible();
+  });
 });
