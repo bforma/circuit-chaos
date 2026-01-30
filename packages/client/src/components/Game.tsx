@@ -2,6 +2,7 @@ import { useGameStore } from '../stores/gameStore';
 import { GameBoard } from '../game/GameBoard';
 import { ProgrammingPanel } from './ProgrammingPanel';
 import { PlayerHUD } from './PlayerHUD';
+import { PlayerList } from './PlayerList';
 import styles from './Game.module.css';
 
 export function Game() {
@@ -19,6 +20,7 @@ export function Game() {
       </div>
 
       <div className={styles.sidebar}>
+        <PlayerList />
         <PlayerHUD player={currentPlayer} />
 
         {gameState.phase === 'programming' && (
