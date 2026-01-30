@@ -18,6 +18,10 @@ interface GameStore {
   gameState: GameState | null;
   setGameState: (state: GameState | null) => void;
 
+  // Join state (for URL-based joining)
+  gameIdToJoin: string | null;
+  setGameIdToJoin: (gameId: string | null) => void;
+
   // Local programming state
   selectedCard: Card | null;
   setSelectedCard: (card: Card | null) => void;
@@ -46,6 +50,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
   gameState: null,
   setGameState: (gameState) => set({ gameState }),
 
+  // Join state
+  gameIdToJoin: null,
+  setGameIdToJoin: (gameIdToJoin) => set({ gameIdToJoin }),
+
   // Local programming state
   selectedCard: null,
   setSelectedCard: (card) => set({ selectedCard: card }),
@@ -63,6 +71,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   reset: () => set({
     screen: 'menu',
     gameState: null,
+    gameIdToJoin: null,
     selectedCard: null,
   }),
 }));

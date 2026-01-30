@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGameStore } from '../stores/gameStore';
 import { useSocket } from '../hooks/useSocket';
 import styles from './MainMenu.module.css';
@@ -8,19 +8,32 @@ export function MainMenu() {
   const [gameCode, setGameCode] = useState('');
   const [mode, setMode] = useState<'menu' | 'create' | 'join'>('menu');
 
-  const { playerName, setPlayerName, setScreen } = useGameStore();
+  const { gameIdToJoin, setGameIdToJoin } = useGameStore();
   const { createGame, joinGame } = useSocket();
+
+  // Auto-switch to join mode if there's a game ID in the URL
+  useEffect(() => {
+    if (gameIdToJoin) {
+      setGameCode(gameIdToJoin);
+      setMode('join');
+    }
+  }, [gameIdToJoin]);
 
   const handleCreateGame = () => {
     if (!name.trim()) return;
-    setPlayerName(name);
     createGame(name);
   };
 
   const handleJoinGame = () => {
     if (!name.trim() || !gameCode.trim()) return;
-    setPlayerName(name);
     joinGame(gameCode.toUpperCase(), name);
+  };
+
+  const handleBack = () => {
+    setMode('menu');
+    setGameIdToJoin(null);
+    // Clear URL hash if we're going back to menu
+    window.history.replaceState(null, '', window.location.pathname);
   };
 
   return (
@@ -47,12 +60,13 @@ export function MainMenu() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={20}
+            autoFocus
           />
           <div className={styles.buttons}>
             <button className="btn btn-primary" onClick={handleCreateGame}>
               Create
             </button>
-            <button className="btn btn-secondary" onClick={() => setMode('menu')}>
+            <button className="btn btn-secondary" onClick={handleBack}>
               Back
             </button>
           </div>
@@ -61,25 +75,33 @@ export function MainMenu() {
 
       {mode === 'join' && (
         <div className={styles.form}>
+          {gameIdToJoin && (
+            <p className={styles.joinPrompt}>
+              Enter your name to join game <strong>{gameIdToJoin}</strong>
+            </p>
+          )}
           <input
             type="text"
             placeholder="Your name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={20}
+            autoFocus
           />
-          <input
-            type="text"
-            placeholder="Game code"
-            value={gameCode}
-            onChange={(e) => setGameCode(e.target.value.toUpperCase())}
-            maxLength={6}
-          />
+          {!gameIdToJoin && (
+            <input
+              type="text"
+              placeholder="Game code"
+              value={gameCode}
+              onChange={(e) => setGameCode(e.target.value.toUpperCase())}
+              maxLength={6}
+            />
+          )}
           <div className={styles.buttons}>
             <button className="btn btn-primary" onClick={handleJoinGame}>
               Join
             </button>
-            <button className="btn btn-secondary" onClick={() => setMode('menu')}>
+            <button className="btn btn-secondary" onClick={handleBack}>
               Back
             </button>
           </div>

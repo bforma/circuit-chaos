@@ -41,3 +41,15 @@
 .form input {
   width: 100%;
 }
+
+.joinPrompt {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+
+.joinPrompt strong {
+  color: #667eea;
+  font-family: monospace;
+  letter-spacing: 2px;
+}

@@ -3,27 +3,41 @@ import { io, Socket } from 'socket.io-client';
 import { useGameStore } from '../stores/gameStore';
 import type { GameState, Card } from '@circuit-chaos/shared';
 
-// Local storage keys
-const STORAGE_KEYS = {
-  gameId: 'circuit-chaos-gameId',
-  playerId: 'circuit-chaos-playerId',
-} as const;
-
-// Session helpers
-function saveSession(gameId: string, playerId: string) {
-  localStorage.setItem(STORAGE_KEYS.gameId, gameId);
-  localStorage.setItem(STORAGE_KEYS.playerId, playerId);
+// URL and session helpers
+function getGameIdFromUrl(): string | null {
+  const hash = window.location.hash;
+  // Format: #ABCD or #/ABCD
+  const match = hash.match(/^#\/?([A-Z0-9]{4})$/i);
+  return match ? match[1].toUpperCase() : null;
 }
 
+function setGameIdInUrl(gameId: string) {
+  window.history.replaceState(null, '', `#${gameId}`);
+}
+
+function clearGameIdFromUrl() {
+  window.history.replaceState(null, '', window.location.pathname);
+}
+
+function getPlayerIdForGame(gameId: string): string | null {
+  return localStorage.getItem(`circuit-chaos-player-${gameId}`);
+}
+
+function savePlayerIdForGame(gameId: string, playerId: string) {
+  localStorage.setItem(`circuit-chaos-player-${gameId}`, playerId);
+}
+
+function clearPlayerIdForGame(gameId: string) {
+  localStorage.removeItem(`circuit-chaos-player-${gameId}`);
+}
+
+// Get session from URL + localStorage
 function getSession() {
-  const gameId = localStorage.getItem(STORAGE_KEYS.gameId);
-  const playerId = localStorage.getItem(STORAGE_KEYS.playerId);
-  return gameId && playerId ? { gameId, playerId } : null;
-}
+  const gameId = getGameIdFromUrl();
+  if (!gameId) return null;
 
-function clearSession() {
-  localStorage.removeItem(STORAGE_KEYS.gameId);
-  localStorage.removeItem(STORAGE_KEYS.playerId);
+  const playerId = getPlayerIdForGame(gameId);
+  return playerId ? { gameId, playerId } : { gameId, playerId: null };
 }
 
 // Socket events
@@ -60,11 +74,14 @@ function initializeSocket() {
     console.log('Connected to server');
     useGameStore.getState().setConnected(true);
 
-    // Try to reconnect to existing session
+    // Try to reconnect to existing session from URL
     const session = getSession();
-    if (session) {
+    if (session?.gameId && session?.playerId) {
       console.log('Attempting to reconnect to game:', session.gameId);
       socket?.emit('game:reconnect', session.gameId, session.playerId);
+    } else if (session?.gameId) {
+      // Game ID in URL but no player ID - show join prompt
+      useGameStore.getState().setGameIdToJoin(session.gameId);
     }
   });
 
@@ -75,33 +92,35 @@ function initializeSocket() {
 
   socket.on('game:created', ({ gameId, playerId }) => {
     console.log('Game created:', gameId);
-    saveSession(gameId, playerId);
+    setGameIdInUrl(gameId);
+    savePlayerIdForGame(gameId, playerId);
     useGameStore.getState().setPlayerId(playerId);
     useGameStore.getState().setScreen('lobby');
   });
 
   socket.on('game:joined', ({ playerId }) => {
     console.log('Joined game as:', playerId);
-    // gameId is already set when joining, get it from the state that will arrive
     useGameStore.getState().setPlayerId(playerId);
     useGameStore.getState().setScreen('lobby');
+    useGameStore.getState().setGameIdToJoin(null);
   });
 
   socket.on('game:reconnected', ({ gameId, playerId }) => {
     console.log('Reconnected to game:', gameId);
-    saveSession(gameId, playerId);
+    setGameIdInUrl(gameId);
+    savePlayerIdForGame(gameId, playerId);
     useGameStore.getState().setPlayerId(playerId);
-    // Screen will be set based on game phase when state arrives
   });
 
   socket.on('game:state', (state) => {
     console.log('Game state update:', state.phase);
     useGameStore.getState().setGameState(state);
 
-    // Save session when we receive state (for join scenario)
+    // Save player ID when we receive state (for join scenario)
     const playerId = useGameStore.getState().playerId;
     if (playerId) {
-      saveSession(state.id, playerId);
+      setGameIdInUrl(state.id);
+      savePlayerIdForGame(state.id, playerId);
     }
 
     // Update screen based on game phase
@@ -115,11 +134,17 @@ function initializeSocket() {
 
   socket.on('game:error', (message) => {
     console.error('Game error:', message);
-    // Clear session if game not found or player not found
+    const gameId = getGameIdFromUrl();
+
+    // Clear session if game/player not found
     if (message.includes('not found')) {
-      clearSession();
+      if (gameId) {
+        clearPlayerIdForGame(gameId);
+      }
+      // Don't clear URL - user might want to join as new player
     }
-    // Only alert if we're not trying to reconnect silently
+
+    // Only alert if we're not on menu trying to reconnect silently
     if (useGameStore.getState().screen !== 'menu') {
       alert(message);
     }
@@ -136,12 +161,17 @@ export function useSocket() {
   };
 
   const joinGame = (gameId: string, playerName: string) => {
+    setGameIdInUrl(gameId);
     socket?.emit('game:join', gameId, playerName);
   };
 
   const leaveGame = () => {
+    const gameId = getGameIdFromUrl();
     socket?.emit('game:leave');
-    clearSession();
+    if (gameId) {
+      clearPlayerIdForGame(gameId);
+    }
+    clearGameIdFromUrl();
     useGameStore.getState().reset();
   };
 
