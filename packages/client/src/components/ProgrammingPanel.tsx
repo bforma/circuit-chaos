@@ -21,6 +21,23 @@ export function ProgrammingPanel() {
     }
   };
 
+  const handleCardDoubleClick = (card: typeof hand[0]) => {
+    if (isReady) return;
+
+    // Find first empty register
+    const emptyIndex = registers.findIndex(r => r === null);
+    if (emptyIndex === -1) return;
+
+    // If card is already in a register, remove it first
+    const existingIndex = registers.findIndex(r => r?.id === card.id);
+    if (existingIndex !== -1) {
+      programRegister(existingIndex, null);
+    }
+
+    programRegister(emptyIndex, card);
+    setSelectedCard(null);
+  };
+
   const handleRegisterClick = (index: number) => {
     if (isReady || !selectedCard) return;
 
@@ -35,10 +52,17 @@ export function ProgrammingPanel() {
     setSelectedCard(null);
   };
 
-  const handleClearRegister = (index: number, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleClearRegister = (index: number, e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if (isReady) return;
     programRegister(index, null);
+  };
+
+  const handleRegisterDoubleClick = (index: number) => {
+    if (isReady) return;
+    if (registers[index]) {
+      programRegister(index, null);
+    }
   };
 
   const handleSubmit = () => {
@@ -63,6 +87,7 @@ export function ProgrammingPanel() {
               key={index}
               className={`${styles.register} ${card ? styles.filled : ''} ${selectedCard && !isReady ? styles.clickable : ''}`}
               onClick={() => handleRegisterClick(index)}
+              onDoubleClick={() => handleRegisterDoubleClick(index)}
             >
               {card ? (
                 <>
@@ -100,6 +125,7 @@ export function ProgrammingPanel() {
                   ${isReady ? styles.disabled : ''}
                 `}
                 onClick={() => handleCardClick(card)}
+                onDoubleClick={() => handleCardDoubleClick(card)}
               >
                 <span className={styles.cardType}>{getCardLabel(card.type)}</span>
                 <span className={styles.priority}>{card.priority}</span>

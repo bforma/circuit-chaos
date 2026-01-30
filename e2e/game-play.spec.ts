@@ -167,4 +167,55 @@ test.describe('Game Play', () => {
     await hostContext.close();
     await guestContext.close();
   });
+
+  test('can double-click card to place in first empty register', async ({ browser }) => {
+    const hostContext = await browser.newContext();
+    const guestContext = await browser.newContext();
+
+    const hostPage = await hostContext.newPage();
+    const guestPage = await guestContext.newPage();
+
+    // Setup game
+    await hostPage.goto('/');
+    await hostPage.getByRole('button', { name: 'Create Game' }).click();
+    await hostPage.getByPlaceholder('Your name').fill('Host');
+    await hostPage.getByRole('button', { name: 'Create' }).click();
+
+    await expect(hostPage.getByText('Game Lobby')).toBeVisible({ timeout: 5000 });
+    const codeElement = hostPage.locator('text=Code:').locator('xpath=..').locator('span');
+    const gameCode = await codeElement.textContent();
+
+    await guestPage.goto('/');
+    await guestPage.getByRole('button', { name: 'Join Game' }).click();
+    await guestPage.getByPlaceholder('Your name').fill('Guest');
+    await guestPage.getByPlaceholder('Game code').fill(gameCode!);
+    await guestPage.getByRole('button', { name: 'Join' }).click();
+
+    await expect(guestPage.getByText('Game Lobby')).toBeVisible({ timeout: 5000 });
+    await hostPage.getByRole('button', { name: 'Start Game' }).click();
+
+    await expect(hostPage.getByText('Program Your Robot')).toBeVisible({ timeout: 5000 });
+
+    const cardsContainer = hostPage.locator('[class*="cards"]');
+    const registerSlots = hostPage.locator('[class*="registerSlots"]');
+
+    // Double-click first card - should go to register 1
+    const firstCard = cardsContainer.locator('div[class*="card"]').first();
+    await firstCard.dblclick();
+    await hostPage.waitForTimeout(300);
+
+    const register1 = registerSlots.locator('div[class*="register"]').nth(0);
+    await expect(register1).toHaveClass(/filled/);
+
+    // Double-click second card - should go to register 2
+    const secondCard = cardsContainer.locator('div[class*="card"]').nth(1);
+    await secondCard.dblclick();
+    await hostPage.waitForTimeout(300);
+
+    const register2 = registerSlots.locator('div[class*="register"]').nth(1);
+    await expect(register2).toHaveClass(/filled/);
+
+    await hostContext.close();
+    await guestContext.close();
+  });
 });
