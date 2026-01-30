@@ -45,6 +45,29 @@ npm run dev:client
 npm run typecheck
 ```
 
+## Testing
+
+### Unit Tests
+
+Run unit tests with Vitest:
+
+```bash
+npm run test          # Run once
+npm run test:watch    # Watch mode
+```
+
+### End-to-End Tests
+
+Run E2E tests with Playwright:
+
+```bash
+npm run test:e2e           # Run in headless mode
+npm run test:e2e:headed    # Run with browser visible
+npm run test:e2e:ui        # Run with Playwright UI
+```
+
+Tests run in Chromium, Firefox, and WebKit (Safari).
+
 ## How to Play
 
 1. Open http://localhost:5173 in your browser
