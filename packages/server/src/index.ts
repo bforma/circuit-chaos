@@ -27,7 +27,15 @@ app.use(express.json());
 // Serve static files in production
 if (isProduction) {
   const clientDist = path.join(__dirname, '../../client');
-  app.use(express.static(clientDist));
+  app.use(express.static(clientDist, {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript');
+      } else if (filePath.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css');
+      }
+    },
+  }));
 }
 
 // Health check
