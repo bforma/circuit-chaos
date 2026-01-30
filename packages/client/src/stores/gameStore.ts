@@ -78,6 +78,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   reset: () => set({
     screen: 'menu',
+    playerId: null,
     gameState: null,
     gameIdToJoin: null,
     selectedCard: null,

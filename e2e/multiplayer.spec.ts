@@ -115,4 +115,44 @@ test.describe('Multiplayer', () => {
     await hostContext.close();
     await guestContext.close();
   });
+
+  test('host can leave game with guest present', async ({ browser }) => {
+    const hostContext = await browser.newContext();
+    const guestContext = await browser.newContext();
+
+    const hostPage = await hostContext.newPage();
+    const guestPage = await guestContext.newPage();
+
+    // Host creates game
+    await hostPage.goto('/');
+    await hostPage.getByRole('button', { name: 'Create Game' }).click();
+    await hostPage.getByPlaceholder('Your name').fill('Host');
+    await hostPage.getByRole('button', { name: 'Create' }).click();
+
+    await expect(hostPage.getByText('Game Lobby')).toBeVisible({ timeout: 5000 });
+    const codeElement = hostPage.locator('text=Code:').locator('xpath=..').locator('span');
+    const gameCode = await codeElement.textContent();
+
+    // Guest joins
+    await guestPage.goto('/');
+    await guestPage.getByRole('button', { name: 'Join Game' }).click();
+    await guestPage.getByPlaceholder('Your name').fill('Guest');
+    await guestPage.getByPlaceholder('Game code').fill(gameCode!);
+    await guestPage.getByRole('button', { name: 'Join' }).click();
+
+    await expect(guestPage.getByText('Game Lobby')).toBeVisible({ timeout: 5000 });
+    await expect(hostPage.getByText('Players (2/')).toBeVisible();
+
+    // Host leaves the game
+    await hostPage.getByRole('button', { name: 'Leave Game' }).click();
+
+    // Host should return to main menu
+    await expect(hostPage.getByRole('button', { name: 'Create Game' })).toBeVisible({ timeout: 5000 });
+
+    // Guest should become the new host
+    await expect(guestPage.getByText('Guest (Host)')).toBeVisible({ timeout: 5000 });
+
+    await hostContext.close();
+    await guestContext.close();
+  });
 });
