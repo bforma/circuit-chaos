@@ -294,6 +294,10 @@ export class GameManager {
     const playerId = session.socketPlayers.get(socket.id);
     if (!playerId) return;
 
+    // Update mappings
+    session.socketPlayers.delete(socket.id);
+    this.socketToGame.delete(socket.id);
+
     const player = session.state.players.find(p => p.id === playerId);
     if (player) {
       player.isConnected = false;
@@ -308,8 +312,54 @@ export class GameManager {
 
       const currentPlayer = currentSession.state.players.find(p => p.id === playerId);
       if (currentPlayer && !currentPlayer.isConnected) {
-        this.leaveGame(socket);
+        // Remove player from game
+        currentSession.state.players = currentSession.state.players.filter(
+          p => p.id !== playerId
+        );
+        currentSession.playerSockets.delete(playerId);
+
+        // Delete game if empty
+        if (currentSession.state.players.length === 0) {
+          this.games.delete(gameId);
+          console.log(`Game ${gameId} deleted (empty after timeout)`);
+          return;
+        }
+
+        // Transfer host if needed
+        if (currentSession.state.hostId === playerId) {
+          currentSession.state.hostId = currentSession.state.players[0].id;
+        }
+
+        this.broadcastGameState(gameId);
       }
-    }, 30000);
+    }, 60000); // 60 seconds to reconnect
+  }
+
+  reconnect(socket: Socket, gameId: string, playerId: string) {
+    const session = this.games.get(gameId);
+    if (!session) {
+      socket.emit('game:error', 'Game not found');
+      return;
+    }
+
+    const player = session.state.players.find(p => p.id === playerId);
+    if (!player) {
+      socket.emit('game:error', 'Player not found in game');
+      return;
+    }
+
+    // Update socket mappings
+    session.playerSockets.set(playerId, socket.id);
+    session.socketPlayers.set(socket.id, playerId);
+    this.socketToGame.set(socket.id, gameId);
+
+    // Mark player as connected
+    player.isConnected = true;
+
+    socket.join(gameId);
+    socket.emit('game:reconnected', { gameId, playerId });
+    this.broadcastGameState(gameId);
+
+    console.log(`Player ${player.name} reconnected to game ${gameId}`);
   }
 }
