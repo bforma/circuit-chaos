@@ -19,16 +19,17 @@ function clearGameIdFromUrl() {
   window.history.replaceState(null, '', window.location.pathname);
 }
 
+// Use sessionStorage (per-tab) instead of localStorage (shared between tabs)
 function getPlayerIdForGame(gameId: string): string | null {
-  return localStorage.getItem(`circuit-chaos-player-${gameId}`);
+  return sessionStorage.getItem(`circuit-chaos-player-${gameId}`);
 }
 
 function savePlayerIdForGame(gameId: string, playerId: string) {
-  localStorage.setItem(`circuit-chaos-player-${gameId}`, playerId);
+  sessionStorage.setItem(`circuit-chaos-player-${gameId}`, playerId);
 }
 
 function clearPlayerIdForGame(gameId: string) {
-  localStorage.removeItem(`circuit-chaos-player-${gameId}`);
+  sessionStorage.removeItem(`circuit-chaos-player-${gameId}`);
 }
 
 // Get session from URL + localStorage

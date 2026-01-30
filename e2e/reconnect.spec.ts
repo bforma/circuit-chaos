@@ -141,6 +141,58 @@ test.describe('Reconnect', () => {
     await expect(page.getByText('Game Lobby')).not.toBeVisible();
   });
 
+  test('host and guest can both refresh without swapping identities', async ({ browser }) => {
+    const hostContext = await browser.newContext();
+    const guestContext = await browser.newContext();
+
+    const hostPage = await hostContext.newPage();
+    const guestPage = await guestContext.newPage();
+
+    // Host creates game
+    await hostPage.goto('/');
+    await hostPage.getByRole('button', { name: 'Create Game' }).click();
+    await hostPage.getByPlaceholder('Your name').fill('HostPlayer');
+    await hostPage.getByRole('button', { name: 'Create' }).click();
+
+    await expect(hostPage.getByText('Game Lobby')).toBeVisible({ timeout: 5000 });
+    const hostUrl = hostPage.url();
+    const gameCode = hostUrl.split('#')[1];
+
+    // Guest joins via URL
+    await guestPage.goto(`/#${gameCode}`);
+    await guestPage.getByPlaceholder('Your name').fill('GuestPlayer');
+    await guestPage.getByRole('button', { name: 'Join' }).click();
+
+    await expect(guestPage.getByText('Game Lobby')).toBeVisible({ timeout: 5000 });
+
+    // Both should see 2 players
+    await expect(hostPage.getByText('Players (2/')).toBeVisible();
+    await expect(guestPage.getByText('Players (2/')).toBeVisible();
+
+    // Host should still be host (not guest)
+    await expect(hostPage.getByText('HostPlayer (Host) (You)')).toBeVisible();
+    await expect(guestPage.getByText('GuestPlayer (You)')).toBeVisible();
+
+    // Now refresh BOTH pages
+    await hostPage.reload();
+    await guestPage.reload();
+
+    // Wait for reconnection
+    await expect(hostPage.getByText('Game Lobby')).toBeVisible({ timeout: 5000 });
+    await expect(guestPage.getByText('Game Lobby')).toBeVisible({ timeout: 5000 });
+
+    // Host should STILL be host, not swapped with guest
+    await expect(hostPage.getByText('HostPlayer (Host) (You)')).toBeVisible();
+    await expect(guestPage.getByText('GuestPlayer (You)')).toBeVisible();
+
+    // And they should still see each other
+    await expect(hostPage.getByText('GuestPlayer')).toBeVisible();
+    await expect(guestPage.getByText('HostPlayer')).toBeVisible();
+
+    await hostContext.close();
+    await guestContext.close();
+  });
+
   test('multiplayer reconnect preserves game state', async ({ browser }) => {
     const hostContext = await browser.newContext();
     const guestContext = await browser.newContext();
