@@ -8,5 +8,5 @@ export interface DisconnectVote {
   endsAt: number;             // Timestamp when vote ends
 }
 
-export const DISCONNECT_VOTE_DELAY_MS = 30000;  // 30 seconds before vote starts
-export const DISCONNECT_VOTE_DURATION_MS = 5000; // 5 seconds to vote
+export const DISCONNECT_VOTE_DELAY_MS = 5000;   // 5 seconds before vote starts
+export const DISCONNECT_VOTE_DURATION_MS = 30000; // 30 seconds to vote

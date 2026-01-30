@@ -308,6 +308,7 @@ export class GameManager {
     if (!player) return;
 
     player.isConnected = false;
+    player.disconnectedAt = Date.now();
     this.broadcastGameState(gameId);
 
     // In lobby: remove after 60 seconds
@@ -578,6 +579,7 @@ export class GameManager {
 
     // Mark player as connected
     player.isConnected = true;
+    player.disconnectedAt = undefined;
 
     socket.join(gameId);
     socket.emit('game:reconnected', { gameId, playerId });

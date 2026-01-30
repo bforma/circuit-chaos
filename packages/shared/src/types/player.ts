@@ -10,6 +10,7 @@ export interface Player {
   registers: (Card | null)[];
   isReady: boolean; // Has submitted their program
   isConnected: boolean;
+  disconnectedAt?: number; // Timestamp when player disconnected
 }
 
 export const PLAYER_COLORS = [

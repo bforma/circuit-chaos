@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react';
 import { useGameStore } from '../stores/gameStore';
+import { DISCONNECT_VOTE_DELAY_MS } from '@circuit-chaos/shared';
 import type { Player } from '@circuit-chaos/shared';
 import styles from './PlayerList.module.css';
 
@@ -6,6 +8,8 @@ export function PlayerList() {
   const { gameState, playerId } = useGameStore();
 
   if (!gameState) return null;
+
+  const isInGame = gameState.phase !== 'lobby';
 
   return (
     <div className={styles.container}>
@@ -17,6 +21,7 @@ export function PlayerList() {
             player={player}
             isCurrentPlayer={player.id === playerId}
             isHost={player.id === gameState.hostId}
+            showVoteCountdown={isInGame}
           />
         ))}
       </ul>
@@ -28,10 +33,29 @@ interface PlayerListItemProps {
   player: Player;
   isCurrentPlayer: boolean;
   isHost: boolean;
+  showVoteCountdown: boolean;
 }
 
-function PlayerListItem({ player, isCurrentPlayer, isHost }: PlayerListItemProps) {
+function PlayerListItem({ player, isCurrentPlayer, isHost, showVoteCountdown }: PlayerListItemProps) {
   const { robot } = player;
+  const [voteCountdown, setVoteCountdown] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!player.disconnectedAt || player.isConnected || !showVoteCountdown) {
+      setVoteCountdown(null);
+      return;
+    }
+
+    const updateCountdown = () => {
+      const elapsed = Date.now() - player.disconnectedAt!;
+      const remaining = Math.max(0, Math.ceil((DISCONNECT_VOTE_DELAY_MS - elapsed) / 1000));
+      setVoteCountdown(remaining > 0 ? remaining : null);
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [player.disconnectedAt, player.isConnected, showVoteCountdown]);
 
   return (
     <li className={`${styles.player} ${!player.isConnected ? styles.disconnected : ''}`}>
@@ -47,7 +71,12 @@ function PlayerListItem({ player, isCurrentPlayer, isHost }: PlayerListItemProps
         </span>
         <span className={styles.status}>
           {!player.isConnected ? (
-            <span className={styles.offline}>Disconnected</span>
+            <span className={styles.offline}>
+              Disconnected
+              {voteCountdown !== null && (
+                <span className={styles.voteCountdown}> (vote in {voteCountdown}s)</span>
+              )}
+            </span>
           ) : player.isReady ? (
             <span className={styles.ready}>Ready</span>
           ) : (

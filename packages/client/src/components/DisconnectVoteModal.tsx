@@ -7,7 +7,7 @@ import styles from './DisconnectVoteModal.module.css';
 export function DisconnectVoteModal() {
   const { gameState, playerId } = useGameStore();
   const { voteDisconnect } = useSocket();
-  const [timeLeft, setTimeLeft] = useState(5);
+  const [timeLeft, setTimeLeft] = useState(30);
 
   const vote = gameState?.disconnectVote;
 

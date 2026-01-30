@@ -72,6 +72,11 @@
   color: #e74c3c;
 }
 
+.voteCountdown {
+  color: #f39c12;
+  font-weight: 600;
+}
+
 .ready {
   color: #2ecc71;
 }
