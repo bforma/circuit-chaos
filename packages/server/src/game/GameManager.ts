@@ -16,6 +16,10 @@ import {
 import { createDeck, dealCards } from './deck';
 import { executeRegister } from './executor';
 import { createSampleBoard } from './boards';
+import { getRedis } from '../redis';
+
+const GAME_PREFIX = 'game:';
+const GAME_TTL = 60 * 60 * 24; // 24 hours
 
 interface GameSession {
   state: GameState;
@@ -34,6 +38,42 @@ export class GameManager {
     this.io = io;
   }
 
+  // Persist game state to Redis (fire and forget)
+  private persistGame(gameId: string, state: GameState) {
+    const redis = getRedis();
+    if (redis) {
+      redis.setex(GAME_PREFIX + gameId, GAME_TTL, JSON.stringify(state)).catch(err => {
+        console.error('Failed to persist game:', err.message);
+      });
+    }
+  }
+
+  // Delete game from Redis
+  private unpersistGame(gameId: string) {
+    const redis = getRedis();
+    if (redis) {
+      redis.del(GAME_PREFIX + gameId).catch(err => {
+        console.error('Failed to delete game from Redis:', err.message);
+      });
+    }
+  }
+
+  // Load game from Redis (for reconnection after server restart)
+  async loadGameFromRedis(gameId: string): Promise<GameState | null> {
+    const redis = getRedis();
+    if (!redis) return null;
+
+    try {
+      const data = await redis.get(GAME_PREFIX + gameId);
+      if (data) {
+        return JSON.parse(data);
+      }
+    } catch (err) {
+      console.error('Failed to load game from Redis:', err);
+    }
+    return null;
+  }
+
   private generateGameId(): string {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let id = '';
@@ -48,6 +88,7 @@ export class GameManager {
     if (!session) return;
 
     this.io.to(gameId).emit('game:state', session.state);
+    this.persistGame(gameId, session.state);
   }
 
   createGame(socket: Socket, playerName: string) {
@@ -152,6 +193,7 @@ export class GameManager {
     // Delete game if empty
     if (session.state.players.length === 0) {
       this.games.delete(gameId);
+      this.unpersistGame(gameId);
       console.log(`Game ${gameId} deleted (empty)`);
       return;
     }
@@ -514,6 +556,7 @@ export class GameManager {
     // Delete game if empty
     if (session.state.players.length === 0) {
       this.games.delete(gameId);
+      this.unpersistGame(gameId);
       console.log(`Game ${gameId} deleted (empty)`);
       return;
     }
@@ -543,8 +586,28 @@ export class GameManager {
     }
   }
 
-  reconnect(socket: Socket, gameId: string, playerId: string) {
-    const session = this.games.get(gameId);
+  async reconnect(socket: Socket, gameId: string, playerId: string) {
+    let session = this.games.get(gameId);
+
+    // Try to restore from Redis if not in memory
+    if (!session) {
+      const state = await this.loadGameFromRedis(gameId);
+      if (state) {
+        session = {
+          state,
+          playerSockets: new Map(),
+          socketPlayers: new Map(),
+          disconnectTimers: new Map(),
+        };
+        // Mark all players as disconnected initially
+        for (const player of session.state.players) {
+          player.isConnected = false;
+        }
+        this.games.set(gameId, session);
+        console.log(`Restored game ${gameId} from Redis`);
+      }
+    }
+
     if (!session) {
       socket.emit('game:error', 'Game not found');
       return;

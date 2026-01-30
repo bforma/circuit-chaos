@@ -89,7 +89,7 @@ describe('GameManager', () => {
   });
 
   describe('reconnect', () => {
-    it('reconnects a disconnected player', () => {
+    it('reconnects a disconnected player', async () => {
       const socket1 = createMockSocket('socket-1');
       const socket2 = createMockSocket('socket-2');
 
@@ -104,7 +104,7 @@ describe('GameManager', () => {
       gameManager.handleDisconnect(socket1);
 
       // Reconnect with new socket
-      gameManager.reconnect(socket2, gameId, playerId);
+      await gameManager.reconnect(socket2, gameId, playerId);
 
       expect(socket2.emit).toHaveBeenCalledWith(
         'game:reconnected',
@@ -116,15 +116,15 @@ describe('GameManager', () => {
       expect(socket2.join).toHaveBeenCalledWith(gameId);
     });
 
-    it('emits error for non-existent game', () => {
+    it('emits error for non-existent game', async () => {
       const socket = createMockSocket('socket-1');
 
-      gameManager.reconnect(socket, 'XXXX', 'player-id');
+      await gameManager.reconnect(socket, 'XXXX', 'player-id');
 
       expect(socket.emit).toHaveBeenCalledWith('game:error', 'Game not found');
     });
 
-    it('emits error for non-existent player', () => {
+    it('emits error for non-existent player', async () => {
       const hostSocket = createMockSocket('host-socket');
       const reconnectSocket = createMockSocket('reconnect-socket');
 
@@ -134,7 +134,7 @@ describe('GameManager', () => {
       );
       const gameId = createCall[1].gameId;
 
-      gameManager.reconnect(reconnectSocket, gameId, 'wrong-player-id');
+      await gameManager.reconnect(reconnectSocket, gameId, 'wrong-player-id');
 
       expect(reconnectSocket.emit).toHaveBeenCalledWith(
         'game:error',
@@ -142,7 +142,7 @@ describe('GameManager', () => {
       );
     });
 
-    it('marks player as connected after reconnect', () => {
+    it('marks player as connected after reconnect', async () => {
       const socket1 = createMockSocket('socket-1');
       const socket2 = createMockSocket('socket-2');
 
@@ -156,7 +156,7 @@ describe('GameManager', () => {
       gameManager.handleDisconnect(socket1);
 
       // Reconnect
-      gameManager.reconnect(socket2, gameId, playerId);
+      await gameManager.reconnect(socket2, gameId, playerId);
 
       // Verify broadcast was called (player should be marked connected)
       expect(io.to).toHaveBeenCalledWith(gameId);
@@ -191,7 +191,7 @@ describe('GameManager', () => {
       expect(socket.leave).toHaveBeenCalled();
     });
 
-    it('allows rejoining after leaving', () => {
+    it('allows rejoining after leaving', async () => {
       const socket1 = createMockSocket('socket-1');
       const socket2 = createMockSocket('socket-2');
 
@@ -206,7 +206,7 @@ describe('GameManager', () => {
       gameManager.leaveGame(socket1);
 
       // Try to reconnect - should fail (player was removed)
-      gameManager.reconnect(socket2, gameId, createCall[1].playerId);
+      await gameManager.reconnect(socket2, gameId, createCall[1].playerId);
 
       // Game should be deleted (was empty)
       expect(socket2.emit).toHaveBeenCalledWith('game:error', 'Game not found');
