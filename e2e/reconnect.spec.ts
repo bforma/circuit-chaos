@@ -235,4 +235,57 @@ test.describe('Reconnect', () => {
     await hostContext.close();
     await guestContext.close();
   });
+
+  test('shows error when joining game already in progress', async ({ browser }) => {
+    const hostContext = await browser.newContext();
+    const guest1Context = await browser.newContext();
+    const guest2Context = await browser.newContext();
+
+    const hostPage = await hostContext.newPage();
+    const guest1Page = await guest1Context.newPage();
+    const guest2Page = await guest2Context.newPage();
+
+    // Host creates game
+    await hostPage.goto('/');
+    await hostPage.getByRole('button', { name: 'Create Game' }).click();
+    await hostPage.getByPlaceholder('Your name').fill('Host');
+    await hostPage.getByRole('button', { name: 'Create' }).click();
+
+    await expect(hostPage.getByText('Game Lobby')).toBeVisible({ timeout: 5000 });
+    const codeElement = hostPage.locator('text=Code:').locator('xpath=..').locator('span');
+    const gameCode = await codeElement.textContent();
+
+    // Guest1 joins
+    await guest1Page.goto('/');
+    await guest1Page.getByRole('button', { name: 'Join Game' }).click();
+    await guest1Page.getByPlaceholder('Your name').fill('Guest1');
+    await guest1Page.getByPlaceholder('Game code').fill(gameCode!);
+    await guest1Page.getByRole('button', { name: 'Join' }).click();
+
+    await expect(guest1Page.getByText('Game Lobby')).toBeVisible({ timeout: 5000 });
+    await expect(hostPage.getByText('Players (2/')).toBeVisible();
+
+    // Host starts the game
+    await hostPage.getByRole('button', { name: 'Start Game' }).click();
+
+    // Wait for game to start (programming phase)
+    await expect(hostPage.getByText('Program Your Robot')).toBeVisible({ timeout: 5000 });
+
+    // Guest2 tries to join the already-started game
+    await guest2Page.goto('/');
+    await guest2Page.getByRole('button', { name: 'Join Game' }).click();
+    await guest2Page.getByPlaceholder('Your name').fill('Guest2');
+    await guest2Page.getByPlaceholder('Game code').fill(gameCode!);
+    await guest2Page.getByRole('button', { name: 'Join' }).click();
+
+    // Should see error message on screen
+    await expect(guest2Page.getByText('Game already in progress')).toBeVisible({ timeout: 5000 });
+
+    // Should still be on join form, not in lobby
+    await expect(guest2Page.getByText('Game Lobby')).not.toBeVisible();
+
+    await hostContext.close();
+    await guest1Context.close();
+    await guest2Context.close();
+  });
 });

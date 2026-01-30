@@ -145,10 +145,8 @@ function initializeSocket() {
       // Don't clear URL - user might want to join as new player
     }
 
-    // Only alert if we're not on menu trying to reconnect silently
-    if (useGameStore.getState().screen !== 'menu') {
-      alert(message);
-    }
+    // Set error in store for UI display
+    useGameStore.getState().setError(message);
   });
 }
 

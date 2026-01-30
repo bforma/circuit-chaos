@@ -30,6 +30,10 @@ interface GameStore {
   isConnected: boolean;
   setConnected: (connected: boolean) => void;
 
+  // Error state
+  error: string | null;
+  setError: (error: string | null) => void;
+
   // Helpers
   getCurrentPlayer: () => Player | undefined;
   reset: () => void;
@@ -62,6 +66,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
   isConnected: false,
   setConnected: (isConnected) => set({ isConnected }),
 
+  // Error state
+  error: null,
+  setError: (error) => set({ error }),
+
   // Helpers
   getCurrentPlayer: () => {
     const { gameState, playerId } = get();
@@ -73,5 +81,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
     gameState: null,
     gameIdToJoin: null,
     selectedCard: null,
+    error: null,
   }),
 }));

@@ -8,7 +8,7 @@ export function MainMenu() {
   const [gameCode, setGameCode] = useState('');
   const [mode, setMode] = useState<'menu' | 'create' | 'join'>('menu');
 
-  const { gameIdToJoin, setGameIdToJoin } = useGameStore();
+  const { gameIdToJoin, setGameIdToJoin, error, setError } = useGameStore();
   const { createGame, joinGame } = useSocket();
 
   // Auto-switch to join mode if there's a game ID in the URL
@@ -21,17 +21,20 @@ export function MainMenu() {
 
   const handleCreateGame = () => {
     if (!name.trim()) return;
+    setError(null);
     createGame(name);
   };
 
   const handleJoinGame = () => {
     if (!name.trim() || !gameCode.trim()) return;
+    setError(null);
     joinGame(gameCode.toUpperCase(), name);
   };
 
   const handleBack = () => {
     setMode('menu');
     setGameIdToJoin(null);
+    setError(null);
     // Clear URL hash if we're going back to menu
     window.history.replaceState(null, '', window.location.pathname);
   };
@@ -80,6 +83,7 @@ export function MainMenu() {
               Enter your name to join game <strong>{gameIdToJoin}</strong>
             </p>
           )}
+          {error && <p className={styles.error}>{error}</p>}
           <input
             type="text"
             placeholder="Your name"
