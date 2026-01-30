@@ -6,6 +6,7 @@ export * from './types/board';
 export * from './types/robot';
 export * from './types/player';
 export * from './types/game-state';
+export * from './types/disconnect-vote';
 
 // Constants
 export * from './constants';

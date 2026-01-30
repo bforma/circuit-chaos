@@ -56,6 +56,10 @@ io.on('connection', (socket) => {
     gameManager.reconnect(socket, gameId, playerId);
   });
 
+  socket.on('game:vote-disconnect', (vote: string) => {
+    gameManager.submitDisconnectVote(socket, vote as any);
+  });
+
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
     gameManager.handleDisconnect(socket);

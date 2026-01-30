@@ -1,5 +1,6 @@
 import type { Board } from './board';
 import type { Player } from './player';
+import type { DisconnectVote } from './disconnect-vote';
 
 export type GamePhase =
   | 'lobby'
@@ -20,6 +21,7 @@ export interface GameState {
   winnerId?: string;
   maxPlayers: number;
   createdAt: number;
+  disconnectVote?: DisconnectVote; // Active vote about a disconnected player
 }
 
 export interface GameSettings {

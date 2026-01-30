@@ -3,6 +3,7 @@ import { GameBoard } from '../game/GameBoard';
 import { ProgrammingPanel } from './ProgrammingPanel';
 import { PlayerHUD } from './PlayerHUD';
 import { PlayerList } from './PlayerList';
+import { DisconnectVoteModal } from './DisconnectVoteModal';
 import styles from './Game.module.css';
 
 export function Game() {
@@ -42,6 +43,8 @@ export function Game() {
           </div>
         )}
       </div>
+
+      <DisconnectVoteModal />
     </div>
   );
 }

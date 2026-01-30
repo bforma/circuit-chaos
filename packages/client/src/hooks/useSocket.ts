@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useGameStore } from '../stores/gameStore';
-import type { GameState, Card } from '@circuit-chaos/shared';
+import type { GameState, Card, DisconnectVoteOption } from '@circuit-chaos/shared';
 
 // URL and session helpers
 function getGameIdFromUrl(): string | null {
@@ -58,6 +58,7 @@ interface ClientToServerEvents {
   'game:start': () => void;
   'game:program': (registerIndex: number, card: Card | null) => void;
   'game:submit': () => void;
+  'game:vote-disconnect': (vote: DisconnectVoteOption) => void;
 }
 
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
@@ -186,6 +187,10 @@ export function useSocket() {
     socket?.emit('game:submit');
   };
 
+  const voteDisconnect = (vote: DisconnectVoteOption) => {
+    socket?.emit('game:vote-disconnect', vote);
+  };
+
   return {
     createGame,
     joinGame,
@@ -193,5 +198,6 @@ export function useSocket() {
     startGame,
     programRegister,
     submitProgram,
+    voteDisconnect,
   };
 }
