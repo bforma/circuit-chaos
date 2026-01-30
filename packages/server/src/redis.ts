@@ -13,7 +13,6 @@ export function getRedis(): Redis | null {
   if (!redis) {
     redis = new Redis(REDIS_URL, {
       maxRetriesPerRequest: 3,
-      retryDelayOnFailover: 100,
     });
 
     redis.on('connect', () => {
