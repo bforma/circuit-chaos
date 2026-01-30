@@ -26,7 +26,7 @@ app.use(express.json());
 
 // Serve static files in production
 if (isProduction) {
-  const clientDist = path.join(__dirname, '../../client');
+  const clientDist = path.join(__dirname, '../../client/dist');
   app.use(express.static(clientDist, {
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.js')) {
@@ -89,7 +89,7 @@ io.on('connection', (socket) => {
 
 // SPA fallback - serve index.html for all non-API routes in production
 if (isProduction) {
-  const clientDist = path.join(__dirname, '../../client');
+  const clientDist = path.join(__dirname, '../../client/dist');
   app.get('*', (req, res) => {
     res.sendFile(path.join(clientDist, 'index.html'));
   });
