@@ -101,6 +101,7 @@ export function MainMenu() {
             placeholder="Your name"
             value={name}
             onChange={(e) => handleNameChange(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleCreateGame()}
             maxLength={MAX_NAME_LENGTH}
             autoFocus
           />
@@ -128,6 +129,7 @@ export function MainMenu() {
             placeholder="Your name"
             value={name}
             onChange={(e) => handleNameChange(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleJoinGame()}
             maxLength={MAX_NAME_LENGTH}
             autoFocus
           />
@@ -140,6 +142,7 @@ export function MainMenu() {
                 setGameCode(e.target.value.toUpperCase());
                 if (error) setError(null);
               }}
+              onKeyDown={(e) => e.key === 'Enter' && handleJoinGame()}
               maxLength={6}
             />
           )}
