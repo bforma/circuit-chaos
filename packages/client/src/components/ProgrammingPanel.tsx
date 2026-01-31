@@ -1,6 +1,6 @@
 import { useGameStore } from '../stores/gameStore';
 import { useSocket } from '../hooks/useSocket';
-import { getCardLabel, REGISTERS_COUNT } from '@circuit-chaos/shared';
+import { getCardLabel, REGISTERS_COUNT, getLockedRegisterCount } from '@circuit-chaos/shared';
 import styles from './ProgrammingPanel.module.css';
 
 export function ProgrammingPanel() {
@@ -10,7 +10,12 @@ export function ProgrammingPanel() {
   const player = getCurrentPlayer();
   if (!player) return null;
 
-  const { hand, registers, isReady } = player;
+  const { hand, registers, isReady, robot } = player;
+  const lockedCount = getLockedRegisterCount(robot.damage);
+
+  const isRegisterLocked = (index: number) => {
+    return index >= REGISTERS_COUNT - lockedCount;
+  };
 
   const handleCardClick = (card: typeof hand[0]) => {
     if (isReady) return;
@@ -39,7 +44,7 @@ export function ProgrammingPanel() {
   };
 
   const handleRegisterClick = (index: number) => {
-    if (isReady || !selectedCard) return;
+    if (isReady || !selectedCard || isRegisterLocked(index)) return;
 
     // Check if card is already in a register
     const existingIndex = registers.findIndex(r => r?.id === selectedCard.id);
@@ -52,14 +57,31 @@ export function ProgrammingPanel() {
     setSelectedCard(null);
   };
 
+  const handleAutoFill = () => {
+    if (isReady) return;
+
+    // Get cards not yet in registers
+    const usedCardIds = new Set(registers.filter(r => r !== null).map(r => r!.id));
+    const availableCards = hand.filter(card => !usedCardIds.has(card.id));
+
+    // Fill empty unlocked registers
+    let cardIndex = 0;
+    for (let i = 0; i < REGISTERS_COUNT; i++) {
+      if (!isRegisterLocked(i) && registers[i] === null && cardIndex < availableCards.length) {
+        programRegister(i, availableCards[cardIndex]);
+        cardIndex++;
+      }
+    }
+  };
+
   const handleClearRegister = (index: number, e?: React.MouseEvent) => {
     e?.stopPropagation();
-    if (isReady) return;
+    if (isReady || isRegisterLocked(index)) return;
     programRegister(index, null);
   };
 
   const handleRegisterDoubleClick = (index: number) => {
-    if (isReady) return;
+    if (isReady || isRegisterLocked(index)) return;
     if (registers[index]) {
       programRegister(index, null);
     }
@@ -82,31 +104,35 @@ export function ProgrammingPanel() {
       <div className={styles.registers}>
         <span className={styles.label}>Registers</span>
         <div className={styles.registerSlots}>
-          {registers.map((card, index) => (
-            <div
-              key={index}
-              className={`${styles.register} ${card ? styles.filled : ''} ${selectedCard && !isReady ? styles.clickable : ''}`}
-              onClick={() => handleRegisterClick(index)}
-              onDoubleClick={() => handleRegisterDoubleClick(index)}
-            >
-              {card ? (
-                <>
-                  <span className={styles.cardType}>{getCardLabel(card.type)}</span>
-                  <span className={styles.priority}>{card.priority}</span>
-                  {!isReady && (
-                    <button
-                      className={styles.clearBtn}
-                      onClick={(e) => handleClearRegister(index, e)}
-                    >
-                      ×
-                    </button>
-                  )}
-                </>
-              ) : (
-                <span className={styles.registerNumber}>{index + 1}</span>
-              )}
-            </div>
-          ))}
+          {registers.map((card, index) => {
+            const locked = isRegisterLocked(index);
+            return (
+              <div
+                key={index}
+                className={`${styles.register} ${card ? styles.filled : ''} ${locked ? styles.locked : ''} ${selectedCard && !isReady && !locked ? styles.clickable : ''}`}
+                onClick={() => handleRegisterClick(index)}
+                onDoubleClick={() => handleRegisterDoubleClick(index)}
+              >
+                {card ? (
+                  <>
+                    <span className={styles.cardType}>{getCardLabel(card.type)}</span>
+                    <span className={styles.priority}>{card.priority}</span>
+                    {!isReady && !locked && (
+                      <button
+                        className={styles.clearBtn}
+                        onClick={(e) => handleClearRegister(index, e)}
+                      >
+                        ×
+                      </button>
+                    )}
+                    {locked && <span className={styles.lockIcon}>🔒</span>}
+                  </>
+                ) : (
+                  <span className={styles.registerNumber}>{index + 1}</span>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -136,13 +162,23 @@ export function ProgrammingPanel() {
       </div>
 
       {!isReady && (
-        <button
-          className="btn btn-primary"
-          onClick={handleSubmit}
-          disabled={!allRegistersFilled}
-        >
-          {allRegistersFilled ? 'Submit Program' : 'Fill all registers'}
-        </button>
+        <div className={styles.actions}>
+          {!allRegistersFilled && (
+            <button
+              className="btn btn-secondary"
+              onClick={handleAutoFill}
+            >
+              Auto-fill
+            </button>
+          )}
+          <button
+            className="btn btn-primary"
+            onClick={handleSubmit}
+            disabled={!allRegistersFilled}
+          >
+            Submit Program
+          </button>
+        </div>
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Server } from 'socket.io';
 import { GameManager } from './GameManager';
+import { Card, REGISTERS_COUNT } from '@circuit-chaos/shared';
 
 // Mock socket
 function createMockSocket(id: string) {
@@ -12,12 +13,17 @@ function createMockSocket(id: string) {
   } as any;
 }
 
-// Mock io server
+// Mock io server with state capture
 function createMockIO() {
+  const emitFn = vi.fn();
   return {
     to: vi.fn(() => ({
-      emit: vi.fn(),
+      emit: emitFn,
     })),
+    getLastState: () => {
+      const stateCall = emitFn.mock.calls.find((c: any[]) => c[0] === 'game:state');
+      return stateCall ? stateCall[1] : null;
+    },
   } as any;
 }
 
@@ -210,6 +216,92 @@ describe('GameManager', () => {
 
       // Game should be deleted (was empty)
       expect(socket2.emit).toHaveBeenCalledWith('game:error', 'Game not found');
+    });
+  });
+
+  describe('startGame', () => {
+    it('deals cards based on damage (fewer cards at higher damage)', () => {
+      const hostSocket = createMockSocket('host-socket');
+      const guestSocket = createMockSocket('guest-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      const createCall = hostSocket.emit.mock.calls.find(
+        (c: any[]) => c[0] === 'game:created'
+      );
+      const gameId = createCall[1].gameId;
+
+      gameManager.joinGame(guestSocket, gameId, 'Guest');
+
+      // Manually set damage on host's robot via state
+      const state = io.getLastState();
+      state.players[0].robot.damage = 5; // Should get 4 cards
+
+      gameManager.startGame(hostSocket);
+
+      const newState = io.getLastState();
+      expect(newState.players[0].hand.length).toBe(4); // 9 - 5 = 4
+      expect(newState.players[1].hand.length).toBe(9); // No damage
+    });
+
+    it('preserves locked registers when dealing new cards', () => {
+      const hostSocket = createMockSocket('host-socket');
+      const guestSocket = createMockSocket('guest-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      const createCall = hostSocket.emit.mock.calls.find(
+        (c: any[]) => c[0] === 'game:created'
+      );
+      const gameId = createCall[1].gameId;
+
+      gameManager.joinGame(guestSocket, gameId, 'Guest');
+
+      // Set up player with damage and a card in the last register
+      const state = io.getLastState();
+      state.players[0].robot.damage = 5; // 1 locked register (register 5)
+      const lockedCard: Card = {
+        id: 'locked-card',
+        type: 'move1',
+        priority: 100,
+      };
+      state.players[0].registers = [null, null, null, null, lockedCard];
+
+      gameManager.startGame(hostSocket);
+
+      const newState = io.getLastState();
+      // Last register should still have the locked card
+      expect(newState.players[0].registers[4]).toEqual(lockedCard);
+      // Other registers should be cleared
+      expect(newState.players[0].registers[0]).toBeNull();
+      expect(newState.players[0].registers[1]).toBeNull();
+      expect(newState.players[0].registers[2]).toBeNull();
+      expect(newState.players[0].registers[3]).toBeNull();
+    });
+
+    it('skips destroyed robots when dealing cards', () => {
+      const hostSocket = createMockSocket('host-socket');
+      const guestSocket = createMockSocket('guest-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      const createCall = hostSocket.emit.mock.calls.find(
+        (c: any[]) => c[0] === 'game:created'
+      );
+      const gameId = createCall[1].gameId;
+
+      gameManager.joinGame(guestSocket, gameId, 'Guest');
+
+      // Mark host's robot as destroyed
+      const state = io.getLastState();
+      state.players[0].robot.isDestroyed = true;
+
+      gameManager.startGame(hostSocket);
+
+      const newState = io.getLastState();
+      // Destroyed robot gets no cards and is marked as ready
+      expect(newState.players[0].hand.length).toBe(0);
+      expect(newState.players[0].isReady).toBe(true);
+      // Other player gets normal cards
+      expect(newState.players[1].hand.length).toBe(9);
+      expect(newState.players[1].isReady).toBe(false);
     });
   });
 });
