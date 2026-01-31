@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <!-- Dark void background -->
+  <rect width="64" height="64" fill="#0f0f1a"/>
+
+  <!-- Warning stripes - top -->
+  <rect x="0" y="0" width="64" height="8" fill="#f59e0b"/>
+  <rect x="0" y="0" width="8" height="8" fill="#1f2937"/>
+  <rect x="16" y="0" width="8" height="8" fill="#1f2937"/>
+  <rect x="32" y="0" width="8" height="8" fill="#1f2937"/>
+  <rect x="48" y="0" width="8" height="8" fill="#1f2937"/>
+
+  <!-- Warning stripes - bottom -->
+  <rect x="0" y="56" width="64" height="8" fill="#f59e0b"/>
+  <rect x="8" y="56" width="8" height="8" fill="#1f2937"/>
+  <rect x="24" y="56" width="8" height="8" fill="#1f2937"/>
+  <rect x="40" y="56" width="8" height="8" fill="#1f2937"/>
+  <rect x="56" y="56" width="8" height="8" fill="#1f2937"/>
+
+  <!-- Warning stripes - left -->
+  <rect x="0" y="8" width="8" height="48" fill="#f59e0b"/>
+  <rect x="0" y="8" width="8" height="8" fill="#1f2937"/>
+  <rect x="0" y="24" width="8" height="8" fill="#1f2937"/>
+  <rect x="0" y="40" width="8" height="8" fill="#1f2937"/>
+
+  <!-- Warning stripes - right -->
+  <rect x="56" y="8" width="8" height="48" fill="#f59e0b"/>
+  <rect x="56" y="16" width="8" height="8" fill="#1f2937"/>
+  <rect x="56" y="32" width="8" height="8" fill="#1f2937"/>
+  <rect x="56" y="48" width="8" height="8" fill="#1f2937"/>
+
+  <!-- Inner pit with depth layers -->
+  <rect x="10" y="10" width="44" height="44" fill="#0a0a12"/>
+  <rect x="14" y="14" width="36" height="36" fill="#050508"/>
+  <rect x="18" y="18" width="28" height="28" fill="#020204"/>
+
+  <!-- Depth glow effect -->
+  <rect x="22" y="22" width="20" height="20" fill="#0a0a12"/>
+  <rect x="26" y="26" width="12" height="12" fill="#050508"/>
+
+  <!-- Warning light indicators -->
+  <rect x="2" y="2" width="4" height="4" fill="#fcd34d"/>
+  <rect x="58" y="2" width="4" height="4" fill="#fcd34d"/>
+  <rect x="2" y="58" width="4" height="4" fill="#fcd34d"/>
+  <rect x="58" y="58" width="4" height="4" fill="#fcd34d"/>
+</svg>

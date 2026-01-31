@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <!-- Base belt - orange for fast -->
+  <rect width="64" height="64" fill="#ea580c"/>
+
+  <!-- Belt track grooves -->
+  <rect x="0" y="0" width="64" height="8" fill="#c2410c"/>
+  <rect x="0" y="16" width="64" height="8" fill="#c2410c"/>
+  <rect x="0" y="32" width="64" height="8" fill="#c2410c"/>
+  <rect x="0" y="48" width="64" height="8" fill="#c2410c"/>
+
+  <!-- Track highlights -->
+  <rect x="0" y="8" width="64" height="2" fill="#f97316"/>
+  <rect x="0" y="24" width="64" height="2" fill="#f97316"/>
+  <rect x="0" y="40" width="64" height="2" fill="#f97316"/>
+  <rect x="0" y="56" width="64" height="2" fill="#f97316"/>
+
+  <!-- Side rails -->
+  <rect x="0" y="0" width="4" height="64" fill="#9a3412"/>
+  <rect x="60" y="0" width="4" height="64" fill="#9a3412"/>
+  <rect x="4" y="0" width="2" height="64" fill="#ea580c"/>
+  <rect x="58" y="0" width="2" height="64" fill="#7c2d12"/>
+
+  <!-- Double arrows pointing up -->
+  <polygon points="20,12 12,28 16,28 16,44 24,44 24,28 28,28" fill="#fed7aa"/>
+  <polygon points="44,12 36,28 40,28 40,44 48,44 48,28 52,28" fill="#fed7aa"/>
+
+  <!-- Arrow highlights -->
+  <polygon points="20,16 15,26 17,26 17,40 23,40 23,26 25,26" fill="#ffedd5"/>
+  <polygon points="44,16 39,26 41,26 41,40 47,40 47,26 49,26" fill="#ffedd5"/>
+
+  <!-- Speed lines -->
+  <rect x="8" y="50" width="12" height="2" fill="#fef3c7"/>
+  <rect x="44" y="50" width="12" height="2" fill="#fef3c7"/>
+  <rect x="10" y="54" width="8" height="2" fill="#fef3c7"/>
+  <rect x="46" y="54" width="8" height="2" fill="#fef3c7"/>
+</svg>
