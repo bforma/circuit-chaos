@@ -30,3 +30,15 @@ export const PRIORITY_RANGES = {
 export const DEFAULT_BOARD_WIDTH = 12;
 export const DEFAULT_BOARD_HEIGHT = 12;
 export const TILE_SIZE = 64; // pixels
+
+// AI player names
+export const AI_NAMES = [
+  'Sparky',
+  'Bolt',
+  'Gizmo',
+  'Whirr',
+  'Clank',
+  'Servo',
+  'Buzzy',
+  'Zappy',
+] as const;

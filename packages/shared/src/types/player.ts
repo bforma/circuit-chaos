@@ -1,6 +1,8 @@
 import type { Robot } from './robot';
 import type { Card } from './card';
 
+export type AIDifficulty = 'easy' | 'medium' | 'hard';
+
 export interface Player {
   id: string;
   name: string;
@@ -11,6 +13,8 @@ export interface Player {
   isReady: boolean; // Has submitted their program
   isConnected: boolean;
   disconnectedAt?: number; // Timestamp when player disconnected
+  isAI: boolean;
+  aiDifficulty?: AIDifficulty;
 }
 
 export const PLAYER_COLORS = [
@@ -24,7 +28,17 @@ export const PLAYER_COLORS = [
   '#00bcd4', // Cyan
 ] as const;
 
-export function createPlayer(id: string, name: string, colorIndex: number): Omit<Player, 'robot'> {
+export interface CreatePlayerOptions {
+  isAI?: boolean;
+  aiDifficulty?: AIDifficulty;
+}
+
+export function createPlayer(
+  id: string,
+  name: string,
+  colorIndex: number,
+  options: CreatePlayerOptions = {}
+): Omit<Player, 'robot'> {
   return {
     id,
     name,
@@ -33,5 +47,7 @@ export function createPlayer(id: string, name: string, colorIndex: number): Omit
     registers: [null, null, null, null, null],
     isReady: false,
     isConnected: true,
+    isAI: options.isAI ?? false,
+    aiDifficulty: options.aiDifficulty,
   };
 }

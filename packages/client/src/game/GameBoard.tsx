@@ -382,6 +382,28 @@ export function GameBoard({ board, players, theme = 'industrial' }: Props) {
     }
   }, [board.lasers, width, height]);
 
+  // Draw AI indicator ring
+  const drawAIRing = useCallback((g: PIXI.Graphics, x: number, y: number, color: number) => {
+    g.clear();
+    // Outer glow
+    g.lineStyle(4, color, 0.3);
+    g.drawCircle(x, y, TILE_SIZE * 0.5);
+    // Inner ring
+    g.lineStyle(2, color, 0.8);
+    g.drawCircle(x, y, TILE_SIZE * 0.48);
+    // Pulsing effect dots
+    const dotRadius = 3;
+    const ringRadius = TILE_SIZE * 0.5;
+    for (let i = 0; i < 4; i++) {
+      const angle = (i * Math.PI) / 2;
+      const dx = Math.cos(angle) * ringRadius;
+      const dy = Math.sin(angle) * ringRadius;
+      g.beginFill(color, 0.9);
+      g.drawCircle(x + dx, y + dy, dotRadius);
+      g.endFill();
+    }
+  }, []);
+
   // Create robot sprites
   const robots = useMemo(() => {
     return players
@@ -389,23 +411,32 @@ export function GameBoard({ board, players, theme = 'industrial' }: Props) {
       .map((player) => {
         const { robot } = player;
         const rotation = directionToRotation[robot.direction];
+        const robotX = robot.position.x * TILE_SIZE + TILE_SIZE / 2;
+        const robotY = robot.position.y * TILE_SIZE + TILE_SIZE / 2;
+        const colorInt = parseInt(player.color.slice(1), 16);
 
         return (
           <Container key={player.id}>
+            {/* AI indicator ring */}
+            {player.isAI && (
+              <Graphics
+                draw={(g) => drawAIRing(g, robotX, robotY, colorInt)}
+              />
+            )}
             <Sprite
               image={robotSprite}
-              x={robot.position.x * TILE_SIZE + TILE_SIZE / 2}
-              y={robot.position.y * TILE_SIZE + TILE_SIZE / 2}
+              x={robotX}
+              y={robotY}
               width={TILE_SIZE * 0.9}
               height={TILE_SIZE * 0.9}
               anchor={0.5}
               rotation={rotation}
-              tint={parseInt(player.color.slice(1), 16)}
+              tint={colorInt}
             />
             {/* Player name label */}
             <Text
-              text={player.name.slice(0, 8)}
-              x={robot.position.x * TILE_SIZE + TILE_SIZE / 2}
+              text={(player.isAI ? '🤖 ' : '') + player.name.slice(0, 8)}
+              x={robotX}
               y={robot.position.y * TILE_SIZE + TILE_SIZE + 4}
               anchor={[0.5, 0]}
               style={
@@ -423,7 +454,7 @@ export function GameBoard({ board, players, theme = 'industrial' }: Props) {
           </Container>
         );
       });
-  }, [players]);
+  }, [players, drawAIRing]);
 
   return (
     <Stage

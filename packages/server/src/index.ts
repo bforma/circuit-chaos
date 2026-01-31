@@ -89,6 +89,14 @@ io.on('connection', (socket) => {
     gameManager.setTheme(socket, theme as any);
   });
 
+  socket.on('game:addAI', (difficulty: string) => {
+    gameManager.addAIPlayer(socket, difficulty as any);
+  });
+
+  socket.on('game:removeAI', (aiPlayerId: string) => {
+    gameManager.removeAIPlayer(socket, aiPlayerId);
+  });
+
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
     gameManager.handleDisconnect(socket);

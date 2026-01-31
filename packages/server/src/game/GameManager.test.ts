@@ -304,4 +304,192 @@ describe('GameManager', () => {
       expect(newState.players[1].isReady).toBe(false);
     });
   });
+
+  describe('addAIPlayer', () => {
+    it('adds an AI player to the game', () => {
+      const hostSocket = createMockSocket('host-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+
+      gameManager.addAIPlayer(hostSocket, 'medium');
+
+      const state = io.getLastState();
+      expect(state.players.length).toBe(2);
+      expect(state.players[1].isAI).toBe(true);
+      expect(state.players[1].aiDifficulty).toBe('medium');
+    });
+
+    it('assigns unique AI names', () => {
+      const hostSocket = createMockSocket('host-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      gameManager.addAIPlayer(hostSocket, 'easy');
+      gameManager.addAIPlayer(hostSocket, 'medium');
+
+      const state = io.getLastState();
+      expect(state.players[1].name).not.toBe(state.players[2].name);
+    });
+
+    it('only allows host to add AI', () => {
+      const hostSocket = createMockSocket('host-socket');
+      const guestSocket = createMockSocket('guest-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      const createCall = hostSocket.emit.mock.calls.find(
+        (c: any[]) => c[0] === 'game:created'
+      );
+      const gameId = createCall[1].gameId;
+      gameManager.joinGame(guestSocket, gameId, 'Guest');
+
+      gameManager.addAIPlayer(guestSocket, 'hard');
+
+      expect(guestSocket.emit).toHaveBeenCalledWith(
+        'game:error',
+        'Only the host can add AI players'
+      );
+    });
+
+    it('respects max player limit', () => {
+      const hostSocket = createMockSocket('host-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+
+      // Add 7 AI players (host + 7 AI = 8 max)
+      for (let i = 0; i < 7; i++) {
+        gameManager.addAIPlayer(hostSocket, 'easy');
+      }
+
+      // Try to add one more
+      gameManager.addAIPlayer(hostSocket, 'easy');
+
+      expect(hostSocket.emit).toHaveBeenCalledWith('game:error', 'Game is full');
+    });
+
+    it('prevents adding AI after game starts', () => {
+      const hostSocket = createMockSocket('host-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      gameManager.addAIPlayer(hostSocket, 'easy');
+
+      // Start the game
+      gameManager.startGame(hostSocket);
+
+      // Try to add AI after start
+      gameManager.addAIPlayer(hostSocket, 'medium');
+
+      expect(hostSocket.emit).toHaveBeenCalledWith(
+        'game:error',
+        'Cannot add AI after game starts'
+      );
+    });
+  });
+
+  describe('removeAIPlayer', () => {
+    it('removes an AI player from the game', () => {
+      const hostSocket = createMockSocket('host-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      gameManager.addAIPlayer(hostSocket, 'medium');
+
+      const stateWithAI = io.getLastState();
+      const aiPlayerId = stateWithAI.players[1].id;
+
+      gameManager.removeAIPlayer(hostSocket, aiPlayerId);
+
+      const stateAfter = io.getLastState();
+      expect(stateAfter.players.length).toBe(1);
+      expect(stateAfter.players[0].isAI).toBe(false);
+    });
+
+    it('only allows host to remove AI', () => {
+      const hostSocket = createMockSocket('host-socket');
+      const guestSocket = createMockSocket('guest-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      const createCall = hostSocket.emit.mock.calls.find(
+        (c: any[]) => c[0] === 'game:created'
+      );
+      const gameId = createCall[1].gameId;
+
+      gameManager.addAIPlayer(hostSocket, 'medium');
+      const stateWithAI = io.getLastState();
+      const aiPlayerId = stateWithAI.players[1].id;
+
+      gameManager.joinGame(guestSocket, gameId, 'Guest');
+
+      gameManager.removeAIPlayer(guestSocket, aiPlayerId);
+
+      expect(guestSocket.emit).toHaveBeenCalledWith(
+        'game:error',
+        'Only the host can remove AI players'
+      );
+    });
+
+    it('returns error for non-existent AI player', () => {
+      const hostSocket = createMockSocket('host-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+
+      gameManager.removeAIPlayer(hostSocket, 'non-existent-id');
+
+      expect(hostSocket.emit).toHaveBeenCalledWith(
+        'game:error',
+        'AI player not found'
+      );
+    });
+
+    it('cannot remove human players', () => {
+      const hostSocket = createMockSocket('host-socket');
+      const guestSocket = createMockSocket('guest-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      const createCall = hostSocket.emit.mock.calls.find(
+        (c: any[]) => c[0] === 'game:created'
+      );
+      const gameId = createCall[1].gameId;
+
+      gameManager.joinGame(guestSocket, gameId, 'Guest');
+
+      const state = io.getLastState();
+      const guestPlayerId = state.players[1].id;
+
+      gameManager.removeAIPlayer(hostSocket, guestPlayerId);
+
+      expect(hostSocket.emit).toHaveBeenCalledWith(
+        'game:error',
+        'AI player not found'
+      );
+    });
+  });
+
+  describe('AI during game', () => {
+    it('AI players auto-program their registers when game starts', () => {
+      const hostSocket = createMockSocket('host-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      gameManager.addAIPlayer(hostSocket, 'medium');
+
+      gameManager.startGame(hostSocket);
+
+      const state = io.getLastState();
+      const aiPlayer = state.players.find((p: any) => p.isAI);
+
+      // AI should have all registers filled
+      expect(aiPlayer.registers.every((r: any) => r !== null)).toBe(true);
+      // AI should be marked as ready
+      expect(aiPlayer.isReady).toBe(true);
+    });
+
+    it('allows starting game with only 1 human and 1 AI', () => {
+      const hostSocket = createMockSocket('host-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      gameManager.addAIPlayer(hostSocket, 'hard');
+
+      gameManager.startGame(hostSocket);
+
+      const state = io.getLastState();
+      expect(state.phase).toBe('programming');
+    });
+  });
 });

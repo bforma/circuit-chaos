@@ -1,0 +1,245 @@
+import type {
+  GameState,
+  Player,
+  Card,
+  AIDifficulty,
+} from '@circuit-chaos/shared';
+import { REGISTERS_COUNT, getLockedRegisterCount } from '@circuit-chaos/shared';
+import {
+  simulateCardSequence,
+  evaluatePosition,
+} from './pathfinding';
+
+interface CardSelection {
+  registers: (Card | null)[];
+  willPowerDown: boolean;
+}
+
+/**
+ * Make AI decision for card selection
+ * Returns the cards to place in registers and whether to power down
+ */
+export function makeAIDecision(
+  state: GameState,
+  player: Player
+): CardSelection {
+  const difficulty = player.aiDifficulty ?? 'medium';
+
+  switch (difficulty) {
+    case 'easy':
+      return makeEasyDecision(state, player);
+    case 'medium':
+      return makeMediumDecision(state, player);
+    case 'hard':
+      return makeHardDecision(state, player);
+    default:
+      return makeMediumDecision(state, player);
+  }
+}
+
+/**
+ * Easy AI: Mostly random with slight preference for movement
+ */
+function makeEasyDecision(state: GameState, player: Player): CardSelection {
+  const availableCards = [...player.hand];
+  const lockedCount = getLockedRegisterCount(player.robot.damage);
+  const registers: (Card | null)[] = [...player.registers];
+
+  // Fill unlocked registers
+  for (let i = 0; i < REGISTERS_COUNT - lockedCount; i++) {
+    if (availableCards.length === 0) break;
+
+    // 40% pure random, 60% prefer movement cards
+    if (Math.random() < 0.4) {
+      const randomIndex = Math.floor(Math.random() * availableCards.length);
+      registers[i] = availableCards.splice(randomIndex, 1)[0];
+    } else {
+      // Sort by movement preference
+      const sorted = [...availableCards].sort((a, b) => {
+        const moveScore = (card: Card) => {
+          if (card.type.startsWith('move')) return 2;
+          if (card.type === 'backup') return 1;
+          return 0;
+        };
+        return moveScore(b) - moveScore(a);
+      });
+
+      const card = sorted[0];
+      const index = availableCards.indexOf(card);
+      registers[i] = availableCards.splice(index, 1)[0];
+    }
+  }
+
+  return {
+    registers,
+    willPowerDown: false, // Easy AI never powers down
+  };
+}
+
+/**
+ * Medium AI: Greedy pathfinding with 3-move lookahead
+ */
+function makeMediumDecision(state: GameState, player: Player): CardSelection {
+  const availableCards = [...player.hand];
+  const lockedCount = getLockedRegisterCount(player.robot.damage);
+  const registers: (Card | null)[] = [...player.registers];
+
+  // Greedy approach: pick best card for each register
+  for (let i = 0; i < REGISTERS_COUNT - lockedCount; i++) {
+    if (availableCards.length === 0) break;
+
+    let bestCard: Card | null = null;
+    let bestScore = -Infinity;
+
+    for (const card of availableCards) {
+      // Create test registers with this card
+      const testRegisters = [...registers];
+      testRegisters[i] = card;
+
+      // Simulate up to 3 moves ahead (or remaining unlocked registers)
+      const lookahead = Math.min(3, REGISTERS_COUNT - lockedCount - i);
+      const cardsToSimulate = testRegisters.slice(0, i + lookahead);
+
+      const result = simulateCardSequence(state, player, cardsToSimulate);
+      const score = evaluatePosition(state, result, player);
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestCard = card;
+      }
+    }
+
+    // 15% chance to pick second-best option
+    if (bestCard && Math.random() < 0.15 && availableCards.length > 1) {
+      const otherCards = availableCards.filter(c => c.id !== bestCard!.id);
+      if (otherCards.length > 0) {
+        const randomIndex = Math.floor(Math.random() * otherCards.length);
+        bestCard = otherCards[randomIndex];
+      }
+    }
+
+    if (bestCard) {
+      const index = availableCards.findIndex(c => c.id === bestCard!.id);
+      registers[i] = availableCards.splice(index, 1)[0];
+    }
+  }
+
+  // Consider power down if damage > 5 (30% chance)
+  const willPowerDown =
+    player.robot.damage > 5 &&
+    !player.robot.isPoweredDown &&
+    Math.random() < 0.3;
+
+  return {
+    registers,
+    willPowerDown,
+  };
+}
+
+/**
+ * Hard AI: Full lookahead with optimal decision making
+ */
+function makeHardDecision(state: GameState, player: Player): CardSelection {
+  const availableCards = [...player.hand];
+  const lockedCount = getLockedRegisterCount(player.robot.damage);
+  const numToFill = REGISTERS_COUNT - lockedCount;
+
+  // Get locked registers
+  const lockedRegisters = player.registers.slice(REGISTERS_COUNT - lockedCount);
+
+  // Find best combination of cards
+  const bestSequence = findBestCardSequence(
+    state,
+    player,
+    availableCards,
+    numToFill
+  );
+
+  // Combine with locked registers
+  const registers: (Card | null)[] = [...bestSequence, ...lockedRegisters];
+
+  // Strategic power down: if damage >= 7 and not near checkpoint
+  const nearCheckpoint = isNearCheckpoint(state, player);
+  const willPowerDown =
+    player.robot.damage >= 7 &&
+    !player.robot.isPoweredDown &&
+    !nearCheckpoint;
+
+  return {
+    registers,
+    willPowerDown,
+  };
+}
+
+/**
+ * Find the best sequence of cards using exhaustive search
+ * (with pruning for performance)
+ */
+function findBestCardSequence(
+  state: GameState,
+  player: Player,
+  availableCards: Card[],
+  count: number
+): (Card | null)[] {
+  if (count === 0 || availableCards.length === 0) {
+    return [];
+  }
+
+  // For performance, limit search depth
+  const maxCombinations = 1000;
+  let combinationsChecked = 0;
+
+  let bestSequence: Card[] = [];
+  let bestScore = -Infinity;
+
+  // Generate permutations (limited)
+  function* permutations(cards: Card[], length: number): Generator<Card[]> {
+    if (length === 0) {
+      yield [];
+      return;
+    }
+
+    for (let i = 0; i < cards.length; i++) {
+      const remaining = [...cards.slice(0, i), ...cards.slice(i + 1)];
+      for (const perm of permutations(remaining, length - 1)) {
+        yield [cards[i], ...perm];
+      }
+    }
+  }
+
+  for (const sequence of permutations(availableCards, Math.min(count, availableCards.length))) {
+    combinationsChecked++;
+    if (combinationsChecked > maxCombinations) break;
+
+    const result = simulateCardSequence(state, player, sequence);
+    const score = evaluatePosition(state, result, player);
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestSequence = sequence;
+    }
+  }
+
+  // Pad with nulls if we couldn't fill all registers
+  while (bestSequence.length < count) {
+    bestSequence.push(null as unknown as Card);
+  }
+
+  return bestSequence;
+}
+
+/**
+ * Check if player is near their next checkpoint
+ */
+function isNearCheckpoint(state: GameState, player: Player): boolean {
+  const nextCheckpoint = state.board.checkpoints.find(
+    cp => cp.order === player.robot.lastCheckpoint + 1
+  );
+  if (!nextCheckpoint) return false;
+
+  const distance =
+    Math.abs(player.robot.position.x - nextCheckpoint.x) +
+    Math.abs(player.robot.position.y - nextCheckpoint.y);
+
+  return distance <= 3;
+}

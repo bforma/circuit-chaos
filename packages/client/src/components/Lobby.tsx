@@ -1,11 +1,14 @@
+import { useState } from 'react';
 import { useGameStore } from '../stores/gameStore';
 import { useSocket } from '../hooks/useSocket';
 import { ThemeSelector } from './ThemeSelector';
+import type { AIDifficulty } from '@circuit-chaos/shared';
 import styles from './Lobby.module.css';
 
 export function Lobby() {
   const { gameState, playerId } = useGameStore();
-  const { startGame, leaveGame, setTheme } = useSocket();
+  const { startGame, leaveGame, setTheme, addAIPlayer, removeAIPlayer } = useSocket();
+  const [selectedDifficulty, setSelectedDifficulty] = useState<AIDifficulty>('medium');
 
   if (!gameState) {
     return <div className={styles.container}>Loading...</div>;
@@ -33,16 +36,51 @@ export function Lobby() {
                 style={{ backgroundColor: player.color }}
               />
               <span className={styles.playerName}>
+                {player.isAI && <span className={styles.aiIndicator}>🤖</span>}
                 {player.name}
+                {player.isAI && player.aiDifficulty && (
+                  <span className={styles.difficulty}>
+                    ({player.aiDifficulty})
+                  </span>
+                )}
                 {player.id === gameState.hostId && ' (Host)'}
                 {player.id === playerId && ' (You)'}
               </span>
-              {!player.isConnected && (
+              {!player.isConnected && !player.isAI && (
                 <span className={styles.disconnected}>Disconnected</span>
+              )}
+              {player.isAI && isHost && (
+                <button
+                  className={styles.removeAI}
+                  onClick={() => removeAIPlayer(player.id)}
+                  title="Remove AI"
+                >
+                  ✕
+                </button>
               )}
             </li>
           ))}
         </ul>
+
+        {isHost && gameState.players.length < gameState.maxPlayers && (
+          <div className={styles.aiControls}>
+            <select
+              value={selectedDifficulty}
+              onChange={(e) => setSelectedDifficulty(e.target.value as AIDifficulty)}
+              className={styles.difficultySelect}
+            >
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+            <button
+              className={styles.addAI}
+              onClick={() => addAIPlayer(selectedDifficulty)}
+            >
+              + Add AI
+            </button>
+          </div>
+        )}
       </div>
 
       <ThemeSelector

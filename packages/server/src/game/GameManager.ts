@@ -17,11 +17,14 @@ import {
   THEMES,
   getLockedRegisterCount,
   getHandSize,
+  AIDifficulty,
+  AI_NAMES,
 } from '@circuit-chaos/shared';
 import { createDeck, dealCards } from './deck';
 import { executeRegister, respawnDestroyedRobots, processPowerDown } from './executor';
 import { createSampleBoard } from './boards';
 import { getRedis } from '../redis';
+import { makeAIDecision } from './ai';
 
 const GAME_PREFIX = 'game:';
 const GAME_TTL = 60 * 60 * 24; // 24 hours
@@ -264,6 +267,9 @@ export class GameManager {
       player.registers = newRegisters;
       player.isReady = false;
     }
+
+    // Process AI players after dealing cards
+    this.processAIPlayers(session);
   }
 
   programRegister(socket: Socket, registerIndex: number, card: Card | null) {
@@ -663,6 +669,106 @@ export class GameManager {
     session.state.theme = theme;
     this.broadcastGameState(gameId);
     console.log(`Game ${gameId} theme changed to ${theme}`);
+  }
+
+  addAIPlayer(socket: Socket, difficulty: AIDifficulty) {
+    const gameId = this.socketToGame.get(socket.id);
+    if (!gameId) return;
+
+    const session = this.games.get(gameId);
+    if (!session) return;
+
+    // Only host can add AI
+    const playerId = session.socketPlayers.get(socket.id);
+    if (playerId !== session.state.hostId) {
+      socket.emit('game:error', 'Only the host can add AI players');
+      return;
+    }
+
+    // Only in lobby phase
+    if (session.state.phase !== 'lobby') {
+      socket.emit('game:error', 'Cannot add AI after game starts');
+      return;
+    }
+
+    // Check max players
+    if (session.state.players.length >= session.state.maxPlayers) {
+      socket.emit('game:error', 'Game is full');
+      return;
+    }
+
+    // Generate AI player
+    const aiId = crypto.randomUUID();
+    const colorIndex = session.state.players.length;
+    const spawnPoint = session.state.board.spawnPoints[colorIndex] || { x: colorIndex, y: 0 };
+
+    // Pick a unique AI name
+    const usedNames = session.state.players.filter(p => p.isAI).map(p => p.name);
+    const availableNames = AI_NAMES.filter(name => !usedNames.includes(name));
+    const aiName = availableNames[0] ?? `Bot ${colorIndex + 1}`;
+
+    const playerData = createPlayer(aiId, aiName, colorIndex, {
+      isAI: true,
+      aiDifficulty: difficulty,
+    });
+    const robot = createRobot(aiId, spawnPoint);
+    const aiPlayer: Player = { ...playerData, robot };
+
+    session.state.players.push(aiPlayer);
+    this.broadcastGameState(gameId);
+
+    console.log(`AI player ${aiName} (${difficulty}) added to game ${gameId}`);
+  }
+
+  removeAIPlayer(socket: Socket, aiPlayerId: string) {
+    const gameId = this.socketToGame.get(socket.id);
+    if (!gameId) return;
+
+    const session = this.games.get(gameId);
+    if (!session) return;
+
+    // Only host can remove AI
+    const playerId = session.socketPlayers.get(socket.id);
+    if (playerId !== session.state.hostId) {
+      socket.emit('game:error', 'Only the host can remove AI players');
+      return;
+    }
+
+    // Only in lobby phase
+    if (session.state.phase !== 'lobby') {
+      socket.emit('game:error', 'Cannot remove AI after game starts');
+      return;
+    }
+
+    // Find and remove AI player
+    const aiPlayer = session.state.players.find(p => p.id === aiPlayerId && p.isAI);
+    if (!aiPlayer) {
+      socket.emit('game:error', 'AI player not found');
+      return;
+    }
+
+    session.state.players = session.state.players.filter(p => p.id !== aiPlayerId);
+    this.broadcastGameState(gameId);
+
+    console.log(`AI player ${aiPlayer.name} removed from game ${gameId}`);
+  }
+
+  private processAIPlayers(session: GameSession) {
+    for (const player of session.state.players) {
+      if (!player.isAI || player.robot.isDestroyed || player.isReady) {
+        continue;
+      }
+
+      // Make AI decision
+      const decision = makeAIDecision(session.state, player);
+
+      // Apply the decision
+      player.registers = decision.registers;
+      player.robot.willPowerDown = decision.willPowerDown;
+      player.isReady = true;
+
+      console.log(`AI player ${player.name} programmed registers`);
+    }
   }
 
   async reconnect(socket: Socket, gameId: string, playerId: string) {
