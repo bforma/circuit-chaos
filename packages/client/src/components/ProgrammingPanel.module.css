@@ -164,3 +164,50 @@
   gap: 8px;
   justify-content: center;
 }
+
+.powerDown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  background: rgba(251, 191, 36, 0.1);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.powerDownBtn {
+  background: rgba(251, 191, 36, 0.2);
+  border: 2px solid #fbbf24;
+  color: #fbbf24;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.powerDownBtn:hover {
+  background: rgba(251, 191, 36, 0.3);
+}
+
+.powerDownBtn.active {
+  background: #fbbf24;
+  color: #1a1a2e;
+}
+
+.powerDownHint {
+  font-size: 0.75rem;
+  color: rgba(251, 191, 36, 0.8);
+  text-align: center;
+}
+
+.poweredDownStatus {
+  background: rgba(251, 191, 36, 0.2);
+  border: 2px solid #fbbf24;
+  color: #fbbf24;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 8px;
+}

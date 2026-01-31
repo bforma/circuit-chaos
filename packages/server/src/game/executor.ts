@@ -18,7 +18,8 @@ export function executeRegister(state: GameState, registerIndex: number) {
 
   for (const player of state.players) {
     const card = player.registers[registerIndex];
-    if (card && !player.robot.isDestroyed) {
+    // Skip destroyed or powered down robots
+    if (card && !player.robot.isDestroyed && !player.robot.isPoweredDown) {
       movements.push({ player, card });
     }
   }
@@ -201,6 +202,24 @@ export function respawnDestroyedRobots(state: GameState) {
       player.robot.damage = 2; // Respawn with some damage
       // Clear all registers for next round
       player.registers = [null, null, null, null, null];
+    }
+  }
+}
+
+export function processPowerDown(state: GameState) {
+  for (const player of state.players) {
+    if (player.robot.isDestroyed) continue;
+
+    // Heal robots that were powered down this round
+    if (player.robot.isPoweredDown) {
+      player.robot.damage = 0;
+      player.robot.isPoweredDown = false;
+    }
+
+    // Apply announced power down for next round
+    if (player.robot.willPowerDown) {
+      player.robot.isPoweredDown = true;
+      player.robot.willPowerDown = false;
     }
   }
 }

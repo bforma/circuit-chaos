@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { executeRegister, respawnDestroyedRobots } from './executor';
+import { executeRegister, respawnDestroyedRobots, processPowerDown } from './executor';
 import {
   GameState,
   Player,
@@ -383,5 +383,105 @@ describe('respawnDestroyedRobots', () => {
     // Should not have changed
     expect(player.robot.damage).toBe(5);
     expect(player.robot.position).toEqual({ x: 5, y: 5 });
+  });
+});
+
+describe('executeRegister - powered down robots', () => {
+  let state: GameState;
+
+  beforeEach(() => {
+    state = createTestGameState(10, 10);
+  });
+
+  it('powered down robots do not execute cards', () => {
+    const player = createTestPlayer('p1', 5, 5, 'north');
+    player.robot.isPoweredDown = true;
+    player.registers = [createTestCard('move1'), null, null, null, null];
+    state.players = [player];
+
+    const initialPos = { ...player.robot.position };
+    executeRegister(state, 0);
+
+    // Robot should not have moved
+    expect(player.robot.position).toEqual(initialPos);
+  });
+
+  it('powered down robots can still be affected by board elements', () => {
+    state.board.tiles[5][5] = { type: 'conveyor', direction: 'north', speed: 1 };
+    const player = createTestPlayer('p1', 5, 5, 'east');
+    player.robot.isPoweredDown = true;
+    player.registers = [null, null, null, null, null];
+    state.players = [player];
+
+    executeRegister(state, 0);
+
+    // Robot should have been moved by conveyor
+    expect(player.robot.position).toEqual({ x: 5, y: 4 });
+  });
+});
+
+describe('processPowerDown', () => {
+  let state: GameState;
+
+  beforeEach(() => {
+    state = createTestGameState(10, 10);
+  });
+
+  it('heals powered down robots completely', () => {
+    const player = createTestPlayer('p1', 5, 5, 'north');
+    player.robot.isPoweredDown = true;
+    player.robot.damage = 7;
+    state.players = [player];
+
+    processPowerDown(state);
+
+    expect(player.robot.damage).toBe(0);
+    expect(player.robot.isPoweredDown).toBe(false);
+  });
+
+  it('applies willPowerDown for next round', () => {
+    const player = createTestPlayer('p1', 5, 5, 'north');
+    player.robot.willPowerDown = true;
+    state.players = [player];
+
+    processPowerDown(state);
+
+    expect(player.robot.isPoweredDown).toBe(true);
+    expect(player.robot.willPowerDown).toBe(false);
+  });
+
+  it('does not affect destroyed robots', () => {
+    const player = createTestPlayer('p1', 5, 5, 'north');
+    player.robot.isDestroyed = true;
+    player.robot.isPoweredDown = true;
+    player.robot.damage = 5;
+    state.players = [player];
+
+    processPowerDown(state);
+
+    // Should not have healed
+    expect(player.robot.damage).toBe(5);
+  });
+
+  it('handles multiple robots independently', () => {
+    const player1 = createTestPlayer('p1', 3, 3, 'north');
+    player1.robot.isPoweredDown = true;
+    player1.robot.damage = 5;
+
+    const player2 = createTestPlayer('p2', 7, 7, 'south');
+    player2.robot.willPowerDown = true;
+    player2.robot.damage = 3;
+
+    state.players = [player1, player2];
+
+    processPowerDown(state);
+
+    // Player 1 was powered down - now healed
+    expect(player1.robot.damage).toBe(0);
+    expect(player1.robot.isPoweredDown).toBe(false);
+
+    // Player 2 announced power down - now powered down
+    expect(player2.robot.damage).toBe(3); // Not healed yet
+    expect(player2.robot.isPoweredDown).toBe(true);
   });
 });

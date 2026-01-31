@@ -58,6 +58,7 @@ interface ClientToServerEvents {
   'game:start': () => void;
   'game:program': (registerIndex: number, card: Card | null) => void;
   'game:submit': () => void;
+  'game:powerDown': () => void;
   'game:vote-disconnect': (vote: DisconnectVoteOption) => void;
   'game:setTheme': (theme: ThemeId) => void;
 }
@@ -188,6 +189,10 @@ export function useSocket() {
     socket?.emit('game:submit');
   };
 
+  const togglePowerDown = () => {
+    socket?.emit('game:powerDown');
+  };
+
   const voteDisconnect = (vote: DisconnectVoteOption) => {
     socket?.emit('game:vote-disconnect', vote);
   };
@@ -203,6 +208,7 @@ export function useSocket() {
     startGame,
     programRegister,
     submitProgram,
+    togglePowerDown,
     voteDisconnect,
     setTheme,
   };

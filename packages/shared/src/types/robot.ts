@@ -16,6 +16,8 @@ export interface Robot {
   lastCheckpoint: number;
   isDestroyed: boolean;
   spawnPosition: Position;
+  isPoweredDown: boolean;      // Currently powered down this round
+  willPowerDown: boolean;      // Announced power down for next round
 }
 
 export function createRobot(playerId: string, spawnPosition: Position): Robot {
@@ -29,6 +31,8 @@ export function createRobot(playerId: string, spawnPosition: Position): Robot {
     lastCheckpoint: 0,
     isDestroyed: false,
     spawnPosition: { ...spawnPosition },
+    isPoweredDown: false,
+    willPowerDown: false,
   };
 }
 
