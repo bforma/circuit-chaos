@@ -127,11 +127,19 @@
   cursor: not-allowed;
 }
 
+.cardIcon {
+  display: block;
+  font-size: 1.5rem;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
 .cardType {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .priority {

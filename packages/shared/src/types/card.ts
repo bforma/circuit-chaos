@@ -24,3 +24,15 @@ export function getCardLabel(type: CardType): string {
     case 'uturn': return 'U-Turn';
   }
 }
+
+export function getCardIcon(type: CardType): string {
+  switch (type) {
+    case 'move1': return '↑';
+    case 'move2': return '⇈';
+    case 'move3': return '⤊';
+    case 'backup': return '↓';
+    case 'rotateLeft': return '↺';
+    case 'rotateRight': return '↻';
+    case 'uturn': return '↩';
+  }
+}

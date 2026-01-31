@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getCardLabel, CardType } from './card';
+import { getCardLabel, getCardIcon, CardType } from './card';
 
 describe('getCardLabel', () => {
   it('returns correct label for movement cards', () => {
@@ -13,5 +13,20 @@ describe('getCardLabel', () => {
     expect(getCardLabel('rotateLeft')).toBe('Turn Left');
     expect(getCardLabel('rotateRight')).toBe('Turn Right');
     expect(getCardLabel('uturn')).toBe('U-Turn');
+  });
+});
+
+describe('getCardIcon', () => {
+  it('returns arrow icons for movement cards', () => {
+    expect(getCardIcon('move1')).toBe('↑');
+    expect(getCardIcon('move2')).toBe('⇈');
+    expect(getCardIcon('move3')).toBe('⤊');
+    expect(getCardIcon('backup')).toBe('↓');
+  });
+
+  it('returns rotation icons for rotation cards', () => {
+    expect(getCardIcon('rotateLeft')).toBe('↺');
+    expect(getCardIcon('rotateRight')).toBe('↻');
+    expect(getCardIcon('uturn')).toBe('↩');
   });
 });

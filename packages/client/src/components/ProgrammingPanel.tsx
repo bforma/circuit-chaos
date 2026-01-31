@@ -1,6 +1,6 @@
 import { useGameStore } from '../stores/gameStore';
 import { useSocket } from '../hooks/useSocket';
-import { getCardLabel, REGISTERS_COUNT, getLockedRegisterCount } from '@circuit-chaos/shared';
+import { getCardLabel, getCardIcon, REGISTERS_COUNT, getLockedRegisterCount } from '@circuit-chaos/shared';
 import styles from './ProgrammingPanel.module.css';
 
 export function ProgrammingPanel() {
@@ -140,6 +140,7 @@ export function ProgrammingPanel() {
               >
                 {card ? (
                   <>
+                    <span className={styles.cardIcon}>{getCardIcon(card.type)}</span>
                     <span className={styles.cardType}>{getCardLabel(card.type)}</span>
                     <span className={styles.priority}>{card.priority}</span>
                     {!isReady && !locked && (
@@ -178,6 +179,7 @@ export function ProgrammingPanel() {
                 onClick={() => handleCardClick(card)}
                 onDoubleClick={() => handleCardDoubleClick(card)}
               >
+                <span className={styles.cardIcon}>{getCardIcon(card.type)}</span>
                 <span className={styles.cardType}>{getCardLabel(card.type)}</span>
                 <span className={styles.priority}>{card.priority}</span>
               </div>
