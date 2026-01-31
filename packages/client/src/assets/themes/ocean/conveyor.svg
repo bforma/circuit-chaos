@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <!-- Ocean current -->
+  <rect width="64" height="64" fill="#0369a1"/>
+  <rect x="4" y="4" width="56" height="56" fill="#0284c7"/>
+
+  <!-- Current flow lines -->
+  <rect x="4" y="8" width="56" height="6" fill="#38bdf8"/>
+  <rect x="4" y="22" width="56" height="6" fill="#38bdf8"/>
+  <rect x="4" y="36" width="56" height="6" fill="#38bdf8"/>
+  <rect x="4" y="50" width="56" height="6" fill="#38bdf8"/>
+
+  <!-- Fish arrow -->
+  <polygon points="32,8 18,28 26,28 26,52 38,52 38,28 46,28" fill="#f97316"/>
+  <polygon points="32,12 22,26 28,26 28,48 36,48 36,26 42,26" fill="#fb923c"/>
+
+  <!-- Coral side rails -->
+  <rect x="0" y="0" width="4" height="64" fill="#f472b6"/>
+  <rect x="60" y="0" width="4" height="64" fill="#f472b6"/>
+
+  <!-- Bubbles -->
+  <rect x="8" y="4" width="4" height="4" fill="#ffffff" opacity="0.5"/>
+  <rect x="52" y="32" width="4" height="4" fill="#ffffff" opacity="0.5"/>
+</svg>

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <!-- Space station floor -->
+  <rect width="64" height="64" fill="#1e293b"/>
+  <rect x="2" y="2" width="60" height="60" fill="#334155"/>
+  <rect x="4" y="4" width="56" height="56" fill="#475569"/>
+
+  <!-- Antenna mast -->
+  <rect x="12" y="8" width="4" height="48" fill="#94a3b8"/>
+  <rect x="14" y="8" width="2" height="48" fill="#cbd5e1"/>
+
+  <!-- Tech base -->
+  <rect x="8" y="52" width="12" height="6" fill="#1e293b"/>
+  <rect x="10" y="54" width="8" height="2" fill="#334155"/>
+
+  <!-- Holographic flag display -->
+  <rect x="16" y="10" width="36" height="24" fill="#6d28d9"/>
+  <rect x="16" y="10" width="36" height="4" fill="#8b5cf6"/>
+  <rect x="48" y="14" width="4" height="8" fill="#4c1d95"/>
+
+  <!-- Scan lines -->
+  <rect x="16" y="18" width="32" height="2" fill="#a78bfa" opacity="0.5"/>
+  <rect x="16" y="26" width="32" height="2" fill="#a78bfa" opacity="0.5"/>
+
+  <!-- Number display (digital) -->
+  <rect x="24" y="16" width="16" height="16" fill="#0f172a"/>
+  <rect x="26" y="18" width="12" height="12" fill="#020617"/>
+
+  <!-- Beacon light -->
+  <rect x="10" y="4" width="8" height="6" fill="#22d3ee"/>
+  <rect x="12" y="6" width="4" height="2" fill="#ffffff"/>
+</svg>

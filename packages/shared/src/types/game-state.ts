@@ -1,6 +1,8 @@
 import type { Board } from './board';
 import type { Player } from './player';
 import type { DisconnectVote } from './disconnect-vote';
+import type { ThemeId } from './theme';
+import { DEFAULT_THEME } from './theme';
 
 export type GamePhase =
   | 'lobby'
@@ -21,6 +23,7 @@ export interface GameState {
   winnerId?: string;
   maxPlayers: number;
   createdAt: number;
+  theme: ThemeId;
   disconnectVote?: DisconnectVote; // Active vote about a disconnected player
 }
 
@@ -29,6 +32,7 @@ export interface GameSettings {
   boardId: string;
   timerEnabled: boolean;
   timerSeconds: number;
+  theme: ThemeId;
 }
 
 export const DEFAULT_GAME_SETTINGS: GameSettings = {
@@ -36,4 +40,5 @@ export const DEFAULT_GAME_SETTINGS: GameSettings = {
   boardId: 'default',
   timerEnabled: true,
   timerSeconds: 60,
+  theme: DEFAULT_THEME,
 };

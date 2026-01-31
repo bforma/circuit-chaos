@@ -1,24 +1,118 @@
 import { Stage, Container, Sprite, Text, Graphics } from '@pixi/react';
 import { useCallback, useMemo } from 'react';
-import type { Board, Player, Direction, Tile } from '@circuit-chaos/shared';
+import type { Board, Player, Direction, Tile, ThemeId } from '@circuit-chaos/shared';
 import { TILE_SIZE } from '@circuit-chaos/shared';
 import * as PIXI from 'pixi.js';
-
-// Import tile assets
-import floorTile from '../assets/tiles/floor.svg';
-import pitTile from '../assets/tiles/pit.svg';
-import repairTile from '../assets/tiles/repair.svg';
-import conveyorTile from '../assets/tiles/conveyor.svg';
-import conveyorFastTile from '../assets/tiles/conveyor-fast.svg';
-import gearCwTile from '../assets/tiles/gear-cw.svg';
-import gearCcwTile from '../assets/tiles/gear-ccw.svg';
-import checkpointTile from '../assets/tiles/checkpoint.svg';
-import wallTile from '../assets/tiles/wall.svg';
 import robotSprite from '../assets/robot.svg';
+
+// Theme tile imports - organized by theme
+const themeAssets: Record<ThemeId, Record<string, string>> = {
+  industrial: {
+    floor: new URL('../assets/themes/industrial/floor.svg', import.meta.url).href,
+    pit: new URL('../assets/themes/industrial/pit.svg', import.meta.url).href,
+    repair: new URL('../assets/themes/industrial/repair.svg', import.meta.url).href,
+    conveyor: new URL('../assets/themes/industrial/conveyor.svg', import.meta.url).href,
+    conveyorFast: new URL('../assets/themes/industrial/conveyor-fast.svg', import.meta.url).href,
+    gearCw: new URL('../assets/themes/industrial/gear-cw.svg', import.meta.url).href,
+    gearCcw: new URL('../assets/themes/industrial/gear-ccw.svg', import.meta.url).href,
+    checkpoint: new URL('../assets/themes/industrial/checkpoint.svg', import.meta.url).href,
+  },
+  candy: {
+    floor: new URL('../assets/themes/candy/floor.svg', import.meta.url).href,
+    pit: new URL('../assets/themes/candy/pit.svg', import.meta.url).href,
+    repair: new URL('../assets/themes/candy/repair.svg', import.meta.url).href,
+    conveyor: new URL('../assets/themes/candy/conveyor.svg', import.meta.url).href,
+    conveyorFast: new URL('../assets/themes/candy/conveyor-fast.svg', import.meta.url).href,
+    gearCw: new URL('../assets/themes/candy/gear-cw.svg', import.meta.url).href,
+    gearCcw: new URL('../assets/themes/candy/gear-ccw.svg', import.meta.url).href,
+    checkpoint: new URL('../assets/themes/candy/checkpoint.svg', import.meta.url).href,
+  },
+  neon: {
+    floor: new URL('../assets/themes/neon/floor.svg', import.meta.url).href,
+    pit: new URL('../assets/themes/neon/pit.svg', import.meta.url).href,
+    repair: new URL('../assets/themes/neon/repair.svg', import.meta.url).href,
+    conveyor: new URL('../assets/themes/neon/conveyor.svg', import.meta.url).href,
+    conveyorFast: new URL('../assets/themes/neon/conveyor-fast.svg', import.meta.url).href,
+    gearCw: new URL('../assets/themes/neon/gear-cw.svg', import.meta.url).href,
+    gearCcw: new URL('../assets/themes/neon/gear-ccw.svg', import.meta.url).href,
+    checkpoint: new URL('../assets/themes/neon/checkpoint.svg', import.meta.url).href,
+  },
+  nature: {
+    floor: new URL('../assets/themes/nature/floor.svg', import.meta.url).href,
+    pit: new URL('../assets/themes/nature/pit.svg', import.meta.url).href,
+    repair: new URL('../assets/themes/nature/repair.svg', import.meta.url).href,
+    conveyor: new URL('../assets/themes/nature/conveyor.svg', import.meta.url).href,
+    conveyorFast: new URL('../assets/themes/nature/conveyor-fast.svg', import.meta.url).href,
+    gearCw: new URL('../assets/themes/nature/gear-cw.svg', import.meta.url).href,
+    gearCcw: new URL('../assets/themes/nature/gear-ccw.svg', import.meta.url).href,
+    checkpoint: new URL('../assets/themes/nature/checkpoint.svg', import.meta.url).href,
+  },
+  space: {
+    floor: new URL('../assets/themes/space/floor.svg', import.meta.url).href,
+    pit: new URL('../assets/themes/space/pit.svg', import.meta.url).href,
+    repair: new URL('../assets/themes/space/repair.svg', import.meta.url).href,
+    conveyor: new URL('../assets/themes/space/conveyor.svg', import.meta.url).href,
+    conveyorFast: new URL('../assets/themes/space/conveyor-fast.svg', import.meta.url).href,
+    gearCw: new URL('../assets/themes/space/gear-cw.svg', import.meta.url).href,
+    gearCcw: new URL('../assets/themes/space/gear-ccw.svg', import.meta.url).href,
+    checkpoint: new URL('../assets/themes/space/checkpoint.svg', import.meta.url).href,
+  },
+  ocean: {
+    floor: new URL('../assets/themes/ocean/floor.svg', import.meta.url).href,
+    pit: new URL('../assets/themes/ocean/pit.svg', import.meta.url).href,
+    repair: new URL('../assets/themes/ocean/repair.svg', import.meta.url).href,
+    conveyor: new URL('../assets/themes/ocean/conveyor.svg', import.meta.url).href,
+    conveyorFast: new URL('../assets/themes/ocean/conveyor-fast.svg', import.meta.url).href,
+    gearCw: new URL('../assets/themes/ocean/gear-cw.svg', import.meta.url).href,
+    gearCcw: new URL('../assets/themes/ocean/gear-ccw.svg', import.meta.url).href,
+    checkpoint: new URL('../assets/themes/ocean/checkpoint.svg', import.meta.url).href,
+  },
+  lava: {
+    floor: new URL('../assets/themes/lava/floor.svg', import.meta.url).href,
+    pit: new URL('../assets/themes/lava/pit.svg', import.meta.url).href,
+    repair: new URL('../assets/themes/lava/repair.svg', import.meta.url).href,
+    conveyor: new URL('../assets/themes/lava/conveyor.svg', import.meta.url).href,
+    conveyorFast: new URL('../assets/themes/lava/conveyor-fast.svg', import.meta.url).href,
+    gearCw: new URL('../assets/themes/lava/gear-cw.svg', import.meta.url).href,
+    gearCcw: new URL('../assets/themes/lava/gear-ccw.svg', import.meta.url).href,
+    checkpoint: new URL('../assets/themes/lava/checkpoint.svg', import.meta.url).href,
+  },
+  ice: {
+    floor: new URL('../assets/themes/ice/floor.svg', import.meta.url).href,
+    pit: new URL('../assets/themes/ice/pit.svg', import.meta.url).href,
+    repair: new URL('../assets/themes/ice/repair.svg', import.meta.url).href,
+    conveyor: new URL('../assets/themes/ice/conveyor.svg', import.meta.url).href,
+    conveyorFast: new URL('../assets/themes/ice/conveyor-fast.svg', import.meta.url).href,
+    gearCw: new URL('../assets/themes/ice/gear-cw.svg', import.meta.url).href,
+    gearCcw: new URL('../assets/themes/ice/gear-ccw.svg', import.meta.url).href,
+    checkpoint: new URL('../assets/themes/ice/checkpoint.svg', import.meta.url).href,
+  },
+  jungle: {
+    floor: new URL('../assets/themes/jungle/floor.svg', import.meta.url).href,
+    pit: new URL('../assets/themes/jungle/pit.svg', import.meta.url).href,
+    repair: new URL('../assets/themes/jungle/repair.svg', import.meta.url).href,
+    conveyor: new URL('../assets/themes/jungle/conveyor.svg', import.meta.url).href,
+    conveyorFast: new URL('../assets/themes/jungle/conveyor-fast.svg', import.meta.url).href,
+    gearCw: new URL('../assets/themes/jungle/gear-cw.svg', import.meta.url).href,
+    gearCcw: new URL('../assets/themes/jungle/gear-ccw.svg', import.meta.url).href,
+    checkpoint: new URL('../assets/themes/jungle/checkpoint.svg', import.meta.url).href,
+  },
+  steampunk: {
+    floor: new URL('../assets/themes/steampunk/floor.svg', import.meta.url).href,
+    pit: new URL('../assets/themes/steampunk/pit.svg', import.meta.url).href,
+    repair: new URL('../assets/themes/steampunk/repair.svg', import.meta.url).href,
+    conveyor: new URL('../assets/themes/steampunk/conveyor.svg', import.meta.url).href,
+    conveyorFast: new URL('../assets/themes/steampunk/conveyor-fast.svg', import.meta.url).href,
+    gearCw: new URL('../assets/themes/steampunk/gear-cw.svg', import.meta.url).href,
+    gearCcw: new URL('../assets/themes/steampunk/gear-ccw.svg', import.meta.url).href,
+    checkpoint: new URL('../assets/themes/steampunk/checkpoint.svg', import.meta.url).href,
+  },
+};
 
 interface Props {
   board: Board;
   players: Player[];
+  theme?: ThemeId;
 }
 
 // Direction to rotation angle (in radians)
@@ -29,13 +123,14 @@ const directionToRotation: Record<Direction, number> = {
   west: -Math.PI / 2,
 };
 
-function getTileTexture(tile: Tile): string {
+function getTileTexture(tile: Tile, theme: ThemeId): string {
+  const assets = themeAssets[theme];
   switch (tile.type) {
-    case 'pit': return pitTile;
-    case 'repair': return repairTile;
-    case 'conveyor': return tile.speed === 2 ? conveyorFastTile : conveyorTile;
-    case 'gear': return tile.rotation === 'cw' ? gearCwTile : gearCcwTile;
-    default: return floorTile;
+    case 'pit': return assets.pit;
+    case 'repair': return assets.repair;
+    case 'conveyor': return tile.speed === 2 ? assets.conveyorFast : assets.conveyor;
+    case 'gear': return tile.rotation === 'cw' ? assets.gearCw : assets.gearCcw;
+    default: return assets.floor;
   }
 }
 
@@ -46,7 +141,7 @@ function getTileRotation(tile: Tile): number {
   return 0;
 }
 
-export function GameBoard({ board, players }: Props) {
+export function GameBoard({ board, players, theme = 'industrial' }: Props) {
   const width = board.width * TILE_SIZE;
   const height = board.height * TILE_SIZE;
 
@@ -57,7 +152,7 @@ export function GameBoard({ board, players }: Props) {
     for (let y = 0; y < board.height; y++) {
       for (let x = 0; x < board.width; x++) {
         const tile = board.tiles[y][x];
-        const texture = getTileTexture(tile);
+        const texture = getTileTexture(tile, theme);
         const rotation = getTileRotation(tile);
 
         elements.push(
@@ -76,14 +171,15 @@ export function GameBoard({ board, players }: Props) {
     }
 
     return elements;
-  }, [board.tiles, board.width, board.height]);
+  }, [board.tiles, board.width, board.height, theme]);
 
   // Create checkpoint overlays
   const checkpoints = useMemo(() => {
+    const checkpointAsset = themeAssets[theme].checkpoint;
     return board.checkpoints.map((cp) => (
       <Container key={`cp-${cp.order}`}>
         <Sprite
-          image={checkpointTile}
+          image={checkpointAsset}
           x={cp.x * TILE_SIZE + TILE_SIZE / 2}
           y={cp.y * TILE_SIZE + TILE_SIZE / 2}
           width={TILE_SIZE}
@@ -106,7 +202,7 @@ export function GameBoard({ board, players }: Props) {
         />
       </Container>
     ));
-  }, [board.checkpoints]);
+  }, [board.checkpoints, theme]);
 
   // Draw walls
   const drawWalls = useCallback((g: PIXI.Graphics) => {

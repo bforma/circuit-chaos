@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 16" shape-rendering="crispEdges">
+  <!-- Obsidian wall -->
+  <rect width="64" height="16" fill="#1c1917"/>
+
+  <!-- Rock segments -->
+  <rect x="0" y="4" width="16" height="8" fill="#292524"/>
+  <rect x="16" y="4" width="16" height="8" fill="#1c1917"/>
+  <rect x="32" y="4" width="16" height="8" fill="#292524"/>
+  <rect x="48" y="4" width="16" height="8" fill="#1c1917"/>
+
+  <!-- Lava glow top -->
+  <rect x="0" y="0" width="64" height="2" fill="#f97316"/>
+  <rect x="0" y="2" width="64" height="2" fill="#fbbf24"/>
+
+  <!-- Lava glow bottom -->
+  <rect x="0" y="12" width="64" height="2" fill="#fbbf24"/>
+  <rect x="0" y="14" width="64" height="2" fill="#f97316"/>
+
+  <!-- Lava veins -->
+  <rect x="8" y="6" width="2" height="4" fill="#ef4444"/>
+  <rect x="9" y="7" width="1" height="2" fill="#fbbf24"/>
+  <rect x="40" y="6" width="2" height="4" fill="#ef4444"/>
+  <rect x="41" y="7" width="1" height="2" fill="#fbbf24"/>
+</svg>

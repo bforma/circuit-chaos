@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" shape-rendering="crispEdges">
+  <!-- Dark base -->
+  <rect width="128" height="128" fill="#0f0f23"/>
+  <rect x="4" y="4" width="120" height="120" fill="#1a1a2e"/>
+
+  <!-- Neon gear body -->
+  <circle cx="64" cy="64" r="50" fill="#1a0a2e"/>
+  <circle cx="64" cy="64" r="44" fill="#2a1a3e"/>
+
+  <!-- Gear teeth with neon glow -->
+  <polygon points="64,2 54,18 74,18" fill="#ff00ff"/>
+  <polygon points="90,10 78,24 96,28" fill="#ff00ff"/>
+  <polygon points="110,30 96,28 104,46" fill="#ff00ff"/>
+  <polygon points="126,64 110,54 110,74" fill="#ff00ff"/>
+  <polygon points="110,98 104,82 96,100" fill="#ff00ff"/>
+  <polygon points="90,118 96,100 78,104" fill="#ff00ff"/>
+  <polygon points="64,126 74,110 54,110" fill="#ff00ff"/>
+  <polygon points="38,118 50,104 32,100" fill="#ff00ff"/>
+  <polygon points="18,98 32,100 24,82" fill="#ff00ff"/>
+  <polygon points="2,64 18,74 18,54" fill="#ff00ff"/>
+  <polygon points="18,30 24,46 32,28" fill="#ff00ff"/>
+  <polygon points="38,10 32,28 50,24" fill="#ff00ff"/>
+
+  <!-- Inner rings -->
+  <circle cx="64" cy="64" r="32" fill="#3a2a4e"/>
+  <circle cx="64" cy="64" r="26" fill="#4a3a5e"/>
+
+  <!-- Center hub -->
+  <circle cx="64" cy="64" r="12" fill="#ff00ff"/>
+  <circle cx="64" cy="64" r="6" fill="#ffffff"/>
+
+  <!-- Counter-clockwise arrows (cyan neon) -->
+  <rect x="56" y="28" width="28" height="8" fill="#00fff5"/>
+  <polygon points="52,32 64,22 64,42" fill="#00fff5"/>
+  <rect x="58" y="30" width="24" height="4" fill="#7fffff"/>
+
+  <rect x="92" y="56" width="8" height="28" fill="#00fff5"/>
+  <polygon points="96,52 86,64 106,64" fill="#00fff5"/>
+  <rect x="94" y="58" width="4" height="24" fill="#7fffff"/>
+
+  <rect x="44" y="92" width="28" height="8" fill="#00fff5"/>
+  <polygon points="76,96 64,86 64,106" fill="#00fff5"/>
+  <rect x="46" y="94" width="24" height="4" fill="#7fffff"/>
+
+  <rect x="28" y="44" width="8" height="28" fill="#00fff5"/>
+  <polygon points="32,76 22,64 42,64" fill="#00fff5"/>
+  <rect x="30" y="46" width="4" height="24" fill="#7fffff"/>
+</svg>

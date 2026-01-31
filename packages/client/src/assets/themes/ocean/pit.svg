@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <!-- Deep ocean trench -->
+  <rect width="64" height="64" fill="#0c4a6e"/>
+  <rect x="4" y="4" width="56" height="56" fill="#082f49"/>
+
+  <!-- Abyss -->
+  <rect x="8" y="8" width="48" height="48" fill="#0a1929"/>
+  <rect x="12" y="12" width="40" height="40" fill="#020617"/>
+
+  <!-- Bioluminescent dots -->
+  <rect x="20" y="20" width="2" height="2" fill="#22d3ee" opacity="0.6"/>
+  <rect x="36" y="28" width="2" height="2" fill="#22d3ee" opacity="0.4"/>
+  <rect x="28" y="40" width="2" height="2" fill="#22d3ee" opacity="0.5"/>
+  <rect x="42" y="36" width="2" height="2" fill="#22d3ee" opacity="0.3"/>
+
+  <!-- Coral warning border -->
+  <rect x="0" y="0" width="64" height="4" fill="#ef4444"/>
+  <rect x="0" y="60" width="64" height="4" fill="#ef4444"/>
+  <rect x="0" y="0" width="4" height="64" fill="#ef4444"/>
+  <rect x="60" y="0" width="4" height="64" fill="#ef4444"/>
+
+  <!-- Coral details -->
+  <rect x="4" y="4" width="6" height="8" fill="#f87171"/>
+  <rect x="54" y="52" width="6" height="8" fill="#f87171"/>
+</svg>

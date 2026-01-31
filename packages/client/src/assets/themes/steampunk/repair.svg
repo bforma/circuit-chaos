@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <!-- Workshop base -->
+  <rect width="64" height="64" fill="#78350f"/>
+  <rect x="2" y="2" width="60" height="60" fill="#92400e"/>
+  <rect x="4" y="4" width="56" height="56" fill="#b45309"/>
+
+  <!-- Copper cross (pipes) -->
+  <rect x="26" y="10" width="12" height="44" fill="#ea580c"/>
+  <rect x="10" y="26" width="44" height="12" fill="#ea580c"/>
+
+  <!-- Pipe highlights -->
+  <rect x="28" y="12" width="8" height="40" fill="#f97316"/>
+  <rect x="12" y="28" width="40" height="8" fill="#f97316"/>
+
+  <!-- Center pressure gauge -->
+  <rect x="26" y="26" width="12" height="12" fill="#44403c"/>
+  <rect x="28" y="28" width="8" height="8" fill="#22c55e"/>
+  <rect x="30" y="30" width="4" height="4" fill="#4ade80"/>
+
+  <!-- Pipe joints -->
+  <rect x="24" y="8" width="16" height="4" fill="#78350f"/>
+  <rect x="24" y="52" width="16" height="4" fill="#78350f"/>
+  <rect x="8" y="24" width="4" height="16" fill="#78350f"/>
+  <rect x="52" y="24" width="4" height="16" fill="#78350f"/>
+</svg>

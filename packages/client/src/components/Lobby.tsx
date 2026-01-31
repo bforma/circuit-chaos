@@ -1,10 +1,11 @@
 import { useGameStore } from '../stores/gameStore';
 import { useSocket } from '../hooks/useSocket';
+import { ThemeSelector } from './ThemeSelector';
 import styles from './Lobby.module.css';
 
 export function Lobby() {
   const { gameState, playerId } = useGameStore();
-  const { startGame, leaveGame } = useSocket();
+  const { startGame, leaveGame, setTheme } = useSocket();
 
   if (!gameState) {
     return <div className={styles.container}>Loading...</div>;
@@ -43,6 +44,12 @@ export function Lobby() {
           ))}
         </ul>
       </div>
+
+      <ThemeSelector
+        selectedTheme={gameState.theme}
+        onThemeChange={setTheme}
+        disabled={!isHost}
+      />
 
       <div className={styles.actions}>
         {isHost ? (

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 16" shape-rendering="crispEdges">
+  <!-- Bulkhead wall -->
+  <rect width="64" height="16" fill="#475569"/>
+
+  <!-- Metal plating -->
+  <rect x="0" y="4" width="16" height="8" fill="#64748b"/>
+  <rect x="16" y="4" width="16" height="8" fill="#475569"/>
+  <rect x="32" y="4" width="16" height="8" fill="#64748b"/>
+  <rect x="48" y="4" width="16" height="8" fill="#475569"/>
+
+  <!-- Top highlight -->
+  <rect x="0" y="0" width="64" height="2" fill="#94a3b8"/>
+  <rect x="0" y="2" width="64" height="2" fill="#cbd5e1"/>
+
+  <!-- Bottom shadow -->
+  <rect x="0" y="12" width="64" height="2" fill="#334155"/>
+  <rect x="0" y="14" width="64" height="2" fill="#1e293b"/>
+
+  <!-- Tech lights -->
+  <rect x="6" y="6" width="4" height="4" fill="#22d3ee"/>
+  <rect x="7" y="7" width="2" height="2" fill="#ffffff"/>
+  <rect x="30" y="6" width="4" height="4" fill="#22d3ee"/>
+  <rect x="31" y="7" width="2" height="2" fill="#ffffff"/>
+  <rect x="54" y="6" width="4" height="4" fill="#ef4444"/>
+  <rect x="55" y="7" width="2" height="2" fill="#fca5a5"/>
+</svg>

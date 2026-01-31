@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <!-- Dark base -->
+  <rect width="64" height="64" fill="#0f0f23"/>
+  <rect x="4" y="4" width="56" height="56" fill="#1a1a2e"/>
+
+  <!-- Glowing tracks -->
+  <rect x="4" y="8" width="56" height="4" fill="#00fff5" opacity="0.6"/>
+  <rect x="4" y="20" width="56" height="4" fill="#00fff5" opacity="0.4"/>
+  <rect x="4" y="32" width="56" height="4" fill="#00fff5" opacity="0.6"/>
+  <rect x="4" y="44" width="56" height="4" fill="#00fff5" opacity="0.4"/>
+  <rect x="4" y="56" width="56" height="4" fill="#00fff5" opacity="0.6"/>
+
+  <!-- Neon arrow -->
+  <polygon points="32,8 18,30 26,30 26,56 38,56 38,30 46,30" fill="#ff00ff"/>
+  <polygon points="32,12 22,28 28,28 28,52 36,52 36,28 42,28" fill="#ff7fff"/>
+
+  <!-- Side rails -->
+  <rect x="0" y="0" width="4" height="64" fill="#ff00ff"/>
+  <rect x="60" y="0" width="4" height="64" fill="#ff00ff"/>
+</svg>

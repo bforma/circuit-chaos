@@ -81,6 +81,10 @@ io.on('connection', (socket) => {
     gameManager.submitDisconnectVote(socket, vote as any);
   });
 
+  socket.on('game:setTheme', (theme: string) => {
+    gameManager.setTheme(socket, theme as any);
+  });
+
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
     gameManager.handleDisconnect(socket);

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <!-- Brass plate floor -->
+  <rect width="64" height="64" fill="#78350f"/>
+  <rect x="2" y="2" width="60" height="60" fill="#92400e"/>
+  <rect x="4" y="4" width="56" height="56" fill="#b45309"/>
+
+  <!-- Riveted panels -->
+  <rect x="4" y="4" width="28" height="28" fill="#ca8a04"/>
+  <rect x="32" y="32" width="28" height="28" fill="#ca8a04"/>
+
+  <!-- Panel seams -->
+  <rect x="30" y="4" width="2" height="56" fill="#78350f"/>
+  <rect x="4" y="30" width="56" height="2" fill="#78350f"/>
+
+  <!-- Rivets -->
+  <rect x="8" y="8" width="4" height="4" fill="#a16207"/>
+  <rect x="9" y="9" width="2" height="2" fill="#fbbf24"/>
+  <rect x="24" y="8" width="4" height="4" fill="#a16207"/>
+  <rect x="36" y="36" width="4" height="4" fill="#a16207"/>
+  <rect x="52" y="52" width="4" height="4" fill="#a16207"/>
+
+  <!-- Highlight -->
+  <rect x="4" y="4" width="56" height="2" fill="#eab308"/>
+</svg>

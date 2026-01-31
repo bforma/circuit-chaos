@@ -17,7 +17,7 @@ export function Game() {
   return (
     <div className={styles.container}>
       <div className={styles.gameArea}>
-        <GameBoard board={gameState.board} players={gameState.players} />
+        <GameBoard board={gameState.board} players={gameState.players} theme={gameState.theme} />
       </div>
 
       <div className={styles.sidebar}>

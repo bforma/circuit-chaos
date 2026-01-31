@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <!-- Candy pink base -->
+  <rect width="64" height="64" fill="#f9a8d4"/>
+  <rect x="2" y="2" width="60" height="60" fill="#fbcfe8"/>
+  <rect x="4" y="4" width="56" height="56" fill="#fce7f3"/>
+
+  <!-- Checkerboard candy pattern -->
+  <rect x="4" y="4" width="14" height="14" fill="#f9a8d4"/>
+  <rect x="32" y="4" width="14" height="14" fill="#f9a8d4"/>
+  <rect x="18" y="18" width="14" height="14" fill="#f9a8d4"/>
+  <rect x="46" y="18" width="14" height="14" fill="#f9a8d4"/>
+  <rect x="4" y="32" width="14" height="14" fill="#f9a8d4"/>
+  <rect x="32" y="32" width="14" height="14" fill="#f9a8d4"/>
+  <rect x="18" y="46" width="14" height="14" fill="#f9a8d4"/>
+  <rect x="46" y="46" width="14" height="14" fill="#f9a8d4"/>
+
+  <!-- Sparkle highlights -->
+  <rect x="10" y="10" width="4" height="4" fill="#ffffff"/>
+  <rect x="50" y="26" width="4" height="4" fill="#ffffff"/>
+  <rect x="26" y="50" width="4" height="4" fill="#ffffff"/>
+
+  <!-- Border highlight -->
+  <rect x="4" y="4" width="56" height="2" fill="#fdf2f8"/>
+  <rect x="4" y="4" width="2" height="56" fill="#fdf2f8"/>
+</svg>

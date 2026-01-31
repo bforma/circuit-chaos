@@ -25,6 +25,7 @@ function createTestGameState(boardWidth = 5, boardHeight = 5): GameState {
     hostId: 'host',
     maxPlayers: 4,
     createdAt: Date.now(),
+    theme: 'industrial',
   };
 }
 

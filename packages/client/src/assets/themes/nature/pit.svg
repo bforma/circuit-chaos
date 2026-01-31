@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <!-- Muddy pit -->
+  <rect width="64" height="64" fill="#78350f"/>
+  <rect x="4" y="4" width="56" height="56" fill="#451a03"/>
+
+  <!-- Deep mud -->
+  <rect x="8" y="8" width="48" height="48" fill="#292524"/>
+  <rect x="12" y="12" width="40" height="40" fill="#1c1917"/>
+
+  <!-- Mud splatters around edge -->
+  <rect x="4" y="16" width="8" height="8" fill="#78350f"/>
+  <rect x="52" y="24" width="8" height="12" fill="#78350f"/>
+  <rect x="20" y="4" width="12" height="8" fill="#78350f"/>
+  <rect x="36" y="52" width="16" height="8" fill="#78350f"/>
+
+  <!-- Warning vines -->
+  <rect x="0" y="0" width="4" height="64" fill="#166534"/>
+  <rect x="60" y="0" width="4" height="64" fill="#166534"/>
+  <rect x="0" y="0" width="64" height="4" fill="#166534"/>
+  <rect x="0" y="60" width="64" height="4" fill="#166534"/>
+
+  <!-- Thorns -->
+  <polygon points="2,16 6,20 2,24" fill="#dc2626"/>
+  <polygon points="62,32 58,36 62,40" fill="#dc2626"/>
+  <polygon points="24,2 28,6 32,2" fill="#dc2626"/>
+</svg>

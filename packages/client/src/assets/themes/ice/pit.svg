@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <!-- Frozen chasm -->
+  <rect width="64" height="64" fill="#0c4a6e"/>
+  <rect x="4" y="4" width="56" height="56" fill="#075985"/>
+
+  <!-- Deep ice -->
+  <rect x="8" y="8" width="48" height="48" fill="#0369a1"/>
+  <rect x="12" y="12" width="40" height="40" fill="#0284c7"/>
+
+  <!-- Frozen depth -->
+  <rect x="16" y="16" width="32" height="32" fill="#0ea5e9"/>
+
+  <!-- Ice crystals in pit -->
+  <polygon points="24,24 28,32 20,32" fill="#7dd3fc"/>
+  <polygon points="40,28 44,36 36,36" fill="#7dd3fc"/>
+  <polygon points="32,36 36,44 28,44" fill="#7dd3fc"/>
+
+  <!-- Icy warning border -->
+  <rect x="0" y="0" width="64" height="4" fill="#38bdf8"/>
+  <rect x="0" y="60" width="64" height="4" fill="#38bdf8"/>
+  <rect x="0" y="0" width="4" height="64" fill="#38bdf8"/>
+  <rect x="60" y="0" width="4" height="64" fill="#38bdf8"/>
+
+  <!-- Frost corners -->
+  <rect x="4" y="4" width="8" height="8" fill="#bae6fd"/>
+  <rect x="52" y="4" width="8" height="8" fill="#bae6fd"/>
+  <rect x="4" y="52" width="8" height="8" fill="#bae6fd"/>
+  <rect x="52" y="52" width="8" height="8" fill="#bae6fd"/>
+</svg>

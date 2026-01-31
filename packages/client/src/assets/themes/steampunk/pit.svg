@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <!-- Steam vent pit -->
+  <rect width="64" height="64" fill="#44403c"/>
+  <rect x="4" y="4" width="56" height="56" fill="#292524"/>
+
+  <!-- Deep machinery -->
+  <rect x="8" y="8" width="48" height="48" fill="#1c1917"/>
+  <rect x="12" y="12" width="40" height="40" fill="#0c0a09"/>
+
+  <!-- Steam vents -->
+  <rect x="16" y="16" width="8" height="32" fill="#78350f"/>
+  <rect x="28" y="20" width="8" height="28" fill="#78350f"/>
+  <rect x="40" y="16" width="8" height="32" fill="#78350f"/>
+
+  <!-- Steam glow -->
+  <rect x="18" y="18" width="4" height="28" fill="#e7e5e4" opacity="0.5"/>
+  <rect x="30" y="22" width="4" height="24" fill="#e7e5e4" opacity="0.5"/>
+  <rect x="42" y="18" width="4" height="28" fill="#e7e5e4" opacity="0.5"/>
+
+  <!-- Brass frame -->
+  <rect x="0" y="0" width="64" height="4" fill="#ca8a04"/>
+  <rect x="0" y="60" width="64" height="4" fill="#ca8a04"/>
+  <rect x="0" y="0" width="4" height="64" fill="#ca8a04"/>
+  <rect x="60" y="0" width="4" height="64" fill="#ca8a04"/>
+
+  <!-- Corner gears -->
+  <rect x="4" y="4" width="6" height="6" fill="#78350f"/>
+  <rect x="54" y="4" width="6" height="6" fill="#78350f"/>
+</svg>

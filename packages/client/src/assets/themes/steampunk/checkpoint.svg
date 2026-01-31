@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <!-- Brass floor -->
+  <rect width="64" height="64" fill="#92400e"/>
+  <rect x="2" y="2" width="60" height="60" fill="#b45309"/>
+  <rect x="4" y="4" width="56" height="56" fill="#ca8a04"/>
+
+  <!-- Copper pole -->
+  <rect x="12" y="8" width="4" height="48" fill="#ea580c"/>
+  <rect x="14" y="8" width="2" height="48" fill="#f97316"/>
+
+  <!-- Mechanical base -->
+  <rect x="8" y="52" width="12" height="6" fill="#44403c"/>
+  <rect x="10" y="54" width="8" height="2" fill="#57534e"/>
+
+  <!-- Victorian flag -->
+  <rect x="16" y="10" width="36" height="24" fill="#78350f"/>
+  <rect x="16" y="10" width="36" height="4" fill="#92400e"/>
+  <rect x="48" y="14" width="4" height="8" fill="#451a03"/>
+
+  <!-- Gear pattern on flag -->
+  <circle cx="32" cy="22" r="8" fill="#ca8a04"/>
+  <circle cx="32" cy="22" r="5" fill="#eab308"/>
+
+  <!-- Number plate -->
+  <rect x="24" y="16" width="16" height="16" fill="#44403c"/>
+  <rect x="26" y="18" width="12" height="12" fill="#57534e"/>
+
+  <!-- Lamp top -->
+  <rect x="10" y="4" width="8" height="6" fill="#fbbf24"/>
+  <rect x="12" y="6" width="4" height="2" fill="#fef3c7"/>
+</svg>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <!-- Healing coral reef -->
+  <rect width="64" height="64" fill="#0891b2"/>
+  <rect x="2" y="2" width="60" height="60" fill="#06b6d4"/>
+  <rect x="4" y="4" width="56" height="56" fill="#22d3ee"/>
+
+  <!-- Healing seaweed cross -->
+  <rect x="26" y="10" width="12" height="44" fill="#22c55e"/>
+  <rect x="10" y="26" width="44" height="12" fill="#22c55e"/>
+
+  <!-- Seaweed details -->
+  <rect x="28" y="12" width="8" height="40" fill="#4ade80"/>
+  <rect x="12" y="28" width="40" height="8" fill="#4ade80"/>
+
+  <!-- Center pearl -->
+  <rect x="26" y="26" width="12" height="12" fill="#fef3c7"/>
+  <rect x="28" y="28" width="8" height="8" fill="#fef9c3"/>
+
+  <!-- Bubbles -->
+  <rect x="8" y="8" width="4" height="4" fill="#ffffff" opacity="0.6"/>
+  <rect x="52" y="12" width="4" height="4" fill="#ffffff" opacity="0.6"/>
+  <rect x="48" y="48" width="6" height="6" fill="#ffffff" opacity="0.6"/>
+  <rect x="6" y="50" width="4" height="4" fill="#ffffff" opacity="0.6"/>
+</svg>

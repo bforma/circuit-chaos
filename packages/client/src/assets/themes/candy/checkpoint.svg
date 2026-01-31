@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <!-- Candy floor base -->
+  <rect width="64" height="64" fill="#f9a8d4"/>
+  <rect x="2" y="2" width="60" height="60" fill="#fbcfe8"/>
+  <rect x="4" y="4" width="56" height="56" fill="#fce7f3"/>
+
+  <!-- Lollipop stick -->
+  <rect x="12" y="8" width="4" height="48" fill="#fbbf24"/>
+  <rect x="14" y="8" width="2" height="48" fill="#fde047"/>
+
+  <!-- Stick base (candy wrapper) -->
+  <rect x="8" y="52" width="12" height="6" fill="#ec4899"/>
+  <rect x="10" y="54" width="8" height="2" fill="#f472b6"/>
+
+  <!-- Lollipop flag -->
+  <rect x="16" y="10" width="36" height="24" fill="#ef4444"/>
+  <rect x="16" y="10" width="36" height="4" fill="#f87171"/>
+  <rect x="48" y="14" width="4" height="8" fill="#dc2626"/>
+
+  <!-- Candy swirl on flag -->
+  <rect x="16" y="30" width="32" height="4" fill="#dc2626"/>
+  <rect x="44" y="26" width="4" height="4" fill="#dc2626"/>
+
+  <!-- Number background (candy button) -->
+  <rect x="24" y="16" width="16" height="16" fill="#be185d"/>
+  <rect x="26" y="18" width="12" height="12" fill="#ec4899"/>
+
+  <!-- Lollipop top swirl -->
+  <rect x="10" y="4" width="8" height="6" fill="#8b5cf6"/>
+  <rect x="12" y="6" width="4" height="2" fill="#a78bfa"/>
+</svg>

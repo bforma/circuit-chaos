@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <!-- Frozen ice base -->
+  <rect width="64" height="64" fill="#bae6fd"/>
+  <rect x="2" y="2" width="60" height="60" fill="#e0f2fe"/>
+  <rect x="4" y="4" width="56" height="56" fill="#f0f9ff"/>
+
+  <!-- Ice cracks -->
+  <rect x="12" y="8" width="2" height="20" fill="#7dd3fc"/>
+  <rect x="12" y="8" width="16" height="2" fill="#7dd3fc"/>
+  <rect x="40" y="16" width="2" height="24" fill="#7dd3fc"/>
+  <rect x="24" y="36" width="20" height="2" fill="#7dd3fc"/>
+  <rect x="8" y="44" width="2" height="12" fill="#7dd3fc"/>
+  <rect x="48" y="48" width="8" height="2" fill="#7dd3fc"/>
+
+  <!-- Frost highlights -->
+  <rect x="4" y="4" width="56" height="2" fill="#ffffff"/>
+  <rect x="4" y="4" width="2" height="56" fill="#ffffff"/>
+
+  <!-- Snow sparkles -->
+  <rect x="20" y="20" width="2" height="2" fill="#ffffff"/>
+  <rect x="44" y="12" width="2" height="2" fill="#ffffff"/>
+  <rect x="32" y="48" width="2" height="2" fill="#ffffff"/>
+</svg>
