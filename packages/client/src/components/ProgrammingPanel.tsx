@@ -108,7 +108,7 @@ export function ProgrammingPanel() {
       </h3>
 
       {/* Power Down toggle */}
-      {!isReady && !isPoweredDown && damage > 0 && (
+      {!isReady && !isPoweredDown && (
         <div className={styles.powerDown}>
           <button
             className={`${styles.powerDownBtn} ${willPowerDown ? styles.active : ''}`}
