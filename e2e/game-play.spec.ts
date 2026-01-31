@@ -34,8 +34,8 @@ test.describe('Game Play', () => {
     await expect(hostPage.getByText('Your Cards')).toBeVisible();
     await expect(hostPage.getByText('Registers', { exact: true })).toBeVisible();
 
-    // Should see submit button (disabled initially)
-    await expect(hostPage.getByRole('button', { name: 'Fill all registers' })).toBeVisible();
+    // Should see auto-fill button (since not all registers are filled)
+    await expect(hostPage.getByRole('button', { name: 'Auto-fill' })).toBeVisible();
 
     await hostContext.close();
     await guestContext.close();

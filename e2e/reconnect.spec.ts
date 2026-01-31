@@ -225,8 +225,8 @@ test.describe('Reconnect', () => {
 
     // Host should reconnect and still see both players
     await expect(hostPage.getByText('Game Lobby')).toBeVisible({ timeout: 5000 });
-    await expect(hostPage.getByText('Host')).toBeVisible();
-    await expect(hostPage.getByText('Guest')).toBeVisible();
+    await expect(hostPage.getByText('Host (Host)')).toBeVisible();
+    await expect(hostPage.getByText('Guest', { exact: true })).toBeVisible();
     await expect(hostPage.getByText('Players (2/')).toBeVisible();
 
     // Guest should still see host as connected (not showing disconnected)
