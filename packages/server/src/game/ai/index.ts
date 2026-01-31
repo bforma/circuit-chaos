@@ -12,12 +12,11 @@ import {
 
 interface CardSelection {
   registers: (Card | null)[];
-  willPowerDown: boolean;
 }
 
 /**
  * Make AI decision for card selection
- * Returns the cards to place in registers and whether to power down
+ * Returns the cards to place in registers
  */
 export function makeAIDecision(
   state: GameState,
@@ -72,7 +71,6 @@ function makeEasyDecision(state: GameState, player: Player): CardSelection {
 
   return {
     registers,
-    willPowerDown: false, // Easy AI never powers down
   };
 }
 
@@ -124,15 +122,8 @@ function makeMediumDecision(state: GameState, player: Player): CardSelection {
     }
   }
 
-  // Consider power down if damage > 5 (30% chance)
-  const willPowerDown =
-    player.robot.damage > 5 &&
-    !player.robot.isPoweredDown &&
-    Math.random() < 0.3;
-
   return {
     registers,
-    willPowerDown,
   };
 }
 
@@ -158,16 +149,8 @@ function makeHardDecision(state: GameState, player: Player): CardSelection {
   // Combine with locked registers
   const registers: (Card | null)[] = [...bestSequence, ...lockedRegisters];
 
-  // Strategic power down: if damage >= 7 and not near checkpoint
-  const nearCheckpoint = isNearCheckpoint(state, player);
-  const willPowerDown =
-    player.robot.damage >= 7 &&
-    !player.robot.isPoweredDown &&
-    !nearCheckpoint;
-
   return {
     registers,
-    willPowerDown,
   };
 }
 
@@ -226,20 +209,4 @@ function findBestCardSequence(
   }
 
   return bestSequence;
-}
-
-/**
- * Check if player is near their next checkpoint
- */
-function isNearCheckpoint(state: GameState, player: Player): boolean {
-  const nextCheckpoint = state.board.checkpoints.find(
-    cp => cp.order === player.robot.lastCheckpoint + 1
-  );
-  if (!nextCheckpoint) return false;
-
-  const distance =
-    Math.abs(player.robot.position.x - nextCheckpoint.x) +
-    Math.abs(player.robot.position.y - nextCheckpoint.y);
-
-  return distance <= 3;
 }

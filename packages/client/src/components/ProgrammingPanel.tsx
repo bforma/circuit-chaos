@@ -5,7 +5,7 @@ import styles from './ProgrammingPanel.module.css';
 
 export function ProgrammingPanel() {
   const { gameState, getCurrentPlayer, selectedCard, setSelectedCard, setHoveredCard } = useGameStore();
-  const { programRegister, submitProgram, togglePowerDown } = useSocket();
+  const { programRegister, submitProgram } = useSocket();
 
   const cardPreviewEnabled = gameState?.cardPreviewEnabled ?? false;
 
@@ -14,7 +14,6 @@ export function ProgrammingPanel() {
 
   const { hand, registers, isReady, robot } = player;
   const lockedCount = getLockedRegisterCount(robot.damage);
-  const { isPoweredDown, willPowerDown, damage } = robot;
 
   const isRegisterLocked = (index: number) => {
     return index >= REGISTERS_COUNT - lockedCount;
@@ -103,32 +102,8 @@ export function ProgrammingPanel() {
   return (
     <div className={styles.container}>
       <h3 className={styles.title}>
-        {isPoweredDown ? '⚡ Powered Down - Healing...' :
-         isReady ? 'Program Submitted!' : 'Program Your Robot'}
+        {isReady ? 'Program Submitted!' : 'Program Your Robot'}
       </h3>
-
-      {/* Power Down toggle */}
-      {!isReady && !isPoweredDown && (
-        <div className={styles.powerDown}>
-          <button
-            className={`${styles.powerDownBtn} ${willPowerDown ? styles.active : ''}`}
-            onClick={togglePowerDown}
-          >
-            {willPowerDown ? '⚡ Power Down Next Round' : '⚡ Announce Power Down'}
-          </button>
-          {willPowerDown && (
-            <span className={styles.powerDownHint}>
-              You will skip next round and heal all damage
-            </span>
-          )}
-        </div>
-      )}
-
-      {isPoweredDown && (
-        <div className={styles.poweredDownStatus}>
-          Robot is powered down. All damage will be healed at end of round.
-        </div>
-      )}
 
       <div className={styles.registers}>
         <span className={styles.label}>Registers</span>

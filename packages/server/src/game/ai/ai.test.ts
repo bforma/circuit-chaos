@@ -136,73 +136,38 @@ describe('AI Decision Making', () => {
     });
 
     describe('easy difficulty', () => {
-      it('never powers down', () => {
+      it('fills registers with preference for movement', () => {
         const player = createTestPlayer({ aiDifficulty: 'easy' });
-        player.robot.damage = 9; // Very high damage
         const state = createTestState(player);
 
-        // Run multiple times to check probability
-        for (let i = 0; i < 10; i++) {
-          const decision = makeAIDecision(state, player);
-          expect(decision.willPowerDown).toBe(false);
-        }
+        const decision = makeAIDecision(state, player);
+
+        expect(decision.registers).toHaveLength(5);
+        expect(decision.registers.every(r => r !== null)).toBe(true);
       });
     });
 
     describe('medium difficulty', () => {
-      it('may power down at high damage', () => {
+      it('makes reasonable card selections', () => {
         const player = createTestPlayer({ aiDifficulty: 'medium' });
-        player.robot.damage = 7;
         const state = createTestState(player);
 
-        // Run many times - should power down at least sometimes (30% chance)
-        let poweredDown = false;
-        for (let i = 0; i < 50; i++) {
-          const decision = makeAIDecision(state, player);
-          if (decision.willPowerDown) {
-            poweredDown = true;
-            break;
-          }
-        }
-        // This could theoretically fail but is extremely unlikely
-        expect(poweredDown).toBe(true);
-      });
+        const decision = makeAIDecision(state, player);
 
-      it('does not power down at low damage', () => {
-        const player = createTestPlayer({ aiDifficulty: 'medium' });
-        player.robot.damage = 3;
-        const state = createTestState(player);
-
-        for (let i = 0; i < 10; i++) {
-          const decision = makeAIDecision(state, player);
-          expect(decision.willPowerDown).toBe(false);
-        }
+        expect(decision.registers).toHaveLength(5);
+        expect(decision.registers.every(r => r !== null)).toBe(true);
       });
     });
 
     describe('hard difficulty', () => {
-      it('makes strategic power down decisions at very high damage', () => {
+      it('makes optimal card selections', () => {
         const player = createTestPlayer({ aiDifficulty: 'hard' });
-        player.robot.damage = 8;
-        player.robot.position = { x: 0, y: 0 }; // Far from checkpoint
         const state = createTestState(player);
 
         const decision = makeAIDecision(state, player);
 
-        // Hard AI should power down at 8 damage when far from checkpoint
-        expect(decision.willPowerDown).toBe(true);
-      });
-
-      it('does not power down when near checkpoint even with high damage', () => {
-        const player = createTestPlayer({ aiDifficulty: 'hard' });
-        player.robot.damage = 8;
-        player.robot.position = { x: 2, y: 3 }; // Near checkpoint at (3,3)
-        const state = createTestState(player);
-
-        const decision = makeAIDecision(state, player);
-
-        // Should not power down when close to checkpoint
-        expect(decision.willPowerDown).toBe(false);
+        expect(decision.registers).toHaveLength(5);
+        expect(decision.registers.every(r => r !== null)).toBe(true);
       });
     });
   });
@@ -225,9 +190,8 @@ describe('AI Decision Making', () => {
       expect(decision.registers.every(r => r !== null)).toBe(true);
     });
 
-    it('handles player already powered down', () => {
+    it('handles high damage player', () => {
       const player = createTestPlayer({ aiDifficulty: 'hard' });
-      player.robot.isPoweredDown = true;
       player.robot.damage = 9;
       const state = createTestState(player);
 

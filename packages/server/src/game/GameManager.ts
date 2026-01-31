@@ -21,7 +21,7 @@ import {
   AI_NAMES,
 } from '@circuit-chaos/shared';
 import { createDeck, dealCards } from './deck';
-import { executeRegister, respawnDestroyedRobots, processPowerDown } from './executor';
+import { executeRegister, respawnDestroyedRobots } from './executor';
 import { createSampleBoard } from './boards';
 import { getRedis } from '../redis';
 import { makeAIDecision } from './ai';
@@ -316,27 +316,6 @@ export class GameManager {
     }
   }
 
-  togglePowerDown(socket: Socket) {
-    const gameId = this.socketToGame.get(socket.id);
-    if (!gameId) return;
-
-    const session = this.games.get(gameId);
-    if (!session || session.state.phase !== 'programming') return;
-
-    const playerId = session.socketPlayers.get(socket.id);
-    const player = session.state.players.find(p => p.id === playerId);
-    if (!player || player.isReady) return;
-
-    // Can't power down if already powered down
-    if (player.robot.isPoweredDown) {
-      socket.emit('game:error', 'Already powered down this round');
-      return;
-    }
-
-    player.robot.willPowerDown = !player.robot.willPowerDown;
-    this.broadcastGameState(gameId);
-  }
-
   private async executeRound(session: GameSession, gameId: string) {
     session.state.phase = 'executing';
     this.broadcastGameState(gameId);
@@ -366,9 +345,6 @@ export class GameManager {
     // Cleanup phase
     session.state.phase = 'cleanup';
     this.broadcastGameState(gameId);
-
-    // Process power down (heal powered down robots, apply next round's power down)
-    processPowerDown(session.state);
 
     // Respawn destroyed robots before dealing new cards
     respawnDestroyedRobots(session.state);
@@ -790,7 +766,6 @@ export class GameManager {
 
       // Apply the decision
       player.registers = decision.registers;
-      player.robot.willPowerDown = decision.willPowerDown;
       player.isReady = true;
 
       console.log(`AI player ${player.name} programmed registers`);

@@ -73,10 +73,6 @@ io.on('connection', (socket) => {
     gameManager.submitProgram(socket);
   });
 
-  socket.on('game:powerDown', () => {
-    gameManager.togglePowerDown(socket);
-  });
-
   socket.on('game:reconnect', (gameId: string, playerId: string) => {
     gameManager.reconnect(socket, gameId, playerId);
   });
