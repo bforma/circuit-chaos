@@ -1,25 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" shape-rendering="crispEdges">
   <!-- River/stream -->
-  <rect width="64" height="64" fill="#0e7490"/>
-  <rect x="4" y="4" width="56" height="56" fill="#0891b2"/>
+  <rect width="128" height="128" fill="#0e7490"/>
+  <rect x="8" y="8" width="112" height="112" fill="#0891b2"/>
 
   <!-- Water flow lines -->
-  <rect x="4" y="8" width="56" height="6" fill="#22d3ee"/>
-  <rect x="4" y="22" width="56" height="6" fill="#22d3ee"/>
-  <rect x="4" y="36" width="56" height="6" fill="#22d3ee"/>
-  <rect x="4" y="50" width="56" height="6" fill="#22d3ee"/>
+  <rect x="8" y="16" width="112" height="12" fill="#22d3ee"/>
+  <rect x="8" y="44" width="112" height="12" fill="#22d3ee"/>
+  <rect x="8" y="72" width="112" height="12" fill="#22d3ee"/>
+  <rect x="8" y="100" width="112" height="12" fill="#22d3ee"/>
 
   <!-- Flow arrow (leaf shape) -->
-  <polygon points="32,8 18,28 26,28 26,52 38,52 38,28 46,28" fill="#22c55e"/>
-  <polygon points="32,12 22,26 28,26 28,48 36,48 36,26 42,26" fill="#4ade80"/>
+  <polygon points="64,16 36,56 52,56 52,104 76,104 76,56 92,56" fill="#22c55e"/>
+  <polygon points="64,24 44,52 56,52 56,96 72,96 72,52 84,52" fill="#4ade80"/>
 
   <!-- Riverbanks -->
-  <rect x="0" y="0" width="4" height="64" fill="#78350f"/>
-  <rect x="60" y="0" width="4" height="64" fill="#78350f"/>
+  <rect x="0" y="0" width="8" height="128" fill="#78350f"/>
+  <rect x="120" y="0" width="8" height="128" fill="#78350f"/>
 
   <!-- Grass on banks -->
-  <rect x="0" y="8" width="4" height="8" fill="#22c55e"/>
-  <rect x="0" y="32" width="4" height="8" fill="#22c55e"/>
-  <rect x="60" y="20" width="4" height="8" fill="#22c55e"/>
-  <rect x="60" y="48" width="4" height="8" fill="#22c55e"/>
+  <rect x="0" y="16" width="8" height="16" fill="#22c55e"/>
+  <rect x="0" y="64" width="8" height="16" fill="#22c55e"/>
+  <rect x="120" y="40" width="8" height="16" fill="#22c55e"/>
+  <rect x="120" y="96" width="8" height="16" fill="#22c55e"/>
 </svg>

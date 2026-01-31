@@ -1,32 +1,32 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 16" shape-rendering="crispEdges">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 32" shape-rendering="crispEdges">
   <!-- Wall base -->
-  <rect width="64" height="16" fill="#64748b"/>
+  <rect width="128" height="32" fill="#64748b"/>
 
   <!-- Top highlight -->
-  <rect x="0" y="0" width="64" height="2" fill="#94a3b8"/>
-  <rect x="0" y="2" width="64" height="2" fill="#cbd5e1"/>
+  <rect x="0" y="0" width="128" height="4" fill="#94a3b8"/>
+  <rect x="0" y="4" width="128" height="4" fill="#cbd5e1"/>
 
   <!-- Bottom shadow -->
-  <rect x="0" y="12" width="64" height="2" fill="#475569"/>
-  <rect x="0" y="14" width="64" height="2" fill="#334155"/>
+  <rect x="0" y="24" width="128" height="4" fill="#475569"/>
+  <rect x="0" y="28" width="128" height="4" fill="#334155"/>
 
   <!-- Brick pattern -->
-  <rect x="0" y="4" width="16" height="8" fill="#64748b" stroke="#475569" stroke-width="1"/>
-  <rect x="16" y="4" width="16" height="8" fill="#64748b" stroke="#475569" stroke-width="1"/>
-  <rect x="32" y="4" width="16" height="8" fill="#64748b" stroke="#475569" stroke-width="1"/>
-  <rect x="48" y="4" width="16" height="8" fill="#64748b" stroke="#475569" stroke-width="1"/>
+  <rect x="0" y="8" width="32" height="16" fill="#64748b" stroke="#475569" stroke-width="2"/>
+  <rect x="32" y="8" width="32" height="16" fill="#64748b" stroke="#475569" stroke-width="2"/>
+  <rect x="64" y="8" width="32" height="16" fill="#64748b" stroke="#475569" stroke-width="2"/>
+  <rect x="96" y="8" width="32" height="16" fill="#64748b" stroke="#475569" stroke-width="2"/>
 
   <!-- Brick highlights -->
-  <rect x="2" y="5" width="12" height="2" fill="#94a3b8"/>
-  <rect x="18" y="5" width="12" height="2" fill="#94a3b8"/>
-  <rect x="34" y="5" width="12" height="2" fill="#94a3b8"/>
-  <rect x="50" y="5" width="12" height="2" fill="#94a3b8"/>
+  <rect x="4" y="10" width="24" height="4" fill="#94a3b8"/>
+  <rect x="36" y="10" width="24" height="4" fill="#94a3b8"/>
+  <rect x="68" y="10" width="24" height="4" fill="#94a3b8"/>
+  <rect x="100" y="10" width="24" height="4" fill="#94a3b8"/>
 
   <!-- Metal bolts -->
-  <rect x="4" y="6" width="4" height="4" fill="#94a3b8"/>
-  <rect x="5" y="7" width="2" height="2" fill="#cbd5e1"/>
-  <rect x="28" y="6" width="4" height="4" fill="#94a3b8"/>
-  <rect x="29" y="7" width="2" height="2" fill="#cbd5e1"/>
-  <rect x="56" y="6" width="4" height="4" fill="#94a3b8"/>
-  <rect x="57" y="7" width="2" height="2" fill="#cbd5e1"/>
+  <rect x="8" y="12" width="8" height="8" fill="#94a3b8"/>
+  <rect x="10" y="14" width="4" height="4" fill="#cbd5e1"/>
+  <rect x="56" y="12" width="8" height="8" fill="#94a3b8"/>
+  <rect x="58" y="14" width="4" height="4" fill="#cbd5e1"/>
+  <rect x="112" y="12" width="8" height="8" fill="#94a3b8"/>
+  <rect x="114" y="14" width="4" height="4" fill="#cbd5e1"/>
 </svg>

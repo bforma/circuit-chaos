@@ -1,19 +1,19 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" shape-rendering="crispEdges">
   <!-- Ice slide -->
-  <rect width="64" height="64" fill="#7dd3fc"/>
-  <rect x="4" y="4" width="56" height="56" fill="#bae6fd"/>
+  <rect width="128" height="128" fill="#7dd3fc"/>
+  <rect x="8" y="8" width="112" height="112" fill="#bae6fd"/>
 
   <!-- Slide stripes -->
-  <rect x="4" y="8" width="56" height="6" fill="#e0f2fe"/>
-  <rect x="4" y="22" width="56" height="6" fill="#e0f2fe"/>
-  <rect x="4" y="36" width="56" height="6" fill="#e0f2fe"/>
-  <rect x="4" y="50" width="56" height="6" fill="#e0f2fe"/>
+  <rect x="8" y="16" width="112" height="12" fill="#e0f2fe"/>
+  <rect x="8" y="44" width="112" height="12" fill="#e0f2fe"/>
+  <rect x="8" y="72" width="112" height="12" fill="#e0f2fe"/>
+  <rect x="8" y="100" width="112" height="12" fill="#e0f2fe"/>
 
   <!-- Snowflake arrow -->
-  <polygon points="32,8 18,28 26,28 26,52 38,52 38,28 46,28" fill="#0284c7"/>
-  <polygon points="32,12 22,26 28,26 28,48 36,48 36,26 42,26" fill="#0ea5e9"/>
+  <polygon points="64,16 36,56 52,56 52,104 76,104 76,56 92,56" fill="#0284c7"/>
+  <polygon points="64,24 44,52 56,52 56,96 72,96 72,52 84,52" fill="#0ea5e9"/>
 
   <!-- Snow banks -->
-  <rect x="0" y="0" width="4" height="64" fill="#f0f9ff"/>
-  <rect x="60" y="0" width="4" height="64" fill="#f0f9ff"/>
+  <rect x="0" y="0" width="8" height="128" fill="#f0f9ff"/>
+  <rect x="120" y="0" width="8" height="128" fill="#f0f9ff"/>
 </svg>

@@ -1,23 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" shape-rendering="crispEdges">
   <!-- Mint green healing station -->
-  <rect width="64" height="64" fill="#6ee7b7"/>
-  <rect x="2" y="2" width="60" height="60" fill="#a7f3d0"/>
-  <rect x="4" y="4" width="56" height="56" fill="#d1fae5"/>
+  <rect width="128" height="128" fill="#6ee7b7"/>
+  <rect x="4" y="4" width="120" height="120" fill="#a7f3d0"/>
+  <rect x="8" y="8" width="112" height="112" fill="#d1fae5"/>
 
   <!-- Candy cross (lollipop style) -->
-  <rect x="26" y="12" width="12" height="40" fill="#f472b6"/>
-  <rect x="12" y="26" width="40" height="12" fill="#f472b6"/>
+  <rect x="52" y="24" width="24" height="80" fill="#f472b6"/>
+  <rect x="24" y="52" width="80" height="24" fill="#f472b6"/>
 
   <!-- Cross highlights -->
-  <rect x="28" y="14" width="8" height="36" fill="#f9a8d4"/>
-  <rect x="14" y="28" width="36" height="8" fill="#f9a8d4"/>
+  <rect x="56" y="28" width="16" height="72" fill="#f9a8d4"/>
+  <rect x="28" y="56" width="72" height="16" fill="#f9a8d4"/>
 
   <!-- Center circle -->
-  <rect x="26" y="26" width="12" height="12" fill="#ec4899"/>
-  <rect x="28" y="28" width="8" height="8" fill="#f472b6"/>
+  <rect x="52" y="52" width="24" height="24" fill="#ec4899"/>
+  <rect x="56" y="56" width="16" height="16" fill="#f472b6"/>
 
   <!-- Sparkles -->
-  <rect x="8" y="8" width="4" height="4" fill="#ffffff"/>
-  <rect x="52" y="52" width="4" height="4" fill="#ffffff"/>
-  <rect x="52" y="8" width="4" height="4" fill="#ffffff"/>
+  <rect x="16" y="16" width="8" height="8" fill="#ffffff"/>
+  <rect x="104" y="104" width="8" height="8" fill="#ffffff"/>
+  <rect x="104" y="16" width="8" height="8" fill="#ffffff"/>
 </svg>

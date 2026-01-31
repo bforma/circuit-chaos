@@ -1,46 +1,46 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" shape-rendering="crispEdges">
   <!-- Base - green metal -->
-  <rect width="64" height="64" fill="#047857"/>
-  <rect x="2" y="2" width="60" height="60" fill="#059669"/>
-  <rect x="4" y="4" width="56" height="56" fill="#10b981"/>
+  <rect width="128" height="128" fill="#047857"/>
+  <rect x="4" y="4" width="120" height="120" fill="#059669"/>
+  <rect x="8" y="8" width="112" height="112" fill="#10b981"/>
 
   <!-- Beveled edges -->
-  <rect x="4" y="4" width="56" height="2" fill="#34d399"/>
-  <rect x="4" y="4" width="2" height="56" fill="#34d399"/>
-  <rect x="4" y="58" width="56" height="2" fill="#047857"/>
-  <rect x="58" y="4" width="2" height="56" fill="#047857"/>
+  <rect x="8" y="8" width="112" height="4" fill="#34d399"/>
+  <rect x="8" y="8" width="4" height="112" fill="#34d399"/>
+  <rect x="8" y="116" width="112" height="4" fill="#047857"/>
+  <rect x="116" y="8" width="4" height="112" fill="#047857"/>
 
   <!-- Cross/plus symbol -->
-  <rect x="26" y="10" width="12" height="44" fill="#ecfdf5"/>
-  <rect x="10" y="26" width="44" height="12" fill="#ecfdf5"/>
+  <rect x="52" y="20" width="24" height="88" fill="#ecfdf5"/>
+  <rect x="20" y="52" width="88" height="24" fill="#ecfdf5"/>
 
   <!-- Cross inner shading -->
-  <rect x="28" y="12" width="8" height="40" fill="#d1fae5"/>
-  <rect x="12" y="28" width="40" height="8" fill="#d1fae5"/>
+  <rect x="56" y="24" width="16" height="80" fill="#d1fae5"/>
+  <rect x="24" y="56" width="80" height="16" fill="#d1fae5"/>
 
   <!-- Cross highlight -->
-  <rect x="28" y="12" width="2" height="40" fill="#ffffff"/>
-  <rect x="12" y="28" width="40" height="2" fill="#ffffff"/>
+  <rect x="56" y="24" width="4" height="80" fill="#ffffff"/>
+  <rect x="24" y="56" width="80" height="4" fill="#ffffff"/>
 
   <!-- Corner bolts -->
-  <rect x="6" y="6" width="6" height="6" fill="#047857"/>
-  <rect x="7" y="7" width="4" height="4" fill="#059669"/>
-  <rect x="8" y="8" width="2" height="2" fill="#34d399"/>
+  <rect x="12" y="12" width="12" height="12" fill="#047857"/>
+  <rect x="14" y="14" width="8" height="8" fill="#059669"/>
+  <rect x="16" y="16" width="4" height="4" fill="#34d399"/>
 
-  <rect x="52" y="6" width="6" height="6" fill="#047857"/>
-  <rect x="53" y="7" width="4" height="4" fill="#059669"/>
-  <rect x="54" y="8" width="2" height="2" fill="#34d399"/>
+  <rect x="104" y="12" width="12" height="12" fill="#047857"/>
+  <rect x="106" y="14" width="8" height="8" fill="#059669"/>
+  <rect x="108" y="16" width="4" height="4" fill="#34d399"/>
 
-  <rect x="6" y="52" width="6" height="6" fill="#047857"/>
-  <rect x="7" y="53" width="4" height="4" fill="#059669"/>
-  <rect x="8" y="54" width="2" height="2" fill="#34d399"/>
+  <rect x="12" y="104" width="12" height="12" fill="#047857"/>
+  <rect x="14" y="106" width="8" height="8" fill="#059669"/>
+  <rect x="16" y="108" width="4" height="4" fill="#34d399"/>
 
-  <rect x="52" y="52" width="6" height="6" fill="#047857"/>
-  <rect x="53" y="53" width="4" height="4" fill="#059669"/>
-  <rect x="54" y="54" width="2" height="2" fill="#34d399"/>
+  <rect x="104" y="104" width="12" height="12" fill="#047857"/>
+  <rect x="106" y="106" width="8" height="8" fill="#059669"/>
+  <rect x="108" y="108" width="4" height="4" fill="#34d399"/>
 
   <!-- Sparkle effects -->
-  <rect x="8" y="18" width="2" height="2" fill="#6ee7b7"/>
-  <rect x="54" y="44" width="2" height="2" fill="#6ee7b7"/>
-  <rect x="18" y="54" width="2" height="2" fill="#6ee7b7"/>
+  <rect x="16" y="36" width="4" height="4" fill="#6ee7b7"/>
+  <rect x="108" y="88" width="4" height="4" fill="#6ee7b7"/>
+  <rect x="36" y="108" width="4" height="4" fill="#6ee7b7"/>
 </svg>
