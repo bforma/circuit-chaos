@@ -15,6 +15,8 @@ import {
   ThemeId,
   DEFAULT_THEME,
   THEMES,
+  getLockedRegisterCount,
+  getHandSize,
 } from '@circuit-chaos/shared';
 import { createDeck, dealCards } from './deck';
 import { executeRegister } from './executor';
@@ -241,10 +243,25 @@ export class GameManager {
     const deck = createDeck();
 
     for (const player of session.state.players) {
-      const handSize = 9 - player.robot.damage;
+      if (player.robot.isDestroyed) {
+        player.hand = [];
+        player.registers = [null, null, null, null, null];
+        player.isReady = true; // Skip destroyed robots
+        continue;
+      }
+
+      const handSize = getHandSize(player.robot.damage);
+      const lockedCount = getLockedRegisterCount(player.robot.damage);
       const cards = dealCards(deck, handSize);
       player.hand = cards;
-      player.registers = [null, null, null, null, null];
+
+      // Preserve locked registers (last N registers stay locked)
+      const newRegisters: (Card | null)[] = [];
+      for (let i = 0; i < REGISTERS_COUNT; i++) {
+        const isLocked = i >= REGISTERS_COUNT - lockedCount;
+        newRegisters[i] = isLocked ? player.registers[i] : null;
+      }
+      player.registers = newRegisters;
       player.isReady = false;
     }
   }
