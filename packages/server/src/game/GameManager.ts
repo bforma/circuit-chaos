@@ -19,7 +19,7 @@ import {
   getHandSize,
 } from '@circuit-chaos/shared';
 import { createDeck, dealCards } from './deck';
-import { executeRegister } from './executor';
+import { executeRegister, respawnDestroyedRobots } from './executor';
 import { createSampleBoard } from './boards';
 import { getRedis } from '../redis';
 
@@ -338,6 +338,9 @@ export class GameManager {
     // Cleanup phase
     session.state.phase = 'cleanup';
     this.broadcastGameState(gameId);
+
+    // Respawn destroyed robots before dealing new cards
+    respawnDestroyedRobots(session.state);
 
     // Deal new cards and start next round
     this.dealCardsToPlayers(session);

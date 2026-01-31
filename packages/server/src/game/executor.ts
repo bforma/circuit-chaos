@@ -188,12 +188,20 @@ function isWallBlocking(board: any, x: number, y: number, direction: Direction):
 function destroyRobot(player: Player) {
   player.robot.isDestroyed = true;
   player.robot.lives--;
+  // Robot stays destroyed for the rest of the round
+  // Respawn happens in respawnDestroyedRobots() during cleanup phase
+}
 
-  if (player.robot.lives > 0) {
-    // Respawn at last checkpoint or spawn
-    player.robot.position = { ...player.robot.spawnPosition };
-    player.robot.isDestroyed = false;
-    player.robot.damage = 2; // Respawn with some damage
+export function respawnDestroyedRobots(state: GameState) {
+  for (const player of state.players) {
+    if (player.robot.isDestroyed && player.robot.lives > 0) {
+      // Respawn at last checkpoint or spawn
+      player.robot.position = { ...player.robot.spawnPosition };
+      player.robot.isDestroyed = false;
+      player.robot.damage = 2; // Respawn with some damage
+      // Clear all registers for next round
+      player.registers = [null, null, null, null, null];
+    }
   }
 }
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { executeRegister } from './executor';
+import { executeRegister, respawnDestroyedRobots } from './executor';
 import {
   GameState,
   Player,
@@ -285,5 +285,103 @@ describe('executeRegister - checkpoints', () => {
 
     // Should not register checkpoint 2 without checkpoint 1
     expect(player.robot.lastCheckpoint).toBe(0);
+  });
+});
+
+describe('executeRegister - destroyed robots', () => {
+  let state: GameState;
+
+  beforeEach(() => {
+    state = createTestGameState(10, 10);
+  });
+
+  it('destroyed robot stays destroyed for the rest of the round', () => {
+    const player = createTestPlayer('p1', 0, 0, 'north');
+    player.registers = [createTestCard('move1'), null, null, null, null];
+    state.players = [player];
+
+    // Robot will fall off the board
+    executeRegister(state, 0);
+
+    // Robot should be destroyed (not respawned yet)
+    expect(player.robot.isDestroyed).toBe(true);
+    expect(player.robot.lives).toBe(2); // Lost one life
+  });
+
+  it('destroyed robot does not execute cards', () => {
+    const player = createTestPlayer('p1', 5, 5, 'north');
+    player.robot.isDestroyed = true;
+    player.registers = [createTestCard('move1'), null, null, null, null];
+    state.players = [player];
+
+    const initialPos = { ...player.robot.position };
+    executeRegister(state, 0);
+
+    // Robot should not have moved
+    expect(player.robot.position).toEqual(initialPos);
+  });
+});
+
+describe('respawnDestroyedRobots', () => {
+  let state: GameState;
+
+  beforeEach(() => {
+    state = createTestGameState(10, 10);
+  });
+
+  it('respawns destroyed robots with lives remaining', () => {
+    const player = createTestPlayer('p1', 5, 5, 'east');
+    player.robot.isDestroyed = true;
+    player.robot.lives = 2;
+    player.robot.spawnPosition = { x: 2, y: 2 };
+    state.players = [player];
+
+    respawnDestroyedRobots(state);
+
+    expect(player.robot.isDestroyed).toBe(false);
+    expect(player.robot.position).toEqual({ x: 2, y: 2 });
+    expect(player.robot.damage).toBe(2); // Respawns with 2 damage
+  });
+
+  it('clears registers on respawn', () => {
+    const player = createTestPlayer('p1', 5, 5, 'east');
+    player.robot.isDestroyed = true;
+    player.robot.lives = 2;
+    player.registers = [
+      createTestCard('move1'),
+      createTestCard('move2'),
+      null,
+      null,
+      null,
+    ];
+    state.players = [player];
+
+    respawnDestroyedRobots(state);
+
+    expect(player.registers).toEqual([null, null, null, null, null]);
+  });
+
+  it('does not respawn robots with no lives', () => {
+    const player = createTestPlayer('p1', 5, 5, 'east');
+    player.robot.isDestroyed = true;
+    player.robot.lives = 0;
+    state.players = [player];
+
+    respawnDestroyedRobots(state);
+
+    expect(player.robot.isDestroyed).toBe(true);
+  });
+
+  it('does not affect non-destroyed robots', () => {
+    const player = createTestPlayer('p1', 5, 5, 'east');
+    player.robot.isDestroyed = false;
+    player.robot.damage = 5;
+    state.players = [player];
+
+    respawnDestroyedRobots(state);
+
+    // Should not have changed
+    expect(player.robot.damage).toBe(5);
+    expect(player.robot.position).toEqual({ x: 5, y: 5 });
   });
 });
