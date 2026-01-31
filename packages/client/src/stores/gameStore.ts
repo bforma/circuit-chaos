@@ -25,6 +25,8 @@ interface GameStore {
   // Local programming state
   selectedCard: Card | null;
   setSelectedCard: (card: Card | null) => void;
+  hoveredCard: Card | null;
+  setHoveredCard: (card: Card | null) => void;
 
   // Connection state
   isConnected: boolean;
@@ -61,6 +63,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   // Local programming state
   selectedCard: null,
   setSelectedCard: (card) => set({ selectedCard: card }),
+  hoveredCard: null,
+  setHoveredCard: (card) => set({ hoveredCard: card }),
 
   // Connection state
   isConnected: false,
@@ -82,6 +86,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     gameState: null,
     gameIdToJoin: null,
     selectedCard: null,
+    hoveredCard: null,
     error: null,
   }),
 }));

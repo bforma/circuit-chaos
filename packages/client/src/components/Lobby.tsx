@@ -7,7 +7,7 @@ import styles from './Lobby.module.css';
 
 export function Lobby() {
   const { gameState, playerId } = useGameStore();
-  const { startGame, leaveGame, setTheme, addAIPlayer, removeAIPlayer } = useSocket();
+  const { startGame, leaveGame, setTheme, setCardPreview, addAIPlayer, removeAIPlayer } = useSocket();
   const [selectedDifficulty, setSelectedDifficulty] = useState<AIDifficulty>('medium');
 
   if (!gameState) {
@@ -88,6 +88,18 @@ export function Lobby() {
         onThemeChange={setTheme}
         disabled={!isHost}
       />
+
+      <div className={styles.settings}>
+        <label className={styles.settingRow}>
+          <input
+            type="checkbox"
+            checked={gameState.cardPreviewEnabled}
+            onChange={(e) => setCardPreview(e.target.checked)}
+            disabled={!isHost}
+          />
+          <span>Card preview (show ghost when hovering cards)</span>
+        </label>
+      </div>
 
       <div className={styles.actions}>
         {isHost ? (

@@ -78,6 +78,7 @@ function createTestState(player?: Player): GameState {
     maxPlayers: 8,
     createdAt: Date.now(),
     theme: 'industrial',
+    cardPreviewEnabled: true,
   };
 }
 

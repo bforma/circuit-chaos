@@ -125,6 +125,7 @@ export class GameManager {
       maxPlayers: 8,
       createdAt: Date.now(),
       theme: DEFAULT_THEME,
+      cardPreviewEnabled: true,
     };
 
     const session: GameSession = {
@@ -669,6 +670,31 @@ export class GameManager {
     session.state.theme = theme;
     this.broadcastGameState(gameId);
     console.log(`Game ${gameId} theme changed to ${theme}`);
+  }
+
+  setCardPreview(socket: Socket, enabled: boolean) {
+    const gameId = this.socketToGame.get(socket.id);
+    if (!gameId) return;
+
+    const session = this.games.get(gameId);
+    if (!session) return;
+
+    // Only host can change this setting
+    const playerId = session.socketPlayers.get(socket.id);
+    if (playerId !== session.state.hostId) {
+      socket.emit('game:error', 'Only the host can change game settings');
+      return;
+    }
+
+    // Only in lobby phase
+    if (session.state.phase !== 'lobby') {
+      socket.emit('game:error', 'Cannot change settings after game starts');
+      return;
+    }
+
+    session.state.cardPreviewEnabled = enabled;
+    this.broadcastGameState(gameId);
+    console.log(`Game ${gameId} card preview ${enabled ? 'enabled' : 'disabled'}`);
   }
 
   addAIPlayer(socket: Socket, difficulty: AIDifficulty) {

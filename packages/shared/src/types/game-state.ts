@@ -25,6 +25,7 @@ export interface GameState {
   createdAt: number;
   theme: ThemeId;
   disconnectVote?: DisconnectVote; // Active vote about a disconnected player
+  cardPreviewEnabled: boolean; // Show ghost preview when hovering cards
 }
 
 export interface GameSettings {

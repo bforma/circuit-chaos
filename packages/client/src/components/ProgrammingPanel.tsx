@@ -4,8 +4,10 @@ import { getCardLabel, getCardIcon, REGISTERS_COUNT, getLockedRegisterCount } fr
 import styles from './ProgrammingPanel.module.css';
 
 export function ProgrammingPanel() {
-  const { getCurrentPlayer, selectedCard, setSelectedCard } = useGameStore();
+  const { gameState, getCurrentPlayer, selectedCard, setSelectedCard, setHoveredCard } = useGameStore();
   const { programRegister, submitProgram, togglePowerDown } = useSocket();
+
+  const cardPreviewEnabled = gameState?.cardPreviewEnabled ?? false;
 
   const player = getCurrentPlayer();
   if (!player) return null;
@@ -42,6 +44,7 @@ export function ProgrammingPanel() {
 
     programRegister(emptyIndex, card);
     setSelectedCard(null);
+    setHoveredCard(null);
   };
 
   const handleRegisterClick = (index: number) => {
@@ -56,6 +59,7 @@ export function ProgrammingPanel() {
 
     programRegister(index, selectedCard);
     setSelectedCard(null);
+    setHoveredCard(null);
   };
 
   const handleAutoFill = () => {
@@ -178,6 +182,8 @@ export function ProgrammingPanel() {
                 `}
                 onClick={() => handleCardClick(card)}
                 onDoubleClick={() => handleCardDoubleClick(card)}
+                onMouseEnter={() => cardPreviewEnabled && !isInRegister && !isReady && setHoveredCard(card)}
+                onMouseLeave={() => setHoveredCard(null)}
               >
                 <span className={styles.cardIcon}>{getCardIcon(card.type)}</span>
                 <span className={styles.cardType}>{getCardLabel(card.type)}</span>

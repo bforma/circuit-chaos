@@ -61,6 +61,7 @@ interface ClientToServerEvents {
   'game:powerDown': () => void;
   'game:vote-disconnect': (vote: DisconnectVoteOption) => void;
   'game:setTheme': (theme: ThemeId) => void;
+  'game:setCardPreview': (enabled: boolean) => void;
   'game:addAI': (difficulty: AIDifficulty) => void;
   'game:removeAI': (aiPlayerId: string) => void;
 }
@@ -203,6 +204,10 @@ export function useSocket() {
     socket?.emit('game:setTheme', theme);
   };
 
+  const setCardPreview = (enabled: boolean) => {
+    socket?.emit('game:setCardPreview', enabled);
+  };
+
   const addAIPlayer = (difficulty: AIDifficulty) => {
     socket?.emit('game:addAI', difficulty);
   };
@@ -221,6 +226,7 @@ export function useSocket() {
     togglePowerDown,
     voteDisconnect,
     setTheme,
+    setCardPreview,
     addAIPlayer,
     removeAIPlayer,
   };

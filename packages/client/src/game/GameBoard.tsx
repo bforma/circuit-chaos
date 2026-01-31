@@ -4,6 +4,8 @@ import type { Board, Player, Direction, Tile, ThemeId } from '@circuit-chaos/sha
 import { TILE_SIZE } from '@circuit-chaos/shared';
 import * as PIXI from 'pixi.js';
 import robotSprite from '../assets/robot.svg';
+import { useGameStore } from '../stores/gameStore';
+import { calculatePreviewPosition } from './previewCalculator';
 
 // Theme tile imports - organized by theme
 const themeAssets: Record<ThemeId, Record<string, string>> = {
@@ -144,6 +146,10 @@ function getTileRotation(tile: Tile): number {
 export function GameBoard({ board, players, theme = 'industrial' }: Props) {
   const width = board.width * TILE_SIZE;
   const height = board.height * TILE_SIZE;
+
+  const { gameState, getCurrentPlayer, hoveredCard } = useGameStore();
+  const currentPlayer = getCurrentPlayer();
+  const cardPreviewEnabled = gameState?.cardPreviewEnabled ?? false;
 
   // Create tile elements
   const tiles = useMemo(() => {
@@ -456,6 +462,63 @@ export function GameBoard({ board, players, theme = 'industrial' }: Props) {
       });
   }, [players, drawAIRing]);
 
+  // Calculate ghost preview position
+  const ghostPreview = useMemo(() => {
+    if (!cardPreviewEnabled || !hoveredCard || !currentPlayer || currentPlayer.robot.isDestroyed) {
+      return null;
+    }
+
+    // Don't show preview if hovered card is already in a register
+    const isAlreadyInRegister = currentPlayer.registers.some(r => r?.id === hoveredCard.id);
+    if (isAlreadyInRegister) {
+      return null;
+    }
+
+    // Build the card sequence: current registers + hovered card in first empty slot
+    const cardsToSimulate: (typeof hoveredCard | null)[] = [...currentPlayer.registers];
+
+    // Find first empty register and put hovered card there
+    const emptyIndex = cardsToSimulate.findIndex(c => c === null);
+    if (emptyIndex === -1) {
+      return null; // No empty register
+    }
+
+    cardsToSimulate[emptyIndex] = hoveredCard;
+
+    // Only simulate up to and including the hovered card position
+    const cardsUpToHovered = cardsToSimulate.slice(0, emptyIndex + 1);
+
+    return calculatePreviewPosition(currentPlayer, board, cardsUpToHovered);
+  }, [cardPreviewEnabled, hoveredCard, currentPlayer, board]);
+
+  // Render ghost robot
+  const ghostRobot = useMemo(() => {
+    if (!ghostPreview || ghostPreview.isDestroyed || !currentPlayer) {
+      return null;
+    }
+
+    const ghostX = ghostPreview.x * TILE_SIZE + TILE_SIZE / 2;
+    const ghostY = ghostPreview.y * TILE_SIZE + TILE_SIZE / 2;
+    const rotation = directionToRotation[ghostPreview.direction];
+    const colorInt = parseInt(currentPlayer.color.slice(1), 16);
+
+    return (
+      <Container key="ghost">
+        <Sprite
+          image={robotSprite}
+          x={ghostX}
+          y={ghostY}
+          width={TILE_SIZE * 0.9}
+          height={TILE_SIZE * 0.9}
+          anchor={0.5}
+          rotation={rotation}
+          tint={colorInt}
+          alpha={0.4}
+        />
+      </Container>
+    );
+  }, [ghostPreview, currentPlayer]);
+
   return (
     <Stage
       width={width}
@@ -474,6 +537,9 @@ export function GameBoard({ board, players, theme = 'industrial' }: Props) {
 
         {/* Lasers layer */}
         <Graphics draw={drawLasers} />
+
+        {/* Ghost preview layer */}
+        {ghostRobot}
 
         {/* Robots layer (on top) */}
         {robots}

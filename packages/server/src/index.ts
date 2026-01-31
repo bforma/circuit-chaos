@@ -89,6 +89,10 @@ io.on('connection', (socket) => {
     gameManager.setTheme(socket, theme as any);
   });
 
+  socket.on('game:setCardPreview', (enabled: boolean) => {
+    gameManager.setCardPreview(socket, enabled);
+  });
+
   socket.on('game:addAI', (difficulty: string) => {
     gameManager.addAIPlayer(socket, difficulty as any);
   });
