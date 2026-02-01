@@ -63,6 +63,7 @@ interface ClientToServerEvents {
   'game:setCardPreview': (enabled: boolean) => void;
   'game:addAI': (difficulty: AIDifficulty) => void;
   'game:removeAI': (aiPlayerId: string) => void;
+  'game:shutdown': () => void;
 }
 
 let socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
@@ -211,6 +212,10 @@ export function useSocket() {
     socket?.emit('game:removeAI', aiPlayerId);
   };
 
+  const shutdownRobot = () => {
+    socket?.emit('game:shutdown');
+  };
+
   return {
     createGame,
     joinGame,
@@ -223,5 +228,6 @@ export function useSocket() {
     setCardPreview,
     addAIPlayer,
     removeAIPlayer,
+    shutdownRobot,
   };
 }

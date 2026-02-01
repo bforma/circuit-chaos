@@ -10,7 +10,7 @@ Converting Circuit Chaos from 2016 to 2023 RoboRally rules.
 | 2. Personal Decks | `[x]` | Each player has own 20-card deck |
 | 3. Energy System | `[x]` | Energy 0-10, batteries, Power Up card |
 | 4. Damage Cards | `[x]` | SPAM and Haywire cards |
-| 5. Shutdown/Reboot | `[ ]` | Voluntary shutdown, reboot tokens (future) |
+| 5. Shutdown/Reboot | `[x]` | Voluntary shutdown, reboot tokens |
 | 6. Upgrade Cards | `[ ]` | Permanent/temporary upgrades (future) |
 
 ---
@@ -151,12 +151,37 @@ Converting Circuit Chaos from 2016 to 2023 RoboRally rules.
 
 ---
 
-## Future Phases
+## Phase 5: Shutdown/Reboot System `[COMPLETE]`
 
-### Phase 5: Shutdown/Reboot
-- Voluntary shutdown to clear all damage
-- Reboot tokens for respawn locations
-- Draw 2 damage on reboot
+**Goal**: Implement voluntary shutdown and proper reboot mechanics.
+
+### Implementation
+
+**Types** (`packages/shared/src/types/`):
+- [x] `tile.ts`: Add `RebootToken` interface
+- [x] `board.ts`: Add `rebootToken?: RebootToken` to Board
+
+**Server** (`packages/server/src/game/`):
+- [x] `executor.ts`: Add `performShutdown()` - clears all damage cards
+- [x] `executor.ts`: Update `respawnDestroyedRobots()` - use reboot tokens, push if occupied
+- [x] `executor.ts`: Shutdown robots skip checkpoints and batteries
+- [x] `GameManager.ts`: Add `shutdownRobot()` socket handler
+
+**Client** (`packages/client/src/`):
+- [x] `hooks/useSocket.ts`: Add `shutdownRobot` function
+- [x] `components/ProgrammingPanel.tsx`: Add shutdown button (shown after submitting with damage)
+
+### Testing
+- [x] performShutdown clears damage and damage cards
+- [x] Shutdown robot doesn't execute cards
+- [x] Shutdown robot doesn't collect checkpoints/energy
+- [x] Reboot at reboot token position
+- [x] Push occupied robot on reboot
+- [x] Clear hand on reboot (SPAM to discard, Haywire to damage discard)
+
+---
+
+## Future Phases
 
 ### Phase 6: Upgrade Cards
 - 40 upgrade cards (24 permanent, 16 temporary)

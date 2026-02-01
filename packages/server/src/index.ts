@@ -97,6 +97,10 @@ io.on('connection', (socket) => {
     gameManager.removeAIPlayer(socket, aiPlayerId);
   });
 
+  socket.on('game:shutdown', () => {
+    gameManager.shutdownRobot(socket);
+  });
+
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
     gameManager.handleDisconnect(socket);

@@ -54,3 +54,9 @@ export interface Checkpoint {
   y: number;
   order: number; // 1, 2, 3, etc.
 }
+
+export interface RebootToken {
+  x: number;
+  y: number;
+  pushDirection: Direction; // Direction to push robots if spawn is occupied
+}

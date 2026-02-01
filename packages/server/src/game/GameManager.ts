@@ -21,7 +21,7 @@ import {
   AI_NAMES,
 } from '@circuit-chaos/shared';
 import { createDeck, createPersonalDeck, createDamageDeck, dealCards, shuffle } from './deck';
-import { executeRegister, respawnDestroyedRobots } from './executor';
+import { executeRegister, respawnDestroyedRobots, performShutdown } from './executor';
 import { createSampleBoard } from './boards';
 import { getRedis } from '../redis';
 import { makeAIDecision } from './ai';
@@ -895,5 +895,43 @@ export class GameManager {
     this.broadcastGameState(gameId);
 
     console.log(`Player ${player.name} reconnected to game ${gameId}`);
+  }
+
+  /**
+   * Handle voluntary shutdown request (2023 rules)
+   * Can be declared after programming but before execution starts
+   */
+  shutdownRobot(socket: Socket) {
+    const gameId = this.socketToGame.get(socket.id);
+    if (!gameId) return;
+
+    const session = this.games.get(gameId);
+    if (!session) return;
+
+    // Can only shutdown during programming phase after submitting
+    if (session.state.phase !== 'programming') {
+      socket.emit('game:error', 'Can only shutdown during programming phase');
+      return;
+    }
+
+    const playerId = session.socketPlayers.get(socket.id);
+    const player = session.state.players.find(p => p.id === playerId);
+    if (!player) return;
+
+    // Player must have submitted their program
+    if (!player.isReady) {
+      socket.emit('game:error', 'Must submit program before shutting down');
+      return;
+    }
+
+    // Can't shutdown if already shut down or destroyed
+    if (player.robot.isPoweredDown || player.robot.isDestroyed) {
+      socket.emit('game:error', 'Robot is already shut down or destroyed');
+      return;
+    }
+
+    performShutdown(session.state, player);
+    this.broadcastGameState(gameId);
+    console.log(`Player ${player.name} shut down robot in game ${gameId}`);
   }
 }

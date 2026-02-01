@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { executeRegister, respawnDestroyedRobots } from './executor';
+import { executeRegister, respawnDestroyedRobots, performShutdown } from './executor';
 import {
   GameState,
   Player,
@@ -545,6 +545,224 @@ describe('executeRegister - damage cards', () => {
     expect(player.robot.direction).toBe('south'); // U-turn happened
     // Haywire register should be cleared
     expect(player.haywireRegisters[0]).toBeNull();
+  });
+});
+
+describe('performShutdown', () => {
+  let state: GameState;
+
+  beforeEach(() => {
+    state = createTestGameState();
+  });
+
+  it('sets robot to powered down state', () => {
+    const player = createTestPlayer('p1', 2, 2);
+    state.players = [player];
+
+    performShutdown(state, player);
+
+    expect(player.robot.isPoweredDown).toBe(true);
+  });
+
+  it('clears damage counter', () => {
+    const player = createTestPlayer('p1', 2, 2);
+    player.robot.damage = 5;
+    state.players = [player];
+
+    performShutdown(state, player);
+
+    expect(player.robot.damage).toBe(0);
+  });
+
+  it('moves SPAM cards from hand to damage discard pile', () => {
+    const player = createTestPlayer('p1', 2, 2);
+    const spamCard: Card = { id: 'spam1', type: 'spam', priority: 0 };
+    const regularCard: Card = { id: 'move1', type: 'move1', priority: 500 };
+    player.hand = [spamCard, regularCard];
+    state.players = [player];
+
+    performShutdown(state, player);
+
+    expect(player.hand).toHaveLength(1);
+    expect(player.hand[0].type).toBe('move1');
+    expect(state.damageDiscardPile).toContain(spamCard);
+  });
+
+  it('moves Haywire cards from haywireRegisters to damage discard pile', () => {
+    const player = createTestPlayer('p1', 2, 2);
+    const haywireCard: Card = { id: 'hw1', type: 'haywireMove1RotateMove1', priority: 0 };
+    player.haywireRegisters = [haywireCard, null, null, null, null];
+    state.players = [player];
+
+    performShutdown(state, player);
+
+    expect(player.haywireRegisters[0]).toBeNull();
+    expect(state.damageDiscardPile).toContain(haywireCard);
+  });
+
+  it('moves programming cards from registers to player discard pile', () => {
+    const player = createTestPlayer('p1', 2, 2);
+    const card1: Card = { id: 'move1', type: 'move1', priority: 500 };
+    const card2: Card = { id: 'rotL', type: 'rotateLeft', priority: 200 };
+    player.registers = [card1, card2, null, null, null];
+    state.players = [player];
+
+    performShutdown(state, player);
+
+    expect(player.registers).toEqual([null, null, null, null, null]);
+    expect(player.discardPile).toContain(card1);
+    expect(player.discardPile).toContain(card2);
+  });
+
+  it('moves damage cards from discard pile to damage discard pile', () => {
+    const player = createTestPlayer('p1', 2, 2);
+    const spamCard: Card = { id: 'spam1', type: 'spam', priority: 0 };
+    const regularCard: Card = { id: 'move1', type: 'move1', priority: 500 };
+    player.discardPile = [spamCard, regularCard];
+    state.players = [player];
+
+    performShutdown(state, player);
+
+    expect(player.discardPile).toHaveLength(1);
+    expect(player.discardPile[0].type).toBe('move1');
+    expect(state.damageDiscardPile).toContain(spamCard);
+  });
+});
+
+describe('shutdown robot behavior', () => {
+  let state: GameState;
+
+  beforeEach(() => {
+    state = createTestGameState();
+  });
+
+  it('shutdown robot does not execute cards', () => {
+    const player = createTestPlayer('p1', 2, 2);
+    player.robot.isPoweredDown = true;
+    player.registers = [{ id: 'move1', type: 'move1', priority: 500 }, null, null, null, null];
+    state.players = [player];
+
+    executeRegister(state, 0);
+
+    // Robot should not have moved
+    expect(player.robot.position).toEqual({ x: 2, y: 2 });
+  });
+
+  it('shutdown robot does not collect checkpoint', () => {
+    const player = createTestPlayer('p1', 3, 3);
+    player.robot.isPoweredDown = true;
+    player.robot.lastCheckpoint = 0;
+    state.board.checkpoints = [{ x: 3, y: 3, order: 1 }];
+    state.players = [player];
+
+    executeRegister(state, 0);
+
+    // Should not have registered checkpoint
+    expect(player.robot.lastCheckpoint).toBe(0);
+  });
+
+  it('shutdown robot does not collect battery energy', () => {
+    const player = createTestPlayer('p1', 3, 3);
+    player.robot.isPoweredDown = true;
+    player.robot.energy = 3;
+    state.board.tiles[3][3] = { type: 'battery' };
+    state.players = [player];
+
+    executeRegister(state, 0);
+
+    // Energy should not have increased
+    expect(player.robot.energy).toBe(3);
+  });
+});
+
+describe('reboot with rebootToken', () => {
+  let state: GameState;
+
+  beforeEach(() => {
+    state = createTestGameState();
+  });
+
+  it('respawns at reboot token position', () => {
+    state.board.rebootToken = { x: 1, y: 1, pushDirection: 'east' };
+    const player = createTestPlayer('p1', 4, 4);
+    player.robot.isDestroyed = true;
+    player.robot.lives = 2;
+    state.players = [player];
+    // Add SPAM cards to damage deck so reboot damage can be dealt
+    state.damageDeck = [
+      { id: 'spam1', type: 'spam', priority: 0 },
+      { id: 'spam2', type: 'spam', priority: 0 },
+    ];
+
+    respawnDestroyedRobots(state);
+
+    expect(player.robot.position).toEqual({ x: 1, y: 1 });
+    expect(player.robot.isDestroyed).toBe(false);
+  });
+
+  it('pushes robot on reboot token when occupied', () => {
+    state.board.rebootToken = { x: 2, y: 2, pushDirection: 'east' };
+    const player1 = createTestPlayer('p1', 4, 4);
+    player1.robot.isDestroyed = true;
+    player1.robot.lives = 2;
+    const player2 = createTestPlayer('p2', 2, 2); // Occupying reboot token
+    state.players = [player1, player2];
+    state.damageDeck = [
+      { id: 'spam1', type: 'spam', priority: 0 },
+      { id: 'spam2', type: 'spam', priority: 0 },
+    ];
+
+    respawnDestroyedRobots(state);
+
+    // Player 2 should have been pushed east
+    expect(player2.robot.position).toEqual({ x: 3, y: 2 });
+    // Player 1 should respawn at reboot token
+    expect(player1.robot.position).toEqual({ x: 2, y: 2 });
+  });
+
+  it('clears hand and moves SPAM to discard, Haywire to damage discard', () => {
+    state.board.rebootToken = { x: 1, y: 1, pushDirection: 'east' };
+    const player = createTestPlayer('p1', 4, 4);
+    player.robot.isDestroyed = true;
+    player.robot.lives = 2;
+    const spamCard: Card = { id: 'spam1', type: 'spam', priority: 0 };
+    const haywireCard: Card = { id: 'hw1', type: 'haywireMove1RotateMove1', priority: 0 };
+    const regularCard: Card = { id: 'move1', type: 'move1', priority: 500 };
+    player.hand = [spamCard, haywireCard, regularCard];
+    state.players = [player];
+    state.damageDeck = [
+      { id: 'spam2', type: 'spam', priority: 0 },
+      { id: 'spam3', type: 'spam', priority: 0 },
+    ];
+
+    respawnDestroyedRobots(state);
+
+    // Hand should only contain non-damage cards
+    expect(player.hand.some(c => c.type === 'spam')).toBe(false);
+    expect(player.hand.some(c => c.type === 'haywireMove1RotateMove1')).toBe(false);
+    // SPAM should be in player's discard pile
+    expect(player.discardPile.some(c => c.type === 'spam')).toBe(true);
+    // Haywire should be in damage discard pile
+    expect(state.damageDiscardPile.some(c => c.type === 'haywireMove1RotateMove1')).toBe(true);
+  });
+
+  it('resets damage counter on reboot', () => {
+    state.board.rebootToken = { x: 1, y: 1, pushDirection: 'east' };
+    const player = createTestPlayer('p1', 4, 4);
+    player.robot.isDestroyed = true;
+    player.robot.lives = 2;
+    player.robot.damage = 5;
+    state.players = [player];
+    // Note: After reboot, robot draws 2 damage cards so damage will be 2
+    state.damageDeck = [
+      { id: 'spam1', type: 'spam', priority: 0 },
+      { id: 'spam2', type: 'spam', priority: 0 },
+    ];
+
+    respawnDestroyedRobots(state);
+
+    // Damage should be reset to 0, then +2 from reboot damage
+    expect(player.robot.damage).toBe(2);
   });
 });
 

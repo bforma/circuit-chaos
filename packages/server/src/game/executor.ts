@@ -347,15 +347,99 @@ function destroyRobot(player: Player) {
 export function respawnDestroyedRobots(state: GameState) {
   for (const player of state.players) {
     if (player.robot.isDestroyed && player.robot.lives > 0) {
-      // Respawn at last checkpoint or spawn
-      player.robot.position = { ...player.robot.spawnPosition };
+      // Determine respawn position: reboot token or spawn position
+      let respawnPos = { ...player.robot.spawnPosition };
+      let pushDirection: Direction | undefined;
+
+      // Use reboot token if available
+      if (state.board.rebootToken) {
+        respawnPos = { x: state.board.rebootToken.x, y: state.board.rebootToken.y };
+        pushDirection = state.board.rebootToken.pushDirection;
+      }
+
+      // Clear all cards from hand (2023 rules)
+      // SPAM stays in player's discard pile, Haywire goes to damage discard
+      for (const card of player.hand) {
+        if (card.type === 'spam') {
+          player.discardPile.push(card);
+        } else if (isHaywireCard(card.type)) {
+          state.damageDiscardPile.push(card);
+        }
+      }
+      player.hand = player.hand.filter(card => !isDamageCard(card.type));
+
+      // Clear and discard registers
+      for (let i = 0; i < player.registers.length; i++) {
+        const card = player.registers[i];
+        if (card) {
+          if (isDamageCard(card.type)) {
+            if (card.type === 'spam') {
+              player.discardPile.push(card);
+            } else {
+              state.damageDiscardPile.push(card);
+            }
+          } else {
+            player.discardPile.push(card);
+          }
+        }
+        player.registers[i] = null;
+      }
+
+      // Clear haywire registers to damage discard
+      for (let i = 0; i < player.haywireRegisters.length; i++) {
+        const haywire = player.haywireRegisters[i];
+        if (haywire) {
+          state.damageDiscardPile.push(haywire);
+          player.haywireRegisters[i] = null;
+        }
+      }
+
+      // Reset damage counter
+      player.robot.damage = 0;
+
+      // Check if respawn position is occupied and push if needed
+      if (pushDirection) {
+        const occupyingPlayer = state.players.find(p =>
+          !p.robot.isDestroyed &&
+          p.id !== player.id &&
+          p.robot.position.x === respawnPos.x &&
+          p.robot.position.y === respawnPos.y
+        );
+        if (occupyingPlayer) {
+          pushRobotOneSpace(state, occupyingPlayer, pushDirection);
+        }
+      }
+
+      player.robot.position = { ...respawnPos };
       player.robot.isDestroyed = false;
-      // Clear all registers for next round
-      player.registers = [null, null, null, null, null];
-      player.haywireRegisters = [null, null, null, null, null];
+
       // Draw 2 damage cards on reboot (2023 rules)
       dealDamageToPlayer(state, player, 2, 0);
     }
+  }
+}
+
+/**
+ * Push a robot one space in a direction (for reboot collision)
+ */
+function pushRobotOneSpace(state: GameState, player: Player, direction: Direction) {
+  const delta = getDirectionDelta(direction);
+  const newX = player.robot.position.x + delta.dx;
+  const newY = player.robot.position.y + delta.dy;
+
+  // Check bounds
+  if (newX >= 0 && newX < state.board.width && newY >= 0 && newY < state.board.height) {
+    player.robot.position.x = newX;
+    player.robot.position.y = newY;
+
+    // Check if pushed into pit
+    const tile = state.board.tiles[newY]?.[newX];
+    if (tile?.type === 'pit') {
+      destroyRobot(player);
+    }
+  } else {
+    // Pushed off the board
+    destroyRobot(player);
   }
 }
 
@@ -363,17 +447,61 @@ export function processPowerDown(state: GameState) {
   for (const player of state.players) {
     if (player.robot.isDestroyed) continue;
 
-    // Heal robots that were powered down this round
+    // Clear shutdown state at end of round
     if (player.robot.isPoweredDown) {
-      player.robot.damage = 0;
       player.robot.isPoweredDown = false;
     }
 
-    // Apply announced power down for next round
+    // Apply announced shutdown for next round
     if (player.robot.willPowerDown) {
       player.robot.isPoweredDown = true;
       player.robot.willPowerDown = false;
     }
+  }
+}
+
+/**
+ * Perform voluntary shutdown for a player (2023 rules)
+ * - Discards all damage cards (SPAM and Haywire) to damage discard pile
+ * - Discards all programming cards to player's discard pile
+ * - Robot stays on board but doesn't execute programming
+ * - Robot is still affected by board elements, pushing, and lasers
+ * - Robot cannot collect energy or checkpoints while shut down
+ */
+export function performShutdown(state: GameState, player: Player) {
+  player.robot.isPoweredDown = true;
+  player.robot.damage = 0;
+
+  // Discard all damage cards from hand (SPAM cards) to damage discard pile
+  const damageCardsInHand = player.hand.filter(card => isDamageCard(card.type));
+  for (const card of damageCardsInHand) {
+    state.damageDiscardPile.push(card);
+  }
+  player.hand = player.hand.filter(card => !isDamageCard(card.type));
+
+  // Discard all damage cards from discard pile
+  const damageCardsInDiscard = player.discardPile.filter(card => isDamageCard(card.type));
+  for (const card of damageCardsInDiscard) {
+    state.damageDiscardPile.push(card);
+  }
+  player.discardPile = player.discardPile.filter(card => !isDamageCard(card.type));
+
+  // Move haywire cards to damage discard pile
+  for (let i = 0; i < player.haywireRegisters.length; i++) {
+    const haywire = player.haywireRegisters[i];
+    if (haywire) {
+      state.damageDiscardPile.push(haywire);
+      player.haywireRegisters[i] = null;
+    }
+  }
+
+  // Discard programming cards from registers to player's discard pile
+  for (let i = 0; i < player.registers.length; i++) {
+    const card = player.registers[i];
+    if (card && !isDamageCard(card.type)) {
+      player.discardPile.push(card);
+    }
+    player.registers[i] = null;
   }
 }
 
@@ -523,6 +651,8 @@ function executeCheckpoints(state: GameState) {
 
   for (const player of players) {
     if (player.robot.isDestroyed) continue;
+    // Shutdown robots cannot reach checkpoints (2023 rules)
+    if (player.robot.isPoweredDown) continue;
 
     const { x, y } = player.robot.position;
 
@@ -549,6 +679,8 @@ function executeBatteries(state: GameState) {
 
   for (const player of players) {
     if (player.robot.isDestroyed) continue;
+    // Shutdown robots cannot collect energy (2023 rules)
+    if (player.robot.isPoweredDown) continue;
 
     const { x, y } = player.robot.position;
     const tile = board.tiles[y]?.[x];

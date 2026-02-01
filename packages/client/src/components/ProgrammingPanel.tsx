@@ -1,11 +1,11 @@
 import { useGameStore } from '../stores/gameStore';
 import { useSocket } from '../hooks/useSocket';
-import { getCardLabel, getCardIcon, REGISTERS_COUNT, getLockedRegisterCount } from '@circuit-chaos/shared';
+import { getCardLabel, getCardIcon, REGISTERS_COUNT, getLockedRegisterCount, isDamageCard } from '@circuit-chaos/shared';
 import styles from './ProgrammingPanel.module.css';
 
 export function ProgrammingPanel() {
   const { gameState, getCurrentPlayer, selectedCard, setSelectedCard, setHoveredCard } = useGameStore();
-  const { programRegister, submitProgram } = useSocket();
+  const { programRegister, submitProgram, shutdownRobot } = useSocket();
 
   const cardPreviewEnabled = gameState?.cardPreviewEnabled ?? false;
 
@@ -186,6 +186,26 @@ export function ProgrammingPanel() {
           >
             Submit Program
           </button>
+        </div>
+      )}
+
+      {isReady && robot.damage > 0 && !robot.isPoweredDown && (
+        <div className={styles.shutdownSection}>
+          <p className={styles.shutdownHint}>
+            You have {robot.damage} damage. Shutdown to clear all damage cards and skip this round.
+          </p>
+          <button
+            className="btn btn-warning"
+            onClick={shutdownRobot}
+          >
+            Shutdown Robot
+          </button>
+        </div>
+      )}
+
+      {robot.isPoweredDown && (
+        <div className={styles.shutdownNotice}>
+          Robot is shut down this round. All damage cleared.
         </div>
       )}
     </div>

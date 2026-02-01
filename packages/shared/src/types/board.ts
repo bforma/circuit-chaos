@@ -1,4 +1,4 @@
-import type { Tile, Wall, Laser, Checkpoint } from './tile';
+import type { Tile, Wall, Laser, Checkpoint, RebootToken } from './tile';
 
 export interface SpawnPoint {
   x: number;
@@ -16,6 +16,7 @@ export interface Board {
   lasers: Laser[];
   checkpoints: Checkpoint[];
   spawnPoints: SpawnPoint[];
+  rebootToken?: RebootToken; // Where destroyed robots respawn (2023 rules)
 }
 
 export function createEmptyBoard(width: number, height: number, name: string = 'Custom Board'): Board {
