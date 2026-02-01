@@ -1,11 +1,22 @@
 import { Container, Sprite, Text } from '@pixi/react';
 import { useTick } from '@pixi/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
 import type { Direction } from '@circuit-chaos/shared';
 import { TILE_SIZE } from '@circuit-chaos/shared';
 import robotSprite from '../assets/robot.svg';
-import { useAnimationStore, type RobotVisual } from '../stores/animationStore';
+import { useAnimationStore } from '../stores/animationStore';
+
+// Shared text style (created once, reused)
+const nameTextStyle = new PIXI.TextStyle({
+  fill: '#ffffff',
+  fontSize: 10,
+  fontWeight: 'bold',
+  fontFamily: 'monospace',
+  dropShadow: true,
+  dropShadowColor: '#000000',
+  dropShadowDistance: 1,
+});
 
 interface Props {
   playerId: string;
@@ -97,31 +108,41 @@ export function AnimatedRobot({
     }
   }, [isProcessing, visualX, visualY, visualDirection, fallbackX, fallbackY, fallbackDirection]);
 
-  // Animate towards target
+  // Track whether animation is needed (to conditionally enable useTick)
+  const needsAnimationRef = useRef(false);
+  const needsPositionUpdate = Math.abs(targetX - displayX) > 0.001 || Math.abs(targetY - displayY) > 0.001;
+  const needsRotationUpdate = Math.abs(shortestRotation(displayRotation, targetRotation)) > 0.001;
+  needsAnimationRef.current = needsPositionUpdate || needsRotationUpdate;
+
+  // Animate towards target - only enabled when animation is needed
   useTick((delta) => {
-    // Position interpolation
     const dx = targetX - displayX;
     const dy = targetY - displayY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
+    const rotationDiff = shortestRotation(displayRotation, targetRotation);
 
-    if (distance > 0.01) {
-      const step = Math.min(LERP_SPEED * delta, 1);
-      setDisplayX((prev) => prev + dx * step);
-      setDisplayY((prev) => prev + dy * step);
-    } else if (distance > 0) {
-      setDisplayX(targetX);
-      setDisplayY(targetY);
+    // Position interpolation
+    if (Math.abs(dx) > 0.001 || Math.abs(dy) > 0.001) {
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance > 0.01) {
+        const step = Math.min(LERP_SPEED * delta, 1);
+        setDisplayX((prev) => prev + dx * step);
+        setDisplayY((prev) => prev + dy * step);
+      } else {
+        setDisplayX(targetX);
+        setDisplayY(targetY);
+      }
     }
 
     // Rotation interpolation
-    const rotationDiff = shortestRotation(displayRotation, targetRotation);
-    if (Math.abs(rotationDiff) > 0.01) {
-      const step = Math.min(ROTATION_LERP_SPEED * delta, 1);
-      setDisplayRotation((prev) => prev + rotationDiff * step);
-    } else if (rotationDiff !== 0) {
-      setDisplayRotation(targetRotation);
+    if (Math.abs(rotationDiff) > 0.001) {
+      if (Math.abs(rotationDiff) > 0.01) {
+        const step = Math.min(ROTATION_LERP_SPEED * delta, 1);
+        setDisplayRotation((prev) => prev + rotationDiff * step);
+      } else {
+        setDisplayRotation(targetRotation);
+      }
     }
-  });
+  }, needsAnimationRef.current);
 
   if (isDestroyed) {
     return null;
@@ -149,17 +170,7 @@ export function AnimatedRobot({
         x={robotX}
         y={displayY * TILE_SIZE + TILE_SIZE + 4}
         anchor={[0.5, 0]}
-        style={
-          new PIXI.TextStyle({
-            fill: '#ffffff',
-            fontSize: 10,
-            fontWeight: 'bold',
-            fontFamily: 'monospace',
-            dropShadow: true,
-            dropShadowColor: '#000000',
-            dropShadowDistance: 1,
-          })
-        }
+        style={nameTextStyle}
       />
     </Container>
   );

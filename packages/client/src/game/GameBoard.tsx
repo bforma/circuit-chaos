@@ -1,5 +1,5 @@
-import { Stage, Container, Sprite, Text, Graphics } from '@pixi/react';
-import { useCallback, useMemo, useEffect } from 'react';
+import { Stage, Container, Sprite, Text, Graphics, useApp } from '@pixi/react';
+import { useCallback, useMemo, useEffect, useRef } from 'react';
 import type { Board, Player, Direction, Tile, ThemeId } from '@circuit-chaos/shared';
 import { TILE_SIZE } from '@circuit-chaos/shared';
 import * as PIXI from 'pixi.js';
@@ -8,6 +8,57 @@ import { useGameStore } from '../stores/gameStore';
 import { useAnimationStore } from '../stores/animationStore';
 import { calculatePreviewPosition } from './previewCalculator';
 import { AnimatedRobot } from './AnimatedRobot';
+
+// Shared text style for checkpoints (created once)
+const checkpointTextStyle = new PIXI.TextStyle({
+  fill: '#fef3c7',
+  fontSize: 16,
+  fontWeight: 'bold',
+  fontFamily: 'monospace',
+});
+
+// Component to control ticker based on animation state (must be inside Stage)
+function TickerController({ renderTrigger }: { renderTrigger: unknown }) {
+  const app = useApp();
+  const isProcessingQueue = useAnimationStore((state) => state.isProcessingQueue);
+  const hasInitialized = useRef(false);
+
+  useEffect(() => {
+    if (isProcessingQueue) {
+      // Start ticker for animations
+      app.ticker.start();
+    } else if (hasInitialized.current) {
+      // Only stop ticker after initial load is complete
+      app.ticker.stop();
+      app.render();
+    }
+  }, [isProcessingQueue, app]);
+
+  // Wait for initial textures to load before stopping ticker
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      hasInitialized.current = true;
+      if (!useAnimationStore.getState().isProcessingQueue) {
+        app.ticker.stop();
+        app.render();
+      }
+    }, 500); // Give textures time to load
+
+    return () => {
+      clearTimeout(timer);
+      app.ticker.stop();
+    };
+  }, [app]);
+
+  // Re-render when external state changes (like ghost preview)
+  useEffect(() => {
+    if (!isProcessingQueue && hasInitialized.current) {
+      app.render();
+    }
+  }, [renderTrigger, isProcessingQueue, app]);
+
+  return null;
+}
 
 // Theme tile imports - organized by theme
 const themeAssets: Record<ThemeId, Record<string, string>> = {
@@ -170,16 +221,22 @@ export function GameBoard({ board, players, theme = 'industrial' }: Props) {
   const clearExpiredLasers = useAnimationStore((state) => state.clearExpiredLasers);
   const isProcessingQueue = useAnimationStore((state) => state.isProcessingQueue);
 
-  // Process animation events periodically
+  // Process animation events using requestAnimationFrame (more efficient than setInterval)
   useEffect(() => {
     if (!isProcessingQueue) return;
 
-    const interval = setInterval(() => {
+    let animationFrameId: number;
+    const tick = () => {
       processEvents();
       clearExpiredLasers();
-    }, 16); // ~60fps
+      // Only continue if still processing
+      if (useAnimationStore.getState().isProcessingQueue) {
+        animationFrameId = requestAnimationFrame(tick);
+      }
+    };
+    animationFrameId = requestAnimationFrame(tick);
 
-    return () => clearInterval(interval);
+    return () => cancelAnimationFrame(animationFrameId);
   }, [isProcessingQueue, processEvents, clearExpiredLasers]);
 
   // Create tile elements
@@ -228,14 +285,7 @@ export function GameBoard({ board, players, theme = 'industrial' }: Props) {
           x={cp.x * TILE_SIZE + TILE_SIZE * 0.5}
           y={cp.y * TILE_SIZE + TILE_SIZE * 0.38}
           anchor={0.5}
-          style={
-            new PIXI.TextStyle({
-              fill: '#fef3c7',
-              fontSize: 16,
-              fontWeight: 'bold',
-              fontFamily: 'monospace',
-            })
-          }
+          style={checkpointTextStyle}
         />
       </Container>
     ));
@@ -531,6 +581,7 @@ export function GameBoard({ board, players, theme = 'industrial' }: Props) {
       height={height + 20}
       options={{ backgroundColor: 0x1a1a2e, antialias: false }}
     >
+      <TickerController renderTrigger={ghostPreview} />
       <Container>
         {/* Tiles layer */}
         {tiles}
