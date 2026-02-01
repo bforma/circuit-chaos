@@ -19,6 +19,7 @@ import {
   getHandSize,
   AIDifficulty,
   AI_NAMES,
+  isDamageCard,
 } from '@circuit-chaos/shared';
 import { createDeck, createPersonalDeck, createDamageDeck, dealCards, shuffle } from './deck';
 import { executeRegister, respawnDestroyedRobots, performShutdown } from './executor';
@@ -387,6 +388,9 @@ export class GameManager {
     session.state.phase = 'cleanup';
     this.broadcastGameState(gameId);
 
+    // Discard used cards from registers and hand
+    this.discardUsedCards(session);
+
     // Respawn destroyed robots before dealing new cards
     respawnDestroyedRobots(session.state);
 
@@ -416,6 +420,39 @@ export class GameManager {
     // Next player in clockwise order
     const nextIndex = (currentIndex + 1) % state.players.length;
     state.priorityPlayerId = state.players[nextIndex].id;
+  }
+
+  /**
+   * Discard used cards at end of round (2023 rules)
+   * - Programming cards from registers go to discard pile
+   * - Remaining hand cards (non-damage) go to discard pile
+   * - SPAM cards stay in hand
+   * - Haywire cards under registers stay there (face-down for next round)
+   */
+  private discardUsedCards(session: GameSession) {
+    for (const player of session.state.players) {
+      if (player.robot.isDestroyed || player.robot.isPoweredDown) {
+        // Destroyed/shutdown robots already handled their cards
+        continue;
+      }
+
+      // Move programming cards from registers to discard pile
+      for (let i = 0; i < player.registers.length; i++) {
+        const card = player.registers[i];
+        if (card && !isDamageCard(card.type)) {
+          player.discardPile.push(card);
+        }
+        player.registers[i] = null;
+      }
+
+      // Move non-damage cards from hand to discard pile
+      // SPAM cards stay in hand (per 2023 rules)
+      const cardsToDiscard = player.hand.filter(card => !isDamageCard(card.type));
+      for (const card of cardsToDiscard) {
+        player.discardPile.push(card);
+      }
+      player.hand = player.hand.filter(card => isDamageCard(card.type));
+    }
   }
 
   private checkWinner(state: GameState): Player | null {

@@ -492,4 +492,26 @@ describe('GameManager', () => {
       expect(state.phase).toBe('programming');
     });
   });
+
+  describe('card management', () => {
+    it('players have 20 cards total in deck + discard + hand + registers', () => {
+      const hostSocket = createMockSocket('host-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      gameManager.addAIPlayer(hostSocket, 'easy');
+      gameManager.startGame(hostSocket);
+
+      const state = io.getLastState();
+      const player = state.players[0];
+
+      // Count all cards
+      const deckCount = player.deck.length;
+      const discardCount = player.discardPile.length;
+      const handCount = player.hand.length;
+      const registerCount = player.registers.filter((r: any) => r !== null).length;
+
+      const totalCards = deckCount + discardCount + handCount + registerCount;
+      expect(totalCards).toBe(20); // Personal deck has 20 cards
+    });
+  });
 });
