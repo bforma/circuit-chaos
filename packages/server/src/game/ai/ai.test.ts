@@ -128,20 +128,6 @@ describe('AI Decision Making', () => {
       expect(usedIds.length).toBe(uniqueIds.size);
     });
 
-    it('respects locked registers', () => {
-      const lockedCard: Card = { id: 'locked', type: 'backup', priority: 100 };
-      const player = createTestPlayer({
-        registers: [null, null, null, null, lockedCard],
-      });
-      player.robot.damage = 5; // 1 locked register
-      const state = createTestState(player);
-
-      const decision = makeAIDecision(state, player);
-
-      // Last register should remain as it was (locked)
-      expect(decision.registers[4]).toEqual(lockedCard);
-    });
-
     describe('easy difficulty', () => {
       it('fills registers with preference for movement', () => {
         const player = createTestPlayer({ aiDifficulty: 'easy' });

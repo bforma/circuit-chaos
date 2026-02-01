@@ -62,24 +62,6 @@
   border-color: #667eea;
 }
 
-.register.locked {
-  background: rgba(231, 76, 60, 0.15);
-  border-color: rgba(231, 76, 60, 0.5);
-  border-style: solid;
-  cursor: not-allowed;
-}
-
-.register.locked.filled {
-  background: rgba(231, 76, 60, 0.25);
-}
-
-.lockIcon {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  font-size: 10px;
-}
-
 .registerNumber {
   font-size: 1.5rem;
   color: rgba(255, 255, 255, 0.2);

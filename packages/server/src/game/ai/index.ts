@@ -4,7 +4,7 @@ import type {
   Card,
   AIDifficulty,
 } from '@circuit-chaos/shared';
-import { REGISTERS_COUNT, getLockedRegisterCount } from '@circuit-chaos/shared';
+import { REGISTERS_COUNT } from '@circuit-chaos/shared';
 import {
   simulateCardSequence,
   evaluatePosition,
@@ -41,11 +41,10 @@ export function makeAIDecision(
  */
 function makeEasyDecision(state: GameState, player: Player): CardSelection {
   const availableCards = [...player.hand];
-  const lockedCount = getLockedRegisterCount(player.robot.damage);
-  const registers: (Card | null)[] = [...player.registers];
+  const registers: (Card | null)[] = [null, null, null, null, null];
 
-  // Fill unlocked registers
-  for (let i = 0; i < REGISTERS_COUNT - lockedCount; i++) {
+  // Fill all 5 registers (2023 rules: no locked registers)
+  for (let i = 0; i < REGISTERS_COUNT; i++) {
     if (availableCards.length === 0) break;
 
     // 40% pure random, 60% prefer movement cards
@@ -79,11 +78,10 @@ function makeEasyDecision(state: GameState, player: Player): CardSelection {
  */
 function makeMediumDecision(state: GameState, player: Player): CardSelection {
   const availableCards = [...player.hand];
-  const lockedCount = getLockedRegisterCount(player.robot.damage);
-  const registers: (Card | null)[] = [...player.registers];
+  const registers: (Card | null)[] = [null, null, null, null, null];
 
   // Greedy approach: pick best card for each register
-  for (let i = 0; i < REGISTERS_COUNT - lockedCount; i++) {
+  for (let i = 0; i < REGISTERS_COUNT; i++) {
     if (availableCards.length === 0) break;
 
     let bestCard: Card | null = null;
@@ -94,8 +92,8 @@ function makeMediumDecision(state: GameState, player: Player): CardSelection {
       const testRegisters = [...registers];
       testRegisters[i] = card;
 
-      // Simulate up to 3 moves ahead (or remaining unlocked registers)
-      const lookahead = Math.min(3, REGISTERS_COUNT - lockedCount - i);
+      // Simulate up to 3 moves ahead
+      const lookahead = Math.min(3, REGISTERS_COUNT - i);
       const cardsToSimulate = testRegisters.slice(0, i + lookahead);
 
       const result = simulateCardSequence(state, player, cardsToSimulate);
@@ -132,25 +130,17 @@ function makeMediumDecision(state: GameState, player: Player): CardSelection {
  */
 function makeHardDecision(state: GameState, player: Player): CardSelection {
   const availableCards = [...player.hand];
-  const lockedCount = getLockedRegisterCount(player.robot.damage);
-  const numToFill = REGISTERS_COUNT - lockedCount;
 
-  // Get locked registers
-  const lockedRegisters = player.registers.slice(REGISTERS_COUNT - lockedCount);
-
-  // Find best combination of cards
+  // Find best combination of cards for all 5 registers
   const bestSequence = findBestCardSequence(
     state,
     player,
     availableCards,
-    numToFill
+    REGISTERS_COUNT
   );
 
-  // Combine with locked registers
-  const registers: (Card | null)[] = [...bestSequence, ...lockedRegisters];
-
   return {
-    registers,
+    registers: bestSequence,
   };
 }
 

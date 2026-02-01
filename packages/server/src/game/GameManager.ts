@@ -15,8 +15,6 @@ import {
   ThemeId,
   DEFAULT_THEME,
   THEMES,
-  getLockedRegisterCount,
-  getHandSize,
   AIDifficulty,
   AI_NAMES,
   isDamageCard,
@@ -261,6 +259,8 @@ export class GameManager {
   }
 
   private dealCardsToPlayers(session: GameSession) {
+    const HAND_SIZE = 9; // 2023 rules: always draw up to 9 cards
+
     for (const player of session.state.players) {
       if (player.robot.isDestroyed) {
         player.hand = [];
@@ -269,20 +269,17 @@ export class GameManager {
         continue;
       }
 
-      const handSize = getHandSize(player.robot.damage);
-      const lockedCount = getLockedRegisterCount(player.robot.damage);
+      // 2023 rules: SPAM cards stay in hand, draw up to 9 total
+      // player.hand may already contain SPAM cards from previous round
+      const currentHandCount = player.hand.length;
+      const cardsToDraw = Math.max(0, HAND_SIZE - currentHandCount);
 
-      // Draw from personal deck (2023 rules)
-      const cards = this.drawFromPersonalDeck(player, handSize);
-      player.hand = cards;
+      // Draw from personal deck
+      const newCards = this.drawFromPersonalDeck(player, cardsToDraw);
+      player.hand = [...player.hand, ...newCards];
 
-      // Preserve locked registers (last N registers stay locked)
-      const newRegisters: (Card | null)[] = [];
-      for (let i = 0; i < REGISTERS_COUNT; i++) {
-        const isLocked = i >= REGISTERS_COUNT - lockedCount;
-        newRegisters[i] = isLocked ? player.registers[i] : null;
-      }
-      player.registers = newRegisters;
+      // 2023 rules: no locked registers
+      player.registers = [null, null, null, null, null];
       player.isReady = false;
     }
 

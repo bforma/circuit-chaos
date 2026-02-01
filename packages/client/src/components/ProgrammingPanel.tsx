@@ -1,6 +1,6 @@
 import { useGameStore } from '../stores/gameStore';
 import { useSocket } from '../hooks/useSocket';
-import { getCardLabel, getCardIcon, REGISTERS_COUNT, getLockedRegisterCount, isDamageCard } from '@circuit-chaos/shared';
+import { getCardLabel, getCardIcon, REGISTERS_COUNT, isDamageCard } from '@circuit-chaos/shared';
 import styles from './ProgrammingPanel.module.css';
 
 export function ProgrammingPanel() {
@@ -13,14 +13,9 @@ export function ProgrammingPanel() {
   if (!player) return null;
 
   const { hand, registers, haywireRegisters, isReady, robot } = player;
-  const lockedCount = getLockedRegisterCount(robot.damage);
 
   // Count damage cards in hand
   const damageCardsInHand = hand.filter(card => isDamageCard(card.type)).length;
-
-  const isRegisterLocked = (index: number) => {
-    return index >= REGISTERS_COUNT - lockedCount;
-  };
 
   const handleCardClick = (card: typeof hand[0]) => {
     if (isReady) return;
@@ -50,7 +45,7 @@ export function ProgrammingPanel() {
   };
 
   const handleRegisterClick = (index: number) => {
-    if (isReady || !selectedCard || isRegisterLocked(index)) return;
+    if (isReady || !selectedCard) return;
 
     // Check if card is already in a register
     const existingIndex = registers.findIndex(r => r?.id === selectedCard.id);
@@ -71,10 +66,10 @@ export function ProgrammingPanel() {
     const usedCardIds = new Set(registers.filter(r => r !== null).map(r => r!.id));
     const availableCards = hand.filter(card => !usedCardIds.has(card.id));
 
-    // Fill empty unlocked registers
+    // Fill empty registers
     let cardIndex = 0;
     for (let i = 0; i < REGISTERS_COUNT; i++) {
-      if (!isRegisterLocked(i) && registers[i] === null && cardIndex < availableCards.length) {
+      if (registers[i] === null && cardIndex < availableCards.length) {
         programRegister(i, availableCards[cardIndex]);
         cardIndex++;
       }
@@ -83,12 +78,12 @@ export function ProgrammingPanel() {
 
   const handleClearRegister = (index: number, e?: React.MouseEvent) => {
     e?.stopPropagation();
-    if (isReady || isRegisterLocked(index)) return;
+    if (isReady) return;
     programRegister(index, null);
   };
 
   const handleRegisterDoubleClick = (index: number) => {
-    if (isReady || isRegisterLocked(index)) return;
+    if (isReady) return;
     if (registers[index]) {
       programRegister(index, null);
     }
@@ -112,12 +107,11 @@ export function ProgrammingPanel() {
         <span className={styles.label}>Registers</span>
         <div className={styles.registerSlots}>
           {registers.map((card, index) => {
-            const locked = isRegisterLocked(index);
             const haywireCard = haywireRegisters?.[index];
             return (
               <div key={index} className={styles.registerWrapper}>
                 <div
-                  className={`${styles.register} ${card ? styles.filled : ''} ${locked ? styles.locked : ''} ${selectedCard && !isReady && !locked ? styles.clickable : ''} ${card && isDamageCard(card.type) ? styles.damageCard : ''}`}
+                  className={`${styles.register} ${card ? styles.filled : ''} ${selectedCard && !isReady ? styles.clickable : ''} ${card && isDamageCard(card.type) ? styles.damageCard : ''}`}
                   onClick={() => handleRegisterClick(index)}
                   onDoubleClick={() => handleRegisterDoubleClick(index)}
                 >
@@ -126,7 +120,7 @@ export function ProgrammingPanel() {
                       <span className={styles.cardIcon}>{getCardIcon(card.type)}</span>
                       <span className={styles.cardType}>{getCardLabel(card.type)}</span>
                       <span className={styles.priority}>{card.priority}</span>
-                      {!isReady && !locked && (
+                      {!isReady && (
                         <button
                           className={styles.clearBtn}
                           onClick={(e) => handleClearRegister(index, e)}
@@ -134,7 +128,6 @@ export function ProgrammingPanel() {
                           ×
                         </button>
                       )}
-                      {locked && <span className={styles.lockIcon}>🔒</span>}
                     </>
                   ) : (
                     <span className={styles.registerNumber}>{index + 1}</span>
@@ -206,10 +199,10 @@ export function ProgrammingPanel() {
         </div>
       )}
 
-      {isReady && robot.damage > 0 && !robot.isPoweredDown && (
+      {isReady && damageCardsInHand > 0 && !robot.isPoweredDown && (
         <div className={styles.shutdownSection}>
           <p className={styles.shutdownHint}>
-            You have {robot.damage} damage. Shutdown to clear all damage cards and skip this round.
+            You have {damageCardsInHand} damage card{damageCardsInHand > 1 ? 's' : ''} in hand. Shutdown to clear all damage and skip this round.
           </p>
           <button
             className="btn btn-warning"

@@ -1,5 +1,5 @@
 import type { Direction } from './direction';
-import { MAX_DAMAGE, STARTING_LIVES, STARTING_ENERGY } from '../constants';
+import { STARTING_LIVES, STARTING_ENERGY } from '../constants';
 
 export interface Position {
   x: number;
@@ -38,17 +38,3 @@ export function createRobot(playerId: string, spawnPosition: Position): Robot {
   };
 }
 
-export function getHandSize(damage: number): number {
-  // Start with 9 cards, lose 1 for each damage
-  return Math.max(0, 9 - damage);
-}
-
-export function getLockedRegisterCount(damage: number): number {
-  // Registers lock at 5+ damage
-  // 5 damage = 1 locked, 6 = 2 locked, etc.
-  return Math.max(0, damage - 4);
-}
-
-export function isRobotDestroyed(damage: number): boolean {
-  return damage >= MAX_DAMAGE;
-}

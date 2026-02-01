@@ -232,18 +232,15 @@ describe('GameManager', () => {
 
       gameManager.joinGame(guestSocket, gameId, 'Guest');
 
-      // Manually set damage on host's robot via state
-      const state = io.getLastState();
-      state.players[0].robot.damage = 5; // Should get 4 cards
-
       gameManager.startGame(hostSocket);
 
       const newState = io.getLastState();
-      expect(newState.players[0].hand.length).toBe(4); // 9 - 5 = 4
-      expect(newState.players[1].hand.length).toBe(9); // No damage
+      // 2023 rules: always draw up to 9 cards
+      expect(newState.players[0].hand.length).toBe(9);
+      expect(newState.players[1].hand.length).toBe(9);
     });
 
-    it('preserves locked registers when dealing new cards', () => {
+    it('keeps SPAM cards in hand between rounds (2023 rules)', () => {
       const hostSocket = createMockSocket('host-socket');
       const guestSocket = createMockSocket('guest-socket');
 
@@ -255,26 +252,22 @@ describe('GameManager', () => {
 
       gameManager.joinGame(guestSocket, gameId, 'Guest');
 
-      // Set up player with damage and a card in the last register
+      // Add SPAM cards to player's hand before starting
       const state = io.getLastState();
-      state.players[0].robot.damage = 5; // 1 locked register (register 5)
-      const lockedCard: Card = {
-        id: 'locked-card',
-        type: 'move1',
-        priority: 100,
+      const spamCard: Card = {
+        id: 'spam-card',
+        type: 'spam',
+        priority: 0,
       };
-      state.players[0].registers = [null, null, null, null, lockedCard];
+      state.players[0].hand = [spamCard];
 
       gameManager.startGame(hostSocket);
 
       const newState = io.getLastState();
-      // Last register should still have the locked card
-      expect(newState.players[0].registers[4]).toEqual(lockedCard);
-      // Other registers should be cleared
-      expect(newState.players[0].registers[0]).toBeNull();
-      expect(newState.players[0].registers[1]).toBeNull();
-      expect(newState.players[0].registers[2]).toBeNull();
-      expect(newState.players[0].registers[3]).toBeNull();
+      // Should have 9 cards total, including the SPAM card
+      expect(newState.players[0].hand.length).toBe(9);
+      // SPAM card should still be in hand
+      expect(newState.players[0].hand.some((c: Card) => c.id === 'spam-card')).toBe(true);
     });
 
     it('skips destroyed robots when dealing cards', () => {
