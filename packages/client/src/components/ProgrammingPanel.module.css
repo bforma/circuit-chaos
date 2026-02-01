@@ -124,12 +124,6 @@
   color: rgba(255, 255, 255, 0.8);
 }
 
-.priority {
-  display: block;
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.5);
-}
-
 .clearBtn {
   position: absolute;
   top: 2px;

@@ -119,7 +119,6 @@ export function ProgrammingPanel() {
                     <>
                       <span className={styles.cardIcon}>{getCardIcon(card.type)}</span>
                       <span className={styles.cardType}>{getCardLabel(card.type)}</span>
-                      <span className={styles.priority}>{card.priority}</span>
                       {!isReady && (
                         <button
                           className={styles.clearBtn}
@@ -172,7 +171,6 @@ export function ProgrammingPanel() {
               >
                 <span className={styles.cardIcon}>{getCardIcon(card.type)}</span>
                 <span className={styles.cardType}>{getCardLabel(card.type)}</span>
-                {!isDamage && <span className={styles.priority}>{card.priority}</span>}
               </div>
             );
           })}
