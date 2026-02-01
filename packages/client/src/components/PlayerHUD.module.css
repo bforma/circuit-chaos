@@ -40,12 +40,7 @@
   font-size: 0.9rem;
 }
 
-.value {
-  font-weight: 500;
-  text-transform: capitalize;
-}
-
-.healthBar {
+.energyBar {
   position: relative;
   width: 120px;
   height: 20px;
@@ -54,35 +49,19 @@
   overflow: hidden;
 }
 
-.healthFill {
+.energyFill {
   height: 100%;
-  transition: width 0.3s ease, background-color 0.3s ease;
+  background: linear-gradient(90deg, #f1c40f, #f39c12);
+  transition: width 0.3s ease;
 }
 
-.healthText {
+.energyText {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 0.8rem;
   font-weight: 600;
-}
-
-.lives {
-  display: flex;
-  gap: 8px;
-}
-
-.life {
-  font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.2);
-}
-
-.lifeActive {
-  color: #e74c3c;
-}
-
-.energy {
-  font-weight: 600;
-  color: #f1c40f;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }

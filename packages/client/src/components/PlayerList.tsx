@@ -89,7 +89,6 @@ function PlayerListItem({ player, isCurrentPlayer, isHost, hasPriority, showVote
       </div>
       <div className={styles.stats}>
         <span className={styles.checkpoint}>CP {robot.lastCheckpoint}</span>
-        <span className={styles.damage}>{robot.damage} dmg</span>
       </div>
     </li>
   );
