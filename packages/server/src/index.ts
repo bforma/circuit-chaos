@@ -101,6 +101,10 @@ io.on('connection', (socket) => {
     gameManager.shutdownRobot(socket);
   });
 
+  socket.on('game:playAgain', () => {
+    gameManager.playAgain(socket);
+  });
+
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
     gameManager.handleDisconnect(socket);

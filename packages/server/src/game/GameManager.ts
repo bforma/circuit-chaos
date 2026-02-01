@@ -995,4 +995,58 @@ export class GameManager {
     this.broadcastGameState(gameId);
     console.log(`Player ${player.name} shut down robot in game ${gameId}`);
   }
+
+  playAgain(socket: Socket) {
+    const gameId = this.socketToGame.get(socket.id);
+    if (!gameId) return;
+
+    const session = this.games.get(gameId);
+    if (!session) return;
+
+    // Only host can restart
+    const playerId = session.socketPlayers.get(socket.id);
+    if (playerId !== session.state.hostId) {
+      socket.emit('game:error', 'Only the host can restart the game');
+      return;
+    }
+
+    // Only when game is finished
+    if (session.state.phase !== 'finished') {
+      socket.emit('game:error', 'Game is not finished');
+      return;
+    }
+
+    // Create a fresh board
+    const board = createSampleBoard();
+
+    // Reset all players
+    for (let i = 0; i < session.state.players.length; i++) {
+      const player = session.state.players[i];
+      const spawnPoint = board.spawnPoints[i] || { x: i, y: 0 };
+
+      // Reset robot
+      player.robot = createRobot(player.id, spawnPoint);
+
+      // Clear cards
+      player.hand = [];
+      player.registers = [null, null, null, null, null];
+      player.deck = [];
+      player.discardPile = [];
+      player.haywireRegisters = [null, null, null, null, null];
+      player.isReady = false;
+    }
+
+    // Reset game state
+    session.state.board = board;
+    session.state.phase = 'lobby';
+    session.state.currentRegister = 0;
+    session.state.turn = 0;
+    session.state.winnerId = undefined;
+    session.state.damageDeck = createDamageDeck();
+    session.state.damageDiscardPile = [];
+    session.state.disconnectVote = undefined;
+
+    this.broadcastGameState(gameId);
+    console.log(`Game ${gameId} restarted`);
+  }
 }

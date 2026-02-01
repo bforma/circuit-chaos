@@ -1,4 +1,5 @@
 import { useGameStore } from '../stores/gameStore';
+import { useSocket } from '../hooks/useSocket';
 import { GameBoard } from '../game/GameBoard';
 import { ProgrammingPanel } from './ProgrammingPanel';
 import { PlayerHUD } from './PlayerHUD';
@@ -8,8 +9,10 @@ import { GameLog } from './GameLog';
 import styles from './Game.module.css';
 
 export function Game() {
-  const { gameState, getCurrentPlayer } = useGameStore();
+  const { gameState, getCurrentPlayer, playerId } = useGameStore();
+  const { playAgain } = useSocket();
   const currentPlayer = getCurrentPlayer();
+  const isHost = playerId === gameState?.hostId;
 
   if (!gameState || !currentPlayer) {
     return <div className={styles.loading}>Loading game...</div>;
@@ -38,6 +41,14 @@ export function Game() {
             <p>
               Winner: {gameState.players.find(p => p.id === gameState.winnerId)?.name}
             </p>
+            {isHost && (
+              <button className="btn btn-primary" onClick={playAgain}>
+                Play Again
+              </button>
+            )}
+            {!isHost && (
+              <p className={styles.waitingHost}>Waiting for host to restart...</p>
+            )}
           </div>
         )}
       </div>

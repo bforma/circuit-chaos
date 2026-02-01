@@ -62,3 +62,13 @@
   color: #2ecc71;
   margin-bottom: 8px;
 }
+
+.winner button {
+  margin-top: 16px;
+}
+
+.waitingHost {
+  margin-top: 16px;
+  color: #999;
+  font-style: italic;
+}
