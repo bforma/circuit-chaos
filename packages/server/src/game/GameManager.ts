@@ -20,7 +20,9 @@ import {
   isDamageCard,
 } from '@circuit-chaos/shared';
 import { createDeck, createPersonalDeck, createDamageDeck, dealCards, shuffle } from './deck';
-import { executeRegister, respawnDestroyedRobots, performShutdown } from './executor';
+import { executeRegisterWithEvents, respawnDestroyedRobots, performShutdown } from './executor';
+import type { AnimationEvent } from '@circuit-chaos/shared';
+import { calculateEventsDuration, ANIMATION_DURATIONS } from '@circuit-chaos/shared';
 import { createSampleBoard } from './boards';
 import { getRedis } from '../redis';
 import { makeAIDecision } from './ai';
@@ -325,7 +327,19 @@ export class GameManager {
 
     if (registerIndex < 0 || registerIndex >= REGISTERS_COUNT) return;
 
-    player.registers[registerIndex] = card;
+    // If setting a card, validate it exists in the player's hand
+    // Use the server-side card object to ensure consistency
+    let cardToPlace: Card | null = null;
+    if (card !== null) {
+      const handCard = player.hand.find(c => c.id === card.id);
+      if (!handCard) {
+        console.warn(`Player ${playerId} tried to place card ${card.id} not in hand`);
+        return;
+      }
+      cardToPlace = handCard;
+    }
+
+    player.registers[registerIndex] = cardToPlace;
     this.broadcastGameState(gameId);
   }
 
@@ -364,11 +378,18 @@ export class GameManager {
       session.state.currentRegister = register;
       this.broadcastGameState(gameId);
 
-      // Execute movements
-      executeRegister(session.state, register);
+      // Execute movements and get animation events
+      const events = executeRegisterWithEvents(session.state, register);
 
-      // Small delay for animation
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Emit animation events to clients
+      this.io.to(gameId).emit('game:animation', events);
+
+      // Calculate wait time based on event duration
+      const animationDuration = calculateEventsDuration(events);
+      const waitTime = Math.max(animationDuration + ANIMATION_DURATIONS.REGISTER_PAUSE, 500);
+
+      // Wait for animations to complete
+      await new Promise(resolve => setTimeout(resolve, waitTime));
       this.broadcastGameState(gameId);
 
       // Check for winner
@@ -434,17 +455,23 @@ export class GameManager {
       }
 
       // Move programming cards from registers to discard pile
+      // Track which card IDs are in registers to avoid double-discarding
+      const registerCardIds = new Set<string>();
       for (let i = 0; i < player.registers.length; i++) {
         const card = player.registers[i];
         if (card && !isDamageCard(card.type)) {
           player.discardPile.push(card);
+          registerCardIds.add(card.id);
         }
         player.registers[i] = null;
       }
 
       // Move non-damage cards from hand to discard pile
       // SPAM cards stay in hand (per 2023 rules)
-      const cardsToDiscard = player.hand.filter(card => !isDamageCard(card.type));
+      // Skip cards already discarded from registers (they exist in both hand and registers)
+      const cardsToDiscard = player.hand.filter(card =>
+        !isDamageCard(card.type) && !registerCardIds.has(card.id)
+      );
       for (const card of cardsToDiscard) {
         player.discardPile.push(card);
       }

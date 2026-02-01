@@ -1,11 +1,13 @@
 import { Stage, Container, Sprite, Text, Graphics } from '@pixi/react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useEffect } from 'react';
 import type { Board, Player, Direction, Tile, ThemeId } from '@circuit-chaos/shared';
 import { TILE_SIZE } from '@circuit-chaos/shared';
 import * as PIXI from 'pixi.js';
 import robotSprite from '../assets/robot.svg';
 import { useGameStore } from '../stores/gameStore';
+import { useAnimationStore } from '../stores/animationStore';
 import { calculatePreviewPosition } from './previewCalculator';
+import { AnimatedRobot } from './AnimatedRobot';
 
 // Theme tile imports - organized by theme
 const themeAssets: Record<ThemeId, Record<string, string>> = {
@@ -161,6 +163,24 @@ export function GameBoard({ board, players, theme = 'industrial' }: Props) {
   const { gameState, getCurrentPlayer, hoveredCard } = useGameStore();
   const currentPlayer = getCurrentPlayer();
   const cardPreviewEnabled = gameState?.cardPreviewEnabled ?? false;
+
+  // Animation store state
+  const laserBeams = useAnimationStore((state) => state.laserBeams);
+  const processEvents = useAnimationStore((state) => state.processEvents);
+  const clearExpiredLasers = useAnimationStore((state) => state.clearExpiredLasers);
+  const isProcessingQueue = useAnimationStore((state) => state.isProcessingQueue);
+
+  // Process animation events periodically
+  useEffect(() => {
+    if (!isProcessingQueue) return;
+
+    const interval = setInterval(() => {
+      processEvents();
+      clearExpiredLasers();
+    }, 16); // ~60fps
+
+    return () => clearInterval(interval);
+  }, [isProcessingQueue, processEvents, clearExpiredLasers]);
 
   // Create tile elements
   const tiles = useMemo(() => {
@@ -399,79 +419,54 @@ export function GameBoard({ board, players, theme = 'industrial' }: Props) {
     }
   }, [board.lasers, width, height]);
 
-  // Draw AI indicator ring
-  const drawAIRing = useCallback((g: PIXI.Graphics, x: number, y: number, color: number) => {
-    g.clear();
-    // Outer glow
-    g.lineStyle(4, color, 0.3);
-    g.drawCircle(x, y, TILE_SIZE * 0.5);
-    // Inner ring
-    g.lineStyle(2, color, 0.8);
-    g.drawCircle(x, y, TILE_SIZE * 0.48);
-    // Pulsing effect dots
-    const dotRadius = 3;
-    const ringRadius = TILE_SIZE * 0.5;
-    for (let i = 0; i < 4; i++) {
-      const angle = (i * Math.PI) / 2;
-      const dx = Math.cos(angle) * ringRadius;
-      const dy = Math.sin(angle) * ringRadius;
-      g.beginFill(color, 0.9);
-      g.drawCircle(x + dx, y + dy, dotRadius);
-      g.endFill();
-    }
-  }, []);
-
-  // Create robot sprites
+  // Create animated robot components
   const robots = useMemo(() => {
     return players
       .filter((player) => !player.robot.isDestroyed)
-      .map((player) => {
-        const { robot } = player;
-        const rotation = directionToRotation[robot.direction];
-        const robotX = robot.position.x * TILE_SIZE + TILE_SIZE / 2;
-        const robotY = robot.position.y * TILE_SIZE + TILE_SIZE / 2;
-        const colorInt = parseInt(player.color.slice(1), 16);
+      .map((player) => (
+        <AnimatedRobot
+          key={player.id}
+          playerId={player.id}
+          playerName={player.name}
+          playerColor={player.color}
+          isAI={player.isAI}
+          fallbackX={player.robot.position.x}
+          fallbackY={player.robot.position.y}
+          fallbackDirection={player.robot.direction}
+          fallbackIsDestroyed={player.robot.isDestroyed}
+        />
+      ));
+  }, [players]);
 
-        return (
-          <Container key={player.id}>
-            {/* AI indicator ring */}
-            {player.isAI && (
-              <Graphics
-                draw={(g) => drawAIRing(g, robotX, robotY, colorInt)}
-              />
-            )}
-            <Sprite
-              image={robotSprite}
-              x={robotX}
-              y={robotY}
-              width={TILE_SIZE * 0.9}
-              height={TILE_SIZE * 0.9}
-              anchor={0.5}
-              rotation={rotation}
-              tint={colorInt}
-            />
-            {/* Player name label */}
-            <Text
-              text={(player.isAI ? '🤖 ' : '') + player.name.slice(0, 8)}
-              x={robotX}
-              y={robot.position.y * TILE_SIZE + TILE_SIZE + 4}
-              anchor={[0.5, 0]}
-              style={
-                new PIXI.TextStyle({
-                  fill: '#ffffff',
-                  fontSize: 10,
-                  fontWeight: 'bold',
-                  fontFamily: 'monospace',
-                  dropShadow: true,
-                  dropShadowColor: '#000000',
-                  dropShadowDistance: 1,
-                })
-              }
-            />
-          </Container>
-        );
-      });
-  }, [players, drawAIRing]);
+  // Draw animated laser beams
+  const drawAnimatedLasers = useCallback(
+    (g: PIXI.Graphics) => {
+      g.clear();
+
+      for (const beam of laserBeams) {
+        const startX = beam.startX * TILE_SIZE + TILE_SIZE / 2;
+        const startY = beam.startY * TILE_SIZE + TILE_SIZE / 2;
+        const endX = beam.endX * TILE_SIZE + TILE_SIZE / 2;
+        const endY = beam.endY * TILE_SIZE + TILE_SIZE / 2;
+
+        // Bright animated laser beam
+        // Outer glow
+        g.lineStyle(8, 0xff0000, 0.3);
+        g.moveTo(startX, startY);
+        g.lineTo(endX, endY);
+        // Middle beam
+        g.lineStyle(4, 0xff4444, 0.6);
+        g.moveTo(startX, startY);
+        g.lineTo(endX, endY);
+        // Core beam
+        g.lineStyle(2, 0xffaaaa, 0.9);
+        g.moveTo(startX, startY);
+        g.lineTo(endX, endY);
+      }
+    },
+    [laserBeams]
+  );
+
 
   // Calculate ghost preview position
   const ghostPreview = useMemo(() => {
@@ -546,8 +541,11 @@ export function GameBoard({ board, players, theme = 'industrial' }: Props) {
         {/* Walls layer */}
         <Graphics draw={drawWalls} />
 
-        {/* Lasers layer */}
+        {/* Static lasers layer (board lasers) */}
         <Graphics draw={drawLasers} />
+
+        {/* Animated laser beams layer */}
+        <Graphics draw={drawAnimatedLasers} />
 
         {/* Ghost preview layer */}
         {ghostRobot}

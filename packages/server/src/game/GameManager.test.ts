@@ -507,4 +507,110 @@ describe('GameManager', () => {
       expect(totalCards).toBe(20); // Personal deck has 20 cards
     });
   });
+
+  describe('programRegister', () => {
+    it('validates card exists in player hand', () => {
+      const hostSocket = createMockSocket('host-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      gameManager.addAIPlayer(hostSocket, 'easy');
+      gameManager.startGame(hostSocket);
+
+      const stateBefore = io.getLastState();
+      const fakeCard: Card = { id: 'fake-card-not-in-hand', type: 'move3', priority: 0 };
+
+      // Try to program a card not in hand
+      gameManager.programRegister(hostSocket, 0, fakeCard);
+
+      const stateAfter = io.getLastState();
+      // Register should still be null (card was rejected)
+      expect(stateAfter.players[0].registers[0]).toBeNull();
+    });
+
+    it('accepts card that exists in player hand', () => {
+      const hostSocket = createMockSocket('host-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      gameManager.addAIPlayer(hostSocket, 'easy');
+      gameManager.startGame(hostSocket);
+
+      const state = io.getLastState();
+      const cardFromHand = state.players[0].hand[0];
+
+      gameManager.programRegister(hostSocket, 0, cardFromHand);
+
+      const stateAfter = io.getLastState();
+      expect(stateAfter.players[0].registers[0]).not.toBeNull();
+      expect(stateAfter.players[0].registers[0].id).toBe(cardFromHand.id);
+    });
+
+    it('allows clearing a register with null', () => {
+      const hostSocket = createMockSocket('host-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      gameManager.addAIPlayer(hostSocket, 'easy');
+      gameManager.startGame(hostSocket);
+
+      const state = io.getLastState();
+      const cardFromHand = state.players[0].hand[0];
+
+      // Place card
+      gameManager.programRegister(hostSocket, 0, cardFromHand);
+
+      // Clear register
+      gameManager.programRegister(hostSocket, 0, null);
+
+      const stateAfter = io.getLastState();
+      expect(stateAfter.players[0].registers[0]).toBeNull();
+    });
+  });
+
+  describe('card discard at end of round', () => {
+    it('does not duplicate cards when discarding from hand and registers', () => {
+      const hostSocket = createMockSocket('host-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      gameManager.addAIPlayer(hostSocket, 'easy');
+      gameManager.startGame(hostSocket);
+
+      // Get initial state and count unique card IDs
+      const initialState = io.getLastState();
+      const player = initialState.players[0];
+
+      // Collect all unique card IDs at start
+      const allCardIds = new Set<string>();
+      player.hand.forEach((c: Card) => allCardIds.add(c.id));
+      player.deck.forEach((c: Card) => allCardIds.add(c.id));
+      player.discardPile.forEach((c: Card) => allCardIds.add(c.id));
+      player.registers.filter((r: Card | null) => r !== null).forEach((c: Card) => allCardIds.add(c!.id));
+
+      const initialUniqueCardCount = allCardIds.size;
+
+      // Program all registers with cards from hand
+      for (let i = 0; i < REGISTERS_COUNT; i++) {
+        const card = player.hand[i];
+        if (card) {
+          gameManager.programRegister(hostSocket, i, card);
+        }
+      }
+
+      // Submit program
+      gameManager.submitProgram(hostSocket);
+
+      // AI is already ready, so game should execute and start new round
+      // Wait for state update
+      const finalState = io.getLastState();
+      const finalPlayer = finalState.players[0];
+
+      // Count unique card IDs after round
+      const finalCardIds = new Set<string>();
+      finalPlayer.hand.forEach((c: Card) => finalCardIds.add(c.id));
+      finalPlayer.deck.forEach((c: Card) => finalCardIds.add(c.id));
+      finalPlayer.discardPile.forEach((c: Card) => finalCardIds.add(c.id));
+      finalPlayer.registers.filter((r: Card | null) => r !== null).forEach((c: Card) => finalCardIds.add(c!.id));
+
+      // Should still have same number of unique cards (no duplicates created)
+      expect(finalCardIds.size).toBe(initialUniqueCardCount);
+    });
+  });
 });

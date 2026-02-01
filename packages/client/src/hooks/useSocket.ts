@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useGameStore } from '../stores/gameStore';
-import type { GameState, Card, DisconnectVoteOption, ThemeId, AIDifficulty } from '@circuit-chaos/shared';
+import { useAnimationStore } from '../stores/animationStore';
+import type { GameState, Card, DisconnectVoteOption, ThemeId, AIDifficulty, AnimationEvent } from '@circuit-chaos/shared';
 
 // URL and session helpers
 function getGameIdFromUrl(): string | null {
@@ -48,6 +49,7 @@ interface ServerToClientEvents {
   'game:joined': (data: { playerId: string }) => void;
   'game:reconnected': (data: { gameId: string; playerId: string }) => void;
   'game:error': (message: string) => void;
+  'game:animation': (events: AnimationEvent[]) => void;
 }
 
 interface ClientToServerEvents {
@@ -123,6 +125,20 @@ function initializeSocket() {
     console.log('Game state update:', state.phase);
     useGameStore.getState().setGameState(state);
 
+    // Initialize animation store robot visuals from game state
+    // Only initialize if:
+    // 1. Not currently animating (would interrupt animation)
+    // 2. Robot visuals don't exist yet OR we're not in executing phase
+    //    (during executing, the animation store handles positions)
+    const animationStore = useAnimationStore.getState();
+    const hasRobotVisuals = animationStore.robotVisuals.size > 0;
+
+    if (!animationStore.isProcessingQueue) {
+      if (!hasRobotVisuals || state.phase !== 'executing') {
+        animationStore.initializeRobotVisuals(state.players);
+      }
+    }
+
     // Save player ID when we receive state (for join scenario)
     const playerId = useGameStore.getState().playerId;
     if (playerId) {
@@ -137,6 +153,15 @@ function initializeSocket() {
     } else if (state.phase !== 'lobby' && currentScreen !== 'game') {
       useGameStore.getState().setScreen('game');
     }
+  });
+
+  socket.on('game:animation', (events) => {
+    console.log('Animation events received:', events.length);
+    const animationStore = useAnimationStore.getState();
+
+    // Queue animation events for processing
+    // Log entries are added by the animation store when events are processed
+    animationStore.queueEvents(events);
   });
 
   socket.on('game:error', (message) => {

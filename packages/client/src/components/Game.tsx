@@ -4,6 +4,7 @@ import { ProgrammingPanel } from './ProgrammingPanel';
 import { PlayerHUD } from './PlayerHUD';
 import { PlayerList } from './PlayerList';
 import { DisconnectVoteModal } from './DisconnectVoteModal';
+import { GameLog } from './GameLog';
 import styles from './Game.module.css';
 
 export function Game() {
@@ -16,11 +17,8 @@ export function Game() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.gameArea}>
-        <GameBoard board={gameState.board} players={gameState.players} theme={gameState.theme} />
-      </div>
-
-      <div className={styles.sidebar}>
+      {/* Left sidebar - Player info and controls */}
+      <div className={styles.leftSidebar}>
         <PlayerList />
         <PlayerHUD player={currentPlayer} />
 
@@ -42,6 +40,15 @@ export function Game() {
             </p>
           </div>
         )}
+      </div>
+
+      <div className={styles.gameArea}>
+        <GameBoard board={gameState.board} players={gameState.players} theme={gameState.theme} />
+      </div>
+
+      {/* Right sidebar - Game Log */}
+      <div className={styles.rightSidebar}>
+        <GameLog />
       </div>
 
       <DisconnectVoteModal />

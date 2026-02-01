@@ -1,10 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { executeRegister, respawnDestroyedRobots, performShutdown } from './executor';
+import { executeRegister, executeRegisterWithEvents, respawnDestroyedRobots, performShutdown } from './executor';
 import {
   GameState,
   Player,
   Board,
   Card,
+  AnimationEvent,
+  PlayerCardEvent,
   createEmptyBoard,
   createRobot,
   createPlayer,
@@ -763,6 +765,103 @@ describe('reboot with rebootToken', () => {
 
     // Damage should be reset to 0, then +2 from reboot damage
     expect(player.robot.damage).toBe(2);
+  });
+});
+
+describe('executeRegisterWithEvents - animation events', () => {
+  let state: GameState;
+
+  beforeEach(() => {
+    state = createTestGameState(10, 10);
+  });
+
+  it('SPAM card replacement emits player_card event for replacement card', () => {
+    const player = createTestPlayer('p1', 3, 3, 'north');
+    const spamCard: Card = { id: 'spam1', type: 'spam', priority: 0 };
+    const replacementCard: Card = { id: 'move1-replacement', type: 'move1', priority: 0 };
+    player.registers = [spamCard, null, null, null, null];
+    player.deck = [replacementCard];
+    player.robot.damage = 1;
+    state.players = [player];
+
+    const events = executeRegisterWithEvents(state, 0);
+
+    // Should have player_card events for both SPAM and replacement
+    const playerCardEvents = events.filter(e => e.type === 'player_card') as PlayerCardEvent[];
+    expect(playerCardEvents.length).toBe(2);
+
+    // First event is for SPAM card
+    expect(playerCardEvents[0].card.type).toBe('spam');
+
+    // Second event is for replacement card
+    expect(playerCardEvents[1].card.type).toBe('move1');
+    expect(playerCardEvents[1].card.id).toBe('move1-replacement');
+  });
+
+  it('Again card in register 0 emits player_card event for replacement card', () => {
+    const player = createTestPlayer('p1', 3, 3, 'north');
+    const againCard: Card = { id: 'again1', type: 'again', priority: 0 };
+    const replacementCard: Card = { id: 'move2-replacement', type: 'move2', priority: 0 };
+    player.registers = [againCard, null, null, null, null];
+    player.deck = [replacementCard];
+    state.players = [player];
+
+    const events = executeRegisterWithEvents(state, 0);
+
+    // Should have player_card events for both Again and replacement
+    const playerCardEvents = events.filter(e => e.type === 'player_card') as PlayerCardEvent[];
+    expect(playerCardEvents.length).toBe(2);
+
+    // First event is for Again card
+    expect(playerCardEvents[0].card.type).toBe('again');
+
+    // Second event is for replacement card
+    expect(playerCardEvents[1].card.type).toBe('move2');
+    expect(playerCardEvents[1].card.id).toBe('move2-replacement');
+  });
+
+  it('Again card in register > 0 does not draw replacement', () => {
+    const player = createTestPlayer('p1', 3, 3, 'north');
+    const move1Card: Card = { id: 'move1', type: 'move1', priority: 0 };
+    const againCard: Card = { id: 'again1', type: 'again', priority: 0 };
+    player.registers = [move1Card, againCard, null, null, null];
+    state.players = [player];
+
+    // Execute register 0 first
+    executeRegisterWithEvents(state, 0);
+
+    // Execute register 1 with Again card
+    const events = executeRegisterWithEvents(state, 1);
+
+    // Should only have one player_card event (for Again, which repeats move1)
+    const playerCardEvents = events.filter(e => e.type === 'player_card') as PlayerCardEvent[];
+    expect(playerCardEvents.length).toBe(1);
+    expect(playerCardEvents[0].card.type).toBe('again');
+  });
+
+  it('generates register_start and register_end events', () => {
+    const player = createTestPlayer('p1', 3, 3, 'north');
+    player.registers = [createTestCard('move1'), null, null, null, null];
+    state.players = [player];
+
+    const events = executeRegisterWithEvents(state, 0);
+
+    expect(events[0].type).toBe('register_start');
+    expect((events[0] as any).registerIndex).toBe(0);
+
+    expect(events[events.length - 1].type).toBe('register_end');
+    expect((events[events.length - 1] as any).registerIndex).toBe(0);
+  });
+
+  it('generates robot_move events for movement cards', () => {
+    const player = createTestPlayer('p1', 3, 3, 'north');
+    player.registers = [createTestCard('move2'), null, null, null, null];
+    state.players = [player];
+
+    const events = executeRegisterWithEvents(state, 0);
+
+    const moveEvents = events.filter(e => e.type === 'robot_move');
+    expect(moveEvents.length).toBe(2); // move2 = 2 moves
   });
 });
 
