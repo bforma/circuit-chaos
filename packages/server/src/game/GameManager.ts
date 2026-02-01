@@ -20,7 +20,7 @@ import {
   AIDifficulty,
   AI_NAMES,
 } from '@circuit-chaos/shared';
-import { createDeck, dealCards } from './deck';
+import { createDeck, createPersonalDeck, dealCards, shuffle } from './deck';
 import { executeRegister, respawnDestroyedRobots } from './executor';
 import { createSampleBoard } from './boards';
 import { getRedis } from '../redis';
@@ -126,6 +126,7 @@ export class GameManager {
       createdAt: Date.now(),
       theme: DEFAULT_THEME,
       cardPreviewEnabled: true,
+      priorityPlayerId: playerId, // First player starts with priority token
     };
 
     const session: GameSession = {
@@ -234,6 +235,9 @@ export class GameManager {
       return;
     }
 
+    // Initialize personal decks for all players (2023 rules)
+    this.initializePersonalDecks(session);
+
     // Deal cards to all players
     this.dealCardsToPlayers(session);
     session.state.phase = 'programming';
@@ -243,9 +247,17 @@ export class GameManager {
     console.log(`Game ${gameId} started`);
   }
 
-  private dealCardsToPlayers(session: GameSession) {
-    const deck = createDeck();
+  /**
+   * Initialize personal 20-card decks for all players (2023 rules)
+   */
+  private initializePersonalDecks(session: GameSession) {
+    for (const player of session.state.players) {
+      player.deck = createPersonalDeck();
+      player.discardPile = [];
+    }
+  }
 
+  private dealCardsToPlayers(session: GameSession) {
     for (const player of session.state.players) {
       if (player.robot.isDestroyed) {
         player.hand = [];
@@ -256,7 +268,9 @@ export class GameManager {
 
       const handSize = getHandSize(player.robot.damage);
       const lockedCount = getLockedRegisterCount(player.robot.damage);
-      const cards = dealCards(deck, handSize);
+
+      // Draw from personal deck (2023 rules)
+      const cards = this.drawFromPersonalDeck(player, handSize);
       player.hand = cards;
 
       // Preserve locked registers (last N registers stay locked)
@@ -271,6 +285,31 @@ export class GameManager {
 
     // Process AI players after dealing cards
     this.processAIPlayers(session);
+  }
+
+  /**
+   * Draw cards from a player's personal deck, reshuffling discard if needed
+   */
+  private drawFromPersonalDeck(player: Player, count: number): Card[] {
+    const cards: Card[] = [];
+
+    for (let i = 0; i < count; i++) {
+      // If deck is empty, shuffle discard pile into deck
+      if (player.deck.length === 0) {
+        if (player.discardPile.length === 0) {
+          break; // No more cards available
+        }
+        player.deck = shuffle(player.discardPile);
+        player.discardPile = [];
+      }
+
+      const card = player.deck.shift();
+      if (card) {
+        cards.push(card);
+      }
+    }
+
+    return cards;
   }
 
   programRegister(socket: Socket, registerIndex: number, card: Card | null) {
@@ -349,6 +388,9 @@ export class GameManager {
     // Respawn destroyed robots before dealing new cards
     respawnDestroyedRobots(session.state);
 
+    // Pass priority token to next player (clockwise = next in array)
+    this.advancePriorityToken(session.state);
+
     // Deal new cards and start next round
     this.dealCardsToPlayers(session);
     session.state.phase = 'programming';
@@ -356,6 +398,22 @@ export class GameManager {
     session.state.currentRegister = 0;
 
     this.broadcastGameState(gameId);
+  }
+
+  /**
+   * Pass priority token to the next player (clockwise order)
+   */
+  private advancePriorityToken(state: GameState) {
+    const currentIndex = state.players.findIndex(p => p.id === state.priorityPlayerId);
+    if (currentIndex === -1) {
+      // Fallback: give to first player
+      state.priorityPlayerId = state.players[0]?.id ?? '';
+      return;
+    }
+
+    // Next player in clockwise order
+    const nextIndex = (currentIndex + 1) % state.players.length;
+    state.priorityPlayerId = state.players[nextIndex].id;
   }
 
   private checkWinner(state: GameState): Player | null {

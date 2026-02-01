@@ -4,7 +4,7 @@ export const STARTING_LIVES = 3;
 export const REGISTERS_COUNT = 5;
 export const BASE_HAND_SIZE = 9;
 
-// Card counts in deck
+// Card counts in shared deck (legacy 2016 rules)
 export const CARD_DISTRIBUTION = {
   move1: 18,
   move2: 12,
@@ -14,6 +14,23 @@ export const CARD_DISTRIBUTION = {
   rotateRight: 18,
   uturn: 6,
 } as const;
+
+// Personal deck distribution (2023 rules) - 20 cards per player
+export const PERSONAL_DECK_DISTRIBUTION = {
+  move1: 4,
+  move2: 3,
+  move3: 1,
+  backup: 1,
+  rotateLeft: 4,
+  rotateRight: 4,
+  uturn: 1,
+  powerUp: 1,
+  again: 1,
+} as const;
+
+// Energy constants (2023 rules)
+export const STARTING_ENERGY = 3;
+export const MAX_ENERGY = 10;
 
 // Priority ranges for each card type
 export const PRIORITY_RANGES = {

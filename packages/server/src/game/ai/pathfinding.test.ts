@@ -37,6 +37,8 @@ function createTestPlayer(): Player {
     color: '#ff0000',
     hand: [],
     registers: [null, null, null, null, null],
+    deck: [],
+    discardPile: [],
     isReady: false,
     isConnected: true,
     isAI: false,
@@ -52,6 +54,7 @@ function createTestPlayer(): Player {
       spawnPosition: { x: 0, y: 0 },
       isPoweredDown: false,
       willPowerDown: false,
+      energy: 3,
     },
   };
 }
@@ -69,6 +72,7 @@ function createTestState(board?: Board): GameState {
     createdAt: Date.now(),
     theme: 'industrial',
     cardPreviewEnabled: true,
+    priorityPlayerId: 'test-player',
   };
 }
 

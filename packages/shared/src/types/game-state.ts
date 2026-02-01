@@ -26,6 +26,7 @@ export interface GameState {
   theme: ThemeId;
   disconnectVote?: DisconnectVote; // Active vote about a disconnected player
   cardPreviewEnabled: boolean; // Show ghost preview when hovering cards
+  priorityPlayerId: string; // Player with Priority Token (executes first, clockwise order)
 }
 
 export interface GameSettings {

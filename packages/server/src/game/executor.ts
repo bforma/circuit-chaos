@@ -5,6 +5,7 @@ import {
   Direction,
   rotateDirection,
   getDirectionDelta,
+  MAX_ENERGY,
 } from '@circuit-chaos/shared';
 
 interface Movement {
@@ -12,7 +13,29 @@ interface Movement {
   card: Card;
 }
 
+/**
+ * Get execution order: clockwise from priority token holder
+ */
+function getExecutionOrder(state: GameState): string[] {
+  const priorityIndex = state.players.findIndex(p => p.id === state.priorityPlayerId);
+  if (priorityIndex === -1) {
+    // Fallback: use natural order
+    return state.players.map(p => p.id);
+  }
+
+  // Rotate array so priority player is first
+  const order: string[] = [];
+  for (let i = 0; i < state.players.length; i++) {
+    const index = (priorityIndex + i) % state.players.length;
+    order.push(state.players[index].id);
+  }
+  return order;
+}
+
 export function executeRegister(state: GameState, registerIndex: number) {
+  // Get clockwise execution order starting from priority token holder
+  const executionOrder = getExecutionOrder(state);
+
   // Collect all movements for this register
   const movements: Movement[] = [];
 
@@ -24,12 +47,14 @@ export function executeRegister(state: GameState, registerIndex: number) {
     }
   }
 
-  // Sort by priority (higher priority moves first)
-  movements.sort((a, b) => b.card.priority - a.card.priority);
+  // Sort by player execution order (clockwise from priority holder)
+  movements.sort((a, b) => {
+    return executionOrder.indexOf(a.player.id) - executionOrder.indexOf(b.player.id);
+  });
 
   // Execute each movement
   for (const { player, card } of movements) {
-    executeCard(state, player, card);
+    executeCard(state, player, card, registerIndex);
   }
 
   // After all cards: execute board elements
@@ -39,7 +64,7 @@ export function executeRegister(state: GameState, registerIndex: number) {
   executeCheckpoints(state);
 }
 
-function executeCard(state: GameState, player: Player, card: Card) {
+function executeCard(state: GameState, player: Player, card: Card, registerIndex: number) {
   const { robot } = player;
 
   switch (card.type) {
@@ -63,6 +88,20 @@ function executeCard(state: GameState, player: Player, card: Card) {
       break;
     case 'uturn':
       robot.direction = rotateDirection(robot.direction, 'uturn');
+      break;
+    case 'powerUp':
+      // Gain 1 energy (capped at MAX_ENERGY)
+      player.robot.energy = Math.min((player.robot.energy ?? 0) + 1, MAX_ENERGY);
+      break;
+    case 'again':
+      // Repeat the previous register's card
+      if (registerIndex > 0) {
+        const previousCard = player.registers[registerIndex - 1];
+        if (previousCard && previousCard.type !== 'again') {
+          executeCard(state, player, previousCard, registerIndex);
+        }
+      }
+      // In register 1, Again acts like a random card (handled elsewhere in 2023 rules)
       break;
   }
 }

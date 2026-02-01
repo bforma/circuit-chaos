@@ -30,6 +30,8 @@ function createTestPlayer(): Player {
     color: '#ff0000',
     hand: [],
     registers: [null, null, null, null, null],
+    deck: [],
+    discardPile: [],
     isReady: false,
     isConnected: true,
     isAI: false,
@@ -45,6 +47,7 @@ function createTestPlayer(): Player {
       spawnPosition: { x: 2, y: 2 },
       isPoweredDown: false,
       willPowerDown: false,
+      energy: 3,
     },
   };
 }

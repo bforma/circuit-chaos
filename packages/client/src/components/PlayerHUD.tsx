@@ -1,5 +1,5 @@
 import type { Player } from '@circuit-chaos/shared';
-import { MAX_DAMAGE, STARTING_LIVES } from '@circuit-chaos/shared';
+import { MAX_DAMAGE, STARTING_LIVES, MAX_ENERGY } from '@circuit-chaos/shared';
 import styles from './PlayerHUD.module.css';
 
 interface Props {
@@ -56,6 +56,11 @@ export function PlayerHUD({ player }: Props) {
       <div className={styles.stat}>
         <span className={styles.label}>Direction</span>
         <span className={styles.value}>{robot.direction}</span>
+      </div>
+
+      <div className={styles.stat}>
+        <span className={styles.label}>Energy</span>
+        <span className={styles.energy}>{robot.energy}/{MAX_ENERGY}</span>
       </div>
     </div>
   );

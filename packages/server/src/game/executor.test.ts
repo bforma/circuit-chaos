@@ -27,6 +27,7 @@ function createTestGameState(boardWidth = 5, boardHeight = 5): GameState {
     createdAt: Date.now(),
     theme: 'industrial',
     cardPreviewEnabled: true,
+    priorityPlayerId: 'host',
   };
 }
 
@@ -138,29 +139,50 @@ describe('executeRegister - rotation', () => {
   });
 });
 
-describe('executeRegister - priority', () => {
+describe('executeRegister - priority token (2023 rules)', () => {
   let state: GameState;
 
   beforeEach(() => {
     state = createTestGameState(10, 10);
   });
 
-  it('executes higher priority cards first', () => {
+  it('executes in clockwise order starting from priority token holder', () => {
     // Two robots facing same direction, one behind the other
     const player1 = createTestPlayer('p1', 5, 6, 'north'); // behind
     const player2 = createTestPlayer('p2', 5, 5, 'north'); // in front
 
-    // Player 1 has lower priority, player 2 has higher
     player1.registers = [createTestCard('move1', 100), null, null, null, null];
     player2.registers = [createTestCard('move1', 800), null, null, null, null];
 
     state.players = [player1, player2];
+    // Player 1 has the priority token, so moves first
+    state.priorityPlayerId = 'p1';
     executeRegister(state, 0);
 
-    // Player 2 moves first (higher priority) to (5,4)
-    // Then player 1 moves to (5,5) - the spot player 2 vacated
-    expect(player2.robot.position).toEqual({ x: 5, y: 4 });
+    // Player 1 moves first (has priority token), tries to move to (5,5) but player2 is there
+    // So player 1 pushes player 2 to (5,4) and moves to (5,5)
+    // Then player 2 moves from (5,4) north to (5,3)
     expect(player1.robot.position).toEqual({ x: 5, y: 5 });
+    expect(player2.robot.position).toEqual({ x: 5, y: 3 });
+  });
+
+  it('respects clockwise order from priority holder', () => {
+    const player1 = createTestPlayer('p1', 2, 2, 'east');
+    const player2 = createTestPlayer('p2', 4, 2, 'west');
+
+    player1.registers = [createTestCard('move1', 100), null, null, null, null];
+    player2.registers = [createTestCard('move1', 800), null, null, null, null];
+
+    state.players = [player1, player2];
+    // Player 2 has priority, so moves first
+    state.priorityPlayerId = 'p2';
+    executeRegister(state, 0);
+
+    // Player 2 moves first (priority token), from (4,2) west to (3,2)
+    // Player 1 moves second, from (2,2) east to (3,2) - but p2 is there
+    // So player 1 pushes p2 east to (4,2), player 1 moves to (3,2)
+    expect(player1.robot.position).toEqual({ x: 3, y: 2 });
+    expect(player2.robot.position).toEqual({ x: 4, y: 2 });
   });
 });
 

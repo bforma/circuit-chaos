@@ -21,6 +21,7 @@ export function PlayerList() {
             player={player}
             isCurrentPlayer={player.id === playerId}
             isHost={player.id === gameState.hostId}
+            hasPriority={player.id === gameState.priorityPlayerId}
             showVoteCountdown={isInGame}
           />
         ))}
@@ -33,10 +34,11 @@ interface PlayerListItemProps {
   player: Player;
   isCurrentPlayer: boolean;
   isHost: boolean;
+  hasPriority: boolean;
   showVoteCountdown: boolean;
 }
 
-function PlayerListItem({ player, isCurrentPlayer, isHost, showVoteCountdown }: PlayerListItemProps) {
+function PlayerListItem({ player, isCurrentPlayer, isHost, hasPriority, showVoteCountdown }: PlayerListItemProps) {
   const { robot } = player;
   const [voteCountdown, setVoteCountdown] = useState<number | null>(null);
 
@@ -68,6 +70,7 @@ function PlayerListItem({ player, isCurrentPlayer, isHost, showVoteCountdown }: 
           {player.name}
           {isHost && <span className={styles.badge}>Host</span>}
           {isCurrentPlayer && <span className={styles.badge}>You</span>}
+          {hasPriority && <span className={styles.priorityBadge} title="Priority Token - moves first">1st</span>}
         </span>
         <span className={styles.status}>
           {!player.isConnected ? (

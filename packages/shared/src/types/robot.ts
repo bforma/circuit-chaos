@@ -1,5 +1,5 @@
 import type { Direction } from './direction';
-import { MAX_DAMAGE, STARTING_LIVES } from '../constants';
+import { MAX_DAMAGE, STARTING_LIVES, STARTING_ENERGY } from '../constants';
 
 export interface Position {
   x: number;
@@ -18,6 +18,7 @@ export interface Robot {
   spawnPosition: Position;
   isPoweredDown: boolean;      // Currently powered down this round
   willPowerDown: boolean;      // Announced power down for next round
+  energy: number;              // Energy for upgrades (0-10, 2023 rules)
 }
 
 export function createRobot(playerId: string, spawnPosition: Position): Robot {
@@ -33,6 +34,7 @@ export function createRobot(playerId: string, spawnPosition: Position): Robot {
     spawnPosition: { ...spawnPosition },
     isPoweredDown: false,
     willPowerDown: false,
+    energy: STARTING_ENERGY,
   };
 }
 

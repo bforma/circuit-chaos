@@ -81,3 +81,8 @@
 .lifeActive {
   color: #e74c3c;
 }
+
+.energy {
+  font-weight: 600;
+  color: #f1c40f;
+}

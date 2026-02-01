@@ -5,7 +5,9 @@ export type CardType =
   | 'backup'
   | 'rotateLeft'
   | 'rotateRight'
-  | 'uturn';
+  | 'uturn'
+  | 'powerUp'
+  | 'again';
 
 export interface Card {
   id: string;
@@ -22,6 +24,8 @@ export function getCardLabel(type: CardType): string {
     case 'rotateLeft': return 'Turn Left';
     case 'rotateRight': return 'Turn Right';
     case 'uturn': return 'U-Turn';
+    case 'powerUp': return 'Power Up';
+    case 'again': return 'Again';
   }
 }
 
@@ -34,5 +38,7 @@ export function getCardIcon(type: CardType): string {
     case 'rotateLeft': return '↺';
     case 'rotateRight': return '↻';
     case 'uturn': return '↩';
+    case 'powerUp': return '⚡';
+    case 'again': return '🔄';
   }
 }

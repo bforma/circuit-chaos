@@ -44,6 +44,8 @@ function createTestPlayer(overrides: Partial<Player> = {}): Player {
     color: '#ff0000',
     hand: createTestCards(),
     registers: [null, null, null, null, null],
+    deck: [],
+    discardPile: [],
     isReady: false,
     isConnected: true,
     isAI: true,
@@ -60,6 +62,7 @@ function createTestPlayer(overrides: Partial<Player> = {}): Player {
       spawnPosition: { x: 0, y: 0 },
       isPoweredDown: false,
       willPowerDown: false,
+      energy: 3,
     },
     ...overrides,
   };
@@ -79,6 +82,7 @@ function createTestState(player?: Player): GameState {
     createdAt: Date.now(),
     theme: 'industrial',
     cardPreviewEnabled: true,
+    priorityPlayerId: 'test-player',
   };
 }
 

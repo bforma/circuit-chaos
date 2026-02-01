@@ -10,6 +10,8 @@ export interface Player {
   robot: Robot;
   hand: Card[];
   registers: (Card | null)[];
+  deck: Card[]; // Personal programming deck (2023 rules)
+  discardPile: Card[]; // Discarded programming cards
   isReady: boolean; // Has submitted their program
   isConnected: boolean;
   disconnectedAt?: number; // Timestamp when player disconnected
@@ -45,6 +47,8 @@ export function createPlayer(
     color: PLAYER_COLORS[colorIndex % PLAYER_COLORS.length],
     hand: [],
     registers: [null, null, null, null, null],
+    deck: [], // Initialized when game starts
+    discardPile: [],
     isReady: false,
     isConnected: true,
     isAI: options.isAI ?? false,
