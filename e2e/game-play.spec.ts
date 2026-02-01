@@ -41,7 +41,7 @@ test.describe('Game Play', () => {
     await guestContext.close();
   });
 
-  test('shows player HUD with damage and lives', async ({ browser }) => {
+  test('shows player HUD with energy', async ({ browser }) => {
     const hostContext = await browser.newContext();
     const guestContext = await browser.newContext();
 
@@ -67,11 +67,8 @@ test.describe('Game Play', () => {
     await expect(guestPage.getByText('Game Lobby')).toBeVisible({ timeout: 5000 });
     await hostPage.getByRole('button', { name: 'Start Game' }).click();
 
-    // Check HUD elements
-    await expect(hostPage.getByText('Damage')).toBeVisible({ timeout: 5000 });
-    await expect(hostPage.getByText('Lives')).toBeVisible();
-    await expect(hostPage.getByText('Checkpoint')).toBeVisible();
-    await expect(hostPage.getByText('Direction')).toBeVisible();
+    // Check HUD elements (2023 rules: only energy shown, damage tracked via cards)
+    await expect(hostPage.getByText('Energy')).toBeVisible({ timeout: 5000 });
 
     await hostContext.close();
     await guestContext.close();
@@ -153,9 +150,9 @@ test.describe('Game Play', () => {
     const firstCard = cardsContainer.locator('[class*="card"]').first();
     await firstCard.click();
 
-    // Click first register slot (inside registerSlots, not the label)
+    // Click first register slot (inside registerSlots, target the inner register div not the wrapper)
     const registerSlots = hostPage.locator('[class*="registerSlots"]');
-    const register1 = registerSlots.locator('[class*="register"]').first();
+    const register1 = registerSlots.locator('[class*="registerWrapper"]').first().locator('[class*="register"]').first();
     await register1.click();
 
     // Wait a moment for state update
@@ -204,7 +201,8 @@ test.describe('Game Play', () => {
     await firstCard.dblclick();
     await hostPage.waitForTimeout(300);
 
-    const register1 = registerSlots.locator('div[class*="register"]').nth(0);
+    // Target the inner register div (not the wrapper) which has the filled class
+    const register1 = registerSlots.locator('[class*="registerWrapper"]').nth(0).locator('[class*="register"]').first();
     await expect(register1).toHaveClass(/filled/);
 
     // Double-click second card - should go to register 2
@@ -212,7 +210,7 @@ test.describe('Game Play', () => {
     await secondCard.dblclick();
     await hostPage.waitForTimeout(300);
 
-    const register2 = registerSlots.locator('div[class*="register"]').nth(1);
+    const register2 = registerSlots.locator('[class*="registerWrapper"]').nth(1).locator('[class*="register"]').first();
     await expect(register2).toHaveClass(/filled/);
 
     await hostContext.close();
