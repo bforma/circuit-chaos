@@ -1,6 +1,6 @@
 import { useGameStore } from '../stores/gameStore';
 import { useSocket } from '../hooks/useSocket';
-import { getCardLabel, getCardIcon, REGISTERS_COUNT, isDamageCard } from '@circuit-chaos/shared';
+import { getCardLabel, getCardIcon, isDamageCard } from '@circuit-chaos/shared';
 import styles from './ProgrammingPanel.module.css';
 
 export function ProgrammingPanel() {
@@ -57,23 +57,6 @@ export function ProgrammingPanel() {
     programRegister(index, selectedCard);
     setSelectedCard(null);
     setHoveredCard(null);
-  };
-
-  const handleAutoFill = () => {
-    if (isReady) return;
-
-    // Get cards not yet in registers
-    const usedCardIds = new Set(registers.filter(r => r !== null).map(r => r!.id));
-    const availableCards = hand.filter(card => !usedCardIds.has(card.id));
-
-    // Fill empty registers
-    let cardIndex = 0;
-    for (let i = 0; i < REGISTERS_COUNT; i++) {
-      if (registers[i] === null && cardIndex < availableCards.length) {
-        programRegister(i, availableCards[cardIndex]);
-        cardIndex++;
-      }
-    }
   };
 
   const handleClearRegister = (index: number, e?: React.MouseEvent) => {
@@ -179,14 +162,6 @@ export function ProgrammingPanel() {
 
       {!isReady && (
         <div className={styles.actions}>
-          {!allRegistersFilled && (
-            <button
-              className="btn btn-secondary"
-              onClick={handleAutoFill}
-            >
-              Auto-fill
-            </button>
-          )}
           <button
             className="btn btn-primary"
             onClick={handleSubmit}
