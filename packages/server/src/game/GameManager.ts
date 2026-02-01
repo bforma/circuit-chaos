@@ -20,7 +20,7 @@ import {
   AIDifficulty,
   AI_NAMES,
 } from '@circuit-chaos/shared';
-import { createDeck, createPersonalDeck, dealCards, shuffle } from './deck';
+import { createDeck, createPersonalDeck, createDamageDeck, dealCards, shuffle } from './deck';
 import { executeRegister, respawnDestroyedRobots } from './executor';
 import { createSampleBoard } from './boards';
 import { getRedis } from '../redis';
@@ -127,6 +127,8 @@ export class GameManager {
       theme: DEFAULT_THEME,
       cardPreviewEnabled: true,
       priorityPlayerId: playerId, // First player starts with priority token
+      damageDeck: createDamageDeck(), // Shared damage deck (2023 rules)
+      damageDiscardPile: [], // Discarded damage cards
     };
 
     const session: GameSession = {

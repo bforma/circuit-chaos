@@ -44,6 +44,7 @@ function createTestPlayer(overrides: Partial<Player> = {}): Player {
     color: '#ff0000',
     hand: createTestCards(),
     registers: [null, null, null, null, null],
+    haywireRegisters: [null, null, null, null, null],
     deck: [],
     discardPile: [],
     isReady: false,
@@ -83,6 +84,8 @@ function createTestState(player?: Player): GameState {
     theme: 'industrial',
     cardPreviewEnabled: true,
     priorityPlayerId: 'test-player',
+    damageDeck: [],
+    damageDiscardPile: [],
   };
 }
 

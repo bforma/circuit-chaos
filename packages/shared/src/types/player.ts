@@ -10,6 +10,7 @@ export interface Player {
   robot: Robot;
   hand: Card[];
   registers: (Card | null)[];
+  haywireRegisters: (Card | null)[]; // Face-down Haywire cards under each register
   deck: Card[]; // Personal programming deck (2023 rules)
   discardPile: Card[]; // Discarded programming cards
   isReady: boolean; // Has submitted their program
@@ -47,6 +48,7 @@ export function createPlayer(
     color: PLAYER_COLORS[colorIndex % PLAYER_COLORS.length],
     hand: [],
     registers: [null, null, null, null, null],
+    haywireRegisters: [null, null, null, null, null], // Face-down Haywire cards
     deck: [], // Initialized when game starts
     discardPile: [],
     isReady: false,

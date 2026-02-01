@@ -6,11 +6,66 @@ import {
   rotateDirection,
   getDirectionDelta,
   MAX_ENERGY,
+  isDamageCard,
+  isHaywireCard,
 } from '@circuit-chaos/shared';
+import { shuffle } from './deck';
 
 interface Movement {
   player: Player;
   card: Card;
+}
+
+/**
+ * Deal damage to a player by drawing from the damage deck
+ * SPAM cards go to programming discard pile
+ * Haywire cards go face-down under the current register
+ */
+export function dealDamageToPlayer(state: GameState, player: Player, count: number, currentRegister: number) {
+  for (let i = 0; i < count; i++) {
+    // If damage deck is empty, reshuffle discard pile
+    if (state.damageDeck.length === 0) {
+      if (state.damageDiscardPile.length === 0) {
+        // No damage cards left at all
+        return;
+      }
+      state.damageDeck = shuffle([...state.damageDiscardPile]);
+      state.damageDiscardPile = [];
+    }
+
+    const damageCard = state.damageDeck.shift()!;
+
+    if (damageCard.type === 'spam') {
+      // SPAM goes into programming discard pile
+      player.discardPile.push(damageCard);
+    } else if (isHaywireCard(damageCard.type)) {
+      // Haywire goes face-down under current register
+      // If there's already a haywire in that register, discard the extra
+      if (player.haywireRegisters[currentRegister] !== null) {
+        state.damageDiscardPile.push(damageCard);
+      } else {
+        player.haywireRegisters[currentRegister] = damageCard;
+      }
+    }
+
+    // Track damage count for display purposes
+    player.robot.damage++;
+  }
+}
+
+/**
+ * Draw a card from the player's programming deck
+ * If deck is empty, shuffle discard pile into deck
+ */
+function drawFromProgrammingDeck(player: Player): Card | null {
+  if (player.deck.length === 0) {
+    if (player.discardPile.length === 0) {
+      return null;
+    }
+    player.deck = shuffle([...player.discardPile]);
+    player.discardPile = [];
+  }
+  return player.deck.shift() ?? null;
 }
 
 /**
@@ -40,7 +95,11 @@ export function executeRegister(state: GameState, registerIndex: number) {
   const movements: Movement[] = [];
 
   for (const player of state.players) {
-    const card = player.registers[registerIndex];
+    // Check for haywire card first (takes precedence over regular programming)
+    const haywireCard = player.haywireRegisters?.[registerIndex];
+    const regularCard = player.registers[registerIndex];
+    const card = haywireCard ?? regularCard;
+
     // Skip destroyed or powered down robots
     if (card && !player.robot.isDestroyed && !player.robot.isPoweredDown) {
       movements.push({ player, card });
@@ -55,12 +114,17 @@ export function executeRegister(state: GameState, registerIndex: number) {
   // Execute each movement
   for (const { player, card } of movements) {
     executeCard(state, player, card, registerIndex);
+
+    // Clear haywire register after execution
+    if (player.haywireRegisters?.[registerIndex]) {
+      player.haywireRegisters[registerIndex] = null;
+    }
   }
 
   // After all cards: execute board elements
   executeConveyors(state);
   executeGears(state);
-  executeLasers(state);
+  executeLasers(state, registerIndex);
   executeCheckpoints(state);
   executeBatteries(state);
 }
@@ -98,11 +162,58 @@ function executeCard(state: GameState, player: Player, card: Card, registerIndex
       // Repeat the previous register's card
       if (registerIndex > 0) {
         const previousCard = player.registers[registerIndex - 1];
-        if (previousCard && previousCard.type !== 'again') {
+        if (previousCard && previousCard.type !== 'again' && !isDamageCard(previousCard.type)) {
           executeCard(state, player, previousCard, registerIndex);
         }
       }
-      // In register 1, Again acts like a random card (handled elsewhere in 2023 rules)
+      // In register 1, Again acts like SPAM (replaced by top of programming deck)
+      if (registerIndex === 0) {
+        const replacement = drawFromProgrammingDeck(player);
+        if (replacement) {
+          player.registers[registerIndex] = replacement;
+          executeCard(state, player, replacement, registerIndex);
+        }
+      }
+      break;
+
+    // Damage cards
+    case 'spam':
+      // SPAM: discard to damage discard pile, replace with top of programming deck
+      state.damageDiscardPile.push(card);
+      player.robot.damage = Math.max(0, player.robot.damage - 1); // Remove from damage count
+      const replacement = drawFromProgrammingDeck(player);
+      if (replacement) {
+        player.registers[registerIndex] = replacement;
+        executeCard(state, player, replacement, registerIndex);
+      }
+      break;
+
+    // Haywire cards
+    case 'haywireMove1RotateMove1':
+      // Move 1, Rotate Right, Move 1
+      state.damageDiscardPile.push(card);
+      player.robot.damage = Math.max(0, player.robot.damage - 1);
+      moveRobot(state, player, 1);
+      robot.direction = rotateDirection(robot.direction, 'cw');
+      moveRobot(state, player, 1);
+      break;
+
+    case 'haywireMove2Sideways':
+      // Move 2 spaces to the right (could be random left/right, but simplified)
+      state.damageDiscardPile.push(card);
+      player.robot.damage = Math.max(0, player.robot.damage - 1);
+      // Move sideways right: temporarily rotate, move, rotate back
+      robot.direction = rotateDirection(robot.direction, 'cw');
+      moveRobot(state, player, 2);
+      robot.direction = rotateDirection(robot.direction, 'ccw');
+      break;
+
+    case 'haywireMove3Uturn':
+      // Move 3, then U-Turn
+      state.damageDiscardPile.push(card);
+      player.robot.damage = Math.max(0, player.robot.damage - 1);
+      moveRobot(state, player, 3);
+      robot.direction = rotateDirection(robot.direction, 'uturn');
       break;
   }
 }
@@ -239,9 +350,11 @@ export function respawnDestroyedRobots(state: GameState) {
       // Respawn at last checkpoint or spawn
       player.robot.position = { ...player.robot.spawnPosition };
       player.robot.isDestroyed = false;
-      player.robot.damage = 2; // Respawn with some damage
       // Clear all registers for next round
       player.registers = [null, null, null, null, null];
+      player.haywireRegisters = [null, null, null, null, null];
+      // Draw 2 damage cards on reboot (2023 rules)
+      dealDamageToPlayer(state, player, 2, 0);
     }
   }
 }
@@ -334,7 +447,7 @@ function executeGears(state: GameState) {
   }
 }
 
-function executeLasers(state: GameState) {
+function executeLasers(state: GameState, registerIndex: number) {
   const { board, players } = state;
 
   // Board lasers
@@ -351,7 +464,8 @@ function executeLasers(state: GameState) {
       );
 
       if (hitPlayer) {
-        hitPlayer.robot.damage += laser.strength;
+        // Deal damage cards from damage deck
+        dealDamageToPlayer(state, hitPlayer, laser.strength, registerIndex);
         if (hitPlayer.robot.damage >= 10) {
           destroyRobot(hitPlayer);
         }
@@ -386,7 +500,8 @@ function executeLasers(state: GameState) {
       );
 
       if (hitPlayer) {
-        hitPlayer.robot.damage += 1;
+        // Deal 1 damage card from damage deck
+        dealDamageToPlayer(state, hitPlayer, 1, registerIndex);
         if (hitPlayer.robot.damage >= 10) {
           destroyRobot(hitPlayer);
         }

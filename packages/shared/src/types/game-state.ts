@@ -1,5 +1,6 @@
 import type { Board } from './board';
 import type { Player } from './player';
+import type { Card } from './card';
 import type { DisconnectVote } from './disconnect-vote';
 import type { ThemeId } from './theme';
 import { DEFAULT_THEME } from './theme';
@@ -27,6 +28,8 @@ export interface GameState {
   disconnectVote?: DisconnectVote; // Active vote about a disconnected player
   cardPreviewEnabled: boolean; // Show ghost preview when hovering cards
   priorityPlayerId: string; // Player with Priority Token (executes first, clockwise order)
+  damageDeck: Card[]; // Shared damage deck (SPAM and Haywire cards)
+  damageDiscardPile: Card[]; // Discarded damage cards
 }
 
 export interface GameSettings {

@@ -28,6 +28,8 @@ function createTestGameState(boardWidth = 5, boardHeight = 5): GameState {
     theme: 'industrial',
     cardPreviewEnabled: true,
     priorityPlayerId: 'host',
+    damageDeck: [],
+    damageDiscardPile: [],
   };
 }
 
@@ -358,12 +360,18 @@ describe('respawnDestroyedRobots', () => {
     player.robot.lives = 2;
     player.robot.spawnPosition = { x: 2, y: 2 };
     state.players = [player];
+    // Add SPAM cards to damage deck for reboot damage
+    state.damageDeck = [
+      { id: 'spam1', type: 'spam', priority: 0 },
+      { id: 'spam2', type: 'spam', priority: 0 },
+    ];
 
     respawnDestroyedRobots(state);
 
     expect(player.robot.isDestroyed).toBe(false);
     expect(player.robot.position).toEqual({ x: 2, y: 2 });
-    expect(player.robot.damage).toBe(2); // Respawns with 2 damage
+    expect(player.robot.damage).toBe(2); // Respawns with 2 damage (from reboot)
+    expect(player.discardPile).toHaveLength(2); // SPAM cards go to discard
   });
 
   it('clears registers on respawn', () => {
@@ -458,6 +466,85 @@ describe('executeRegister - batteries', () => {
     executeRegister(state, 0);
 
     expect(player.robot.energy).toBe(3); // Unchanged
+  });
+});
+
+describe('executeRegister - damage cards', () => {
+  let state: GameState;
+
+  beforeEach(() => {
+    state = createTestGameState(10, 10);
+  });
+
+  it('SPAM card is discarded and replaced with programming card', () => {
+    const player = createTestPlayer('p1', 3, 3, 'north');
+    const spamCard: Card = { id: 'spam1', type: 'spam', priority: 0 };
+    const replacementCard: Card = { id: 'move1', type: 'move1', priority: 0 };
+    player.registers = [spamCard, null, null, null, null];
+    player.deck = [replacementCard];
+    player.robot.damage = 1; // Has 1 damage (the SPAM)
+    state.players = [player];
+
+    executeRegister(state, 0);
+
+    // SPAM should be discarded to damage discard pile
+    expect(state.damageDiscardPile).toContainEqual(spamCard);
+    // Register should have the replacement card
+    expect(player.registers[0]).toEqual(replacementCard);
+    // Robot should have moved (move1 was executed)
+    expect(player.robot.position).toEqual({ x: 3, y: 2 });
+    // Damage count should be reduced
+    expect(player.robot.damage).toBe(0);
+  });
+
+  it('Haywire Move1-Rotate-Move1 executes correctly', () => {
+    const player = createTestPlayer('p1', 3, 3, 'north');
+    const haywireCard: Card = { id: 'hw1', type: 'haywireMove1RotateMove1', priority: 0 };
+    player.registers = [haywireCard, null, null, null, null];
+    player.robot.damage = 1;
+    state.players = [player];
+
+    executeRegister(state, 0);
+
+    // Move 1 north (3,2), rotate right (east), move 1 east (4,2)
+    expect(player.robot.position).toEqual({ x: 4, y: 2 });
+    expect(player.robot.direction).toBe('east');
+    // Haywire discarded
+    expect(state.damageDiscardPile).toContainEqual(haywireCard);
+    expect(player.robot.damage).toBe(0);
+  });
+
+  it('Haywire Move3-Uturn executes correctly', () => {
+    const player = createTestPlayer('p1', 3, 5, 'north');
+    const haywireCard: Card = { id: 'hw1', type: 'haywireMove3Uturn', priority: 0 };
+    player.registers = [haywireCard, null, null, null, null];
+    player.robot.damage = 1;
+    state.players = [player];
+
+    executeRegister(state, 0);
+
+    // Move 3 north (3,2), then U-turn (south)
+    expect(player.robot.position).toEqual({ x: 3, y: 2 });
+    expect(player.robot.direction).toBe('south');
+  });
+
+  it('face-down Haywire under register takes precedence', () => {
+    const player = createTestPlayer('p1', 3, 3, 'north');
+    const regularCard: Card = { id: 'move1', type: 'move1', priority: 0 };
+    const haywireCard: Card = { id: 'hw1', type: 'haywireMove3Uturn', priority: 0 };
+    player.registers = [regularCard, null, null, null, null];
+    player.haywireRegisters = [haywireCard, null, null, null, null]; // Haywire from previous round
+    player.robot.damage = 1;
+    state.players = [player];
+
+    executeRegister(state, 0);
+
+    // Haywire should execute instead of regular card
+    // Move 3 north would go off board at (3,0), so robot is destroyed or stops
+    // Actually let's check - starting at (3,3), move 3 north = (3,0)
+    expect(player.robot.direction).toBe('south'); // U-turn happened
+    // Haywire register should be cleared
+    expect(player.haywireRegisters[0]).toBeNull();
   });
 });
 

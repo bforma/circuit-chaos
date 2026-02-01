@@ -9,7 +9,7 @@ Converting Circuit Chaos from 2016 to 2023 RoboRally rules.
 | 1. Priority Token | `[x]` | Clockwise turn order instead of card priority |
 | 2. Personal Decks | `[x]` | Each player has own 20-card deck |
 | 3. Energy System | `[x]` | Energy 0-10, batteries, Power Up card |
-| 4. Damage Cards | `[ ]` | SPAM and Haywire cards (future) |
+| 4. Damage Cards | `[x]` | SPAM and Haywire cards |
 | 5. Shutdown/Reboot | `[ ]` | Voluntary shutdown, reboot tokens (future) |
 | 6. Upgrade Cards | `[ ]` | Permanent/temporary upgrades (future) |
 
@@ -120,12 +120,38 @@ Converting Circuit Chaos from 2016 to 2023 RoboRally rules.
 
 ---
 
-## Future Phases (Not in MVP)
+## Phase 4: Damage Cards (SPAM/Haywire) `[COMPLETE]`
 
-### Phase 4: Damage Cards (SPAM/Haywire)
-- Replace damage counter with actual damage cards
-- SPAM: goes to discard, when revealed → discard + draw replacement
-- Haywire: face-down under register, activates next round
+**Goal**: Replace damage counter system with actual damage cards from shared deck.
+
+### Implementation
+
+**Types** (`packages/shared/src/types/`):
+- [x] `card.ts`: Add damage card types (spam, haywireMove1RotateMove1, haywireMove2Sideways, haywireMove3Uturn)
+- [x] `card.ts`: Add `isDamageCard()` and `isHaywireCard()` helper functions
+- [x] `player.ts`: Add `haywireRegisters` for face-down Haywire cards
+- [x] `game-state.ts`: Add `damageDeck` and `damageDiscardPile`
+
+**Constants** (`packages/shared/src/constants.ts`):
+- [x] Add `DAMAGE_DECK_DISTRIBUTION` (30 SPAM, 10 Haywire variants)
+
+**Server** (`packages/server/src/game/`):
+- [x] `deck.ts`: Add `createDamageDeck()` function
+- [x] `executor.ts`: Add `dealDamageToPlayer()` - draws from damage deck
+- [x] `executor.ts`: Handle SPAM execution (discard + replace from programming deck)
+- [x] `executor.ts`: Handle Haywire execution (special movement patterns)
+- [x] `executor.ts`: Haywire cards in `haywireRegisters` take precedence
+- [x] `executor.ts`: Lasers deal damage cards instead of incrementing counter
+- [x] `executor.ts`: Reboot draws 2 damage cards
+
+**Testing**:
+- [x] SPAM card replacement test
+- [x] Haywire execution tests
+- [x] Face-down Haywire precedence test
+
+---
+
+## Future Phases
 
 ### Phase 5: Shutdown/Reboot
 - Voluntary shutdown to clear all damage

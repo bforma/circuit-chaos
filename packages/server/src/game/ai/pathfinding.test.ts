@@ -37,6 +37,7 @@ function createTestPlayer(): Player {
     color: '#ff0000',
     hand: [],
     registers: [null, null, null, null, null],
+    haywireRegisters: [null, null, null, null, null],
     deck: [],
     discardPile: [],
     isReady: false,
@@ -73,6 +74,8 @@ function createTestState(board?: Board): GameState {
     theme: 'industrial',
     cardPreviewEnabled: true,
     priorityPlayerId: 'test-player',
+    damageDeck: [],
+    damageDiscardPile: [],
   };
 }
 

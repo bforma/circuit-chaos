@@ -32,6 +32,14 @@ export const PERSONAL_DECK_DISTRIBUTION = {
 export const STARTING_ENERGY = 3;
 export const MAX_ENERGY = 10;
 
+// Damage deck distribution (2023 rules) - 40 cards total
+export const DAMAGE_DECK_DISTRIBUTION = {
+  spam: 30,
+  haywireMove1RotateMove1: 4,
+  haywireMove2Sideways: 3,
+  haywireMove3Uturn: 3,
+} as const;
+
 // Priority ranges for each card type
 export const PRIORITY_RANGES = {
   uturn: { min: 10, max: 60 },
