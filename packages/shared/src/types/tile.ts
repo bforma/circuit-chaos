@@ -1,6 +1,6 @@
 import type { Direction } from './direction';
 
-export type TileType = 'floor' | 'pit' | 'repair' | 'conveyor' | 'gear';
+export type TileType = 'floor' | 'pit' | 'repair' | 'conveyor' | 'gear' | 'battery';
 
 export interface BaseTile {
   type: TileType;
@@ -30,7 +30,11 @@ export interface GearTile extends BaseTile {
   rotation: 'cw' | 'ccw';
 }
 
-export type Tile = FloorTile | PitTile | RepairTile | ConveyorTile | GearTile;
+export interface BatteryTile extends BaseTile {
+  type: 'battery';
+}
+
+export type Tile = FloorTile | PitTile | RepairTile | ConveyorTile | GearTile | BatteryTile;
 
 export interface Wall {
   x: number;

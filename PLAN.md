@@ -8,7 +8,7 @@ Converting Circuit Chaos from 2016 to 2023 RoboRally rules.
 |-------|--------|-------------|
 | 1. Priority Token | `[x]` | Clockwise turn order instead of card priority |
 | 2. Personal Decks | `[x]` | Each player has own 20-card deck |
-| 3. Energy System | `[~]` | Energy 0-10, batteries, Power Up card (batteries pending) |
+| 3. Energy System | `[x]` | Energy 0-10, batteries, Power Up card |
 | 4. Damage Cards | `[ ]` | SPAM and Haywire cards (future) |
 | 5. Shutdown/Reboot | `[ ]` | Voluntary shutdown, reboot tokens (future) |
 | 6. Upgrade Cards | `[ ]` | Permanent/temporary upgrades (future) |
@@ -94,7 +94,7 @@ Converting Circuit Chaos from 2016 to 2023 RoboRally rules.
 
 **Types** (`packages/shared/src/types/`):
 - [x] `robot.ts`: Add `energy: number` (0-10)
-- [ ] `tile.ts`: Add `'battery'` tile type (future)
+- [x] `tile.ts`: Add `'battery'` tile type
 
 **Constants** (`packages/shared/src/constants.ts`):
 - [x] Add `STARTING_ENERGY = 3`
@@ -102,18 +102,19 @@ Converting Circuit Chaos from 2016 to 2023 RoboRally rules.
 
 **Server** (`packages/server/src/game/`):
 - [x] `robot.ts`: Initialize `robot.energy = STARTING_ENERGY`
-- [ ] `executor.ts`: Add `executeBatteries()` - gain 1 energy if on battery at end of register (future)
+- [x] `executor.ts`: Add `executeBatteries()` - gain 1 energy if on battery at end of register
 
 **Client** (`packages/client/src/`):
 - [x] `components/PlayerHUD.tsx`: Display energy (0-10)
-- [ ] `assets/themes/*/`: Add battery tile SVG for all 10 themes (future)
+- [x] `assets/themes/*/`: Add battery tile SVG for all 10 themes
+- [x] `game/GameBoard.tsx`: Add battery tile rendering support
 
 **Boards**:
-- [ ] Add battery tiles to sample boards (future)
+- [ ] Add battery tiles to sample boards (optional)
 
 ### Testing
 - [x] Unit test: energy starts at 3 (via createRobot)
-- [ ] Unit test: battery grants 1 energy (future: with battery tiles)
+- [x] Unit test: battery grants 1 energy
 - [x] Unit test: energy caps at 10 (via MAX_ENERGY in executor)
 - [x] Unit test: Power Up card grants 1 energy
 

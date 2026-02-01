@@ -409,3 +409,55 @@ describe('respawnDestroyedRobots', () => {
   });
 });
 
+describe('executeRegister - batteries', () => {
+  let state: GameState;
+
+  beforeEach(() => {
+    state = createTestGameState(10, 10);
+  });
+
+  it('grants 1 energy when robot ends on battery tile', () => {
+    const player = createTestPlayer('p1', 3, 3, 'north');
+    player.robot.energy = 3;
+    player.registers = [createTestCard('move1'), null, null, null, null];
+    state.players = [player];
+
+    // Place battery at target position (3, 2)
+    state.board.tiles[2][3] = { type: 'battery' };
+
+    executeRegister(state, 0);
+
+    expect(player.robot.position).toEqual({ x: 3, y: 2 });
+    expect(player.robot.energy).toBe(4);
+  });
+
+  it('caps energy at MAX_ENERGY (10)', () => {
+    const player = createTestPlayer('p1', 3, 3, 'north');
+    player.robot.energy = 10;
+    player.registers = [createTestCard('move1'), null, null, null, null];
+    state.players = [player];
+
+    // Place battery at target position
+    state.board.tiles[2][3] = { type: 'battery' };
+
+    executeRegister(state, 0);
+
+    expect(player.robot.energy).toBe(10); // Still capped at 10
+  });
+
+  it('does not grant energy to destroyed robots', () => {
+    const player = createTestPlayer('p1', 3, 3, 'north');
+    player.robot.energy = 3;
+    player.robot.isDestroyed = true;
+    player.registers = [null, null, null, null, null];
+    state.players = [player];
+
+    // Place battery at robot position
+    state.board.tiles[3][3] = { type: 'battery' };
+
+    executeRegister(state, 0);
+
+    expect(player.robot.energy).toBe(3); // Unchanged
+  });
+});
+

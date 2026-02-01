@@ -62,6 +62,7 @@ export function executeRegister(state: GameState, registerIndex: number) {
   executeGears(state);
   executeLasers(state);
   executeCheckpoints(state);
+  executeBatteries(state);
 }
 
 function executeCard(state: GameState, player: Player, card: Card, registerIndex: number) {
@@ -424,6 +425,22 @@ function executeCheckpoints(state: GameState) {
     const tile = board.tiles[y]?.[x];
     if (tile?.type === 'repair') {
       player.robot.damage = Math.max(0, player.robot.damage - 1);
+    }
+  }
+}
+
+function executeBatteries(state: GameState) {
+  const { board, players } = state;
+
+  for (const player of players) {
+    if (player.robot.isDestroyed) continue;
+
+    const { x, y } = player.robot.position;
+    const tile = board.tiles[y]?.[x];
+
+    if (tile?.type === 'battery') {
+      // Grant 1 energy (capped at MAX_ENERGY)
+      player.robot.energy = Math.min((player.robot.energy ?? 0) + 1, MAX_ENERGY);
     }
   }
 }

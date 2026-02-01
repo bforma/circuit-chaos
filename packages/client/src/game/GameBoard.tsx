@@ -18,6 +18,7 @@ const themeAssets: Record<ThemeId, Record<string, string>> = {
     gearCw: new URL('../assets/themes/industrial/gear-cw.svg', import.meta.url).href,
     gearCcw: new URL('../assets/themes/industrial/gear-ccw.svg', import.meta.url).href,
     checkpoint: new URL('../assets/themes/industrial/checkpoint.svg', import.meta.url).href,
+    battery: new URL('../assets/themes/industrial/battery.svg', import.meta.url).href,
   },
   candy: {
     floor: new URL('../assets/themes/candy/floor.svg', import.meta.url).href,
@@ -28,6 +29,7 @@ const themeAssets: Record<ThemeId, Record<string, string>> = {
     gearCw: new URL('../assets/themes/candy/gear-cw.svg', import.meta.url).href,
     gearCcw: new URL('../assets/themes/candy/gear-ccw.svg', import.meta.url).href,
     checkpoint: new URL('../assets/themes/candy/checkpoint.svg', import.meta.url).href,
+    battery: new URL('../assets/themes/candy/battery.svg', import.meta.url).href,
   },
   neon: {
     floor: new URL('../assets/themes/neon/floor.svg', import.meta.url).href,
@@ -38,6 +40,7 @@ const themeAssets: Record<ThemeId, Record<string, string>> = {
     gearCw: new URL('../assets/themes/neon/gear-cw.svg', import.meta.url).href,
     gearCcw: new URL('../assets/themes/neon/gear-ccw.svg', import.meta.url).href,
     checkpoint: new URL('../assets/themes/neon/checkpoint.svg', import.meta.url).href,
+    battery: new URL('../assets/themes/neon/battery.svg', import.meta.url).href,
   },
   nature: {
     floor: new URL('../assets/themes/nature/floor.svg', import.meta.url).href,
@@ -48,6 +51,7 @@ const themeAssets: Record<ThemeId, Record<string, string>> = {
     gearCw: new URL('../assets/themes/nature/gear-cw.svg', import.meta.url).href,
     gearCcw: new URL('../assets/themes/nature/gear-ccw.svg', import.meta.url).href,
     checkpoint: new URL('../assets/themes/nature/checkpoint.svg', import.meta.url).href,
+    battery: new URL('../assets/themes/nature/battery.svg', import.meta.url).href,
   },
   space: {
     floor: new URL('../assets/themes/space/floor.svg', import.meta.url).href,
@@ -58,6 +62,7 @@ const themeAssets: Record<ThemeId, Record<string, string>> = {
     gearCw: new URL('../assets/themes/space/gear-cw.svg', import.meta.url).href,
     gearCcw: new URL('../assets/themes/space/gear-ccw.svg', import.meta.url).href,
     checkpoint: new URL('../assets/themes/space/checkpoint.svg', import.meta.url).href,
+    battery: new URL('../assets/themes/space/battery.svg', import.meta.url).href,
   },
   ocean: {
     floor: new URL('../assets/themes/ocean/floor.svg', import.meta.url).href,
@@ -68,6 +73,7 @@ const themeAssets: Record<ThemeId, Record<string, string>> = {
     gearCw: new URL('../assets/themes/ocean/gear-cw.svg', import.meta.url).href,
     gearCcw: new URL('../assets/themes/ocean/gear-ccw.svg', import.meta.url).href,
     checkpoint: new URL('../assets/themes/ocean/checkpoint.svg', import.meta.url).href,
+    battery: new URL('../assets/themes/ocean/battery.svg', import.meta.url).href,
   },
   lava: {
     floor: new URL('../assets/themes/lava/floor.svg', import.meta.url).href,
@@ -78,6 +84,7 @@ const themeAssets: Record<ThemeId, Record<string, string>> = {
     gearCw: new URL('../assets/themes/lava/gear-cw.svg', import.meta.url).href,
     gearCcw: new URL('../assets/themes/lava/gear-ccw.svg', import.meta.url).href,
     checkpoint: new URL('../assets/themes/lava/checkpoint.svg', import.meta.url).href,
+    battery: new URL('../assets/themes/lava/battery.svg', import.meta.url).href,
   },
   ice: {
     floor: new URL('../assets/themes/ice/floor.svg', import.meta.url).href,
@@ -88,6 +95,7 @@ const themeAssets: Record<ThemeId, Record<string, string>> = {
     gearCw: new URL('../assets/themes/ice/gear-cw.svg', import.meta.url).href,
     gearCcw: new URL('../assets/themes/ice/gear-ccw.svg', import.meta.url).href,
     checkpoint: new URL('../assets/themes/ice/checkpoint.svg', import.meta.url).href,
+    battery: new URL('../assets/themes/ice/battery.svg', import.meta.url).href,
   },
   jungle: {
     floor: new URL('../assets/themes/jungle/floor.svg', import.meta.url).href,
@@ -98,6 +106,7 @@ const themeAssets: Record<ThemeId, Record<string, string>> = {
     gearCw: new URL('../assets/themes/jungle/gear-cw.svg', import.meta.url).href,
     gearCcw: new URL('../assets/themes/jungle/gear-ccw.svg', import.meta.url).href,
     checkpoint: new URL('../assets/themes/jungle/checkpoint.svg', import.meta.url).href,
+    battery: new URL('../assets/themes/jungle/battery.svg', import.meta.url).href,
   },
   steampunk: {
     floor: new URL('../assets/themes/steampunk/floor.svg', import.meta.url).href,
@@ -108,6 +117,7 @@ const themeAssets: Record<ThemeId, Record<string, string>> = {
     gearCw: new URL('../assets/themes/steampunk/gear-cw.svg', import.meta.url).href,
     gearCcw: new URL('../assets/themes/steampunk/gear-ccw.svg', import.meta.url).href,
     checkpoint: new URL('../assets/themes/steampunk/checkpoint.svg', import.meta.url).href,
+    battery: new URL('../assets/themes/steampunk/battery.svg', import.meta.url).href,
   },
 };
 
@@ -132,6 +142,7 @@ function getTileTexture(tile: Tile, theme: ThemeId): string {
     case 'repair': return assets.repair;
     case 'conveyor': return tile.speed === 2 ? assets.conveyorFast : assets.conveyor;
     case 'gear': return tile.rotation === 'cw' ? assets.gearCw : assets.gearCcw;
+    case 'battery': return assets.battery;
     default: return assets.floor;
   }
 }

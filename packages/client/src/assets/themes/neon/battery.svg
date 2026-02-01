@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" shape-rendering="crispEdges">
+  <!-- Dark base -->
+  <rect width="128" height="128" fill="#0f0f23"/>
+  <rect x="4" y="4" width="120" height="120" fill="#1a1a2e"/>
+  <rect x="8" y="8" width="112" height="112" fill="#16213e"/>
+
+  <!-- Neon grid lines -->
+  <rect x="8" y="8" width="112" height="2" fill="#00fff5" opacity="0.3"/>
+  <rect x="8" y="118" width="112" height="2" fill="#00fff5" opacity="0.3"/>
+  <rect x="8" y="8" width="2" height="112" fill="#00fff5" opacity="0.3"/>
+  <rect x="118" y="8" width="2" height="112" fill="#00fff5" opacity="0.3"/>
+
+  <!-- Battery body - neon outline -->
+  <rect x="36" y="32" width="56" height="72" fill="#0f0f23"/>
+  <rect x="38" y="34" width="52" height="68" fill="#1a1a2e"/>
+
+  <!-- Battery terminal -->
+  <rect x="52" y="20" width="24" height="16" fill="#0f0f23"/>
+  <rect x="54" y="22" width="20" height="12" fill="#1a1a2e"/>
+
+  <!-- Neon battery outline -->
+  <rect x="36" y="32" width="56" height="4" fill="#00ff00"/>
+  <rect x="36" y="100" width="56" height="4" fill="#00ff00"/>
+  <rect x="36" y="32" width="4" height="72" fill="#00ff00"/>
+  <rect x="88" y="32" width="4" height="72" fill="#00ff00"/>
+
+  <!-- Terminal outline -->
+  <rect x="52" y="20" width="24" height="4" fill="#00ff00"/>
+  <rect x="52" y="20" width="4" height="16" fill="#00ff00"/>
+  <rect x="72" y="20" width="4" height="16" fill="#00ff00"/>
+
+  <!-- Energy fill - neon yellow/green -->
+  <rect x="44" y="48" width="40" height="48" fill="#00ff00" opacity="0.3"/>
+  <rect x="48" y="52" width="32" height="40" fill="#00ff00" opacity="0.6"/>
+
+  <!-- Lightning bolt neon -->
+  <rect x="58" y="54" width="16" height="4" fill="#ffff00"/>
+  <rect x="54" y="58" width="16" height="4" fill="#ffff00"/>
+  <rect x="50" y="62" width="16" height="4" fill="#ffff00"/>
+  <rect x="58" y="66" width="16" height="4" fill="#ffff00"/>
+  <rect x="62" y="70" width="16" height="4" fill="#ffff00"/>
+  <rect x="58" y="74" width="16" height="4" fill="#ffff00"/>
+  <rect x="54" y="78" width="16" height="4" fill="#ffff00"/>
+
+  <!-- Corner accents -->
+  <rect x="8" y="8" width="8" height="8" fill="#ff00ff" opacity="0.5"/>
+  <rect x="112" y="8" width="8" height="8" fill="#ff00ff" opacity="0.5"/>
+  <rect x="8" y="112" width="8" height="8" fill="#ff00ff" opacity="0.5"/>
+  <rect x="112" y="112" width="8" height="8" fill="#ff00ff" opacity="0.5"/>
+</svg>
