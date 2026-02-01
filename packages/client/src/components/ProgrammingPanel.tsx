@@ -12,8 +12,11 @@ export function ProgrammingPanel() {
   const player = getCurrentPlayer();
   if (!player) return null;
 
-  const { hand, registers, isReady, robot } = player;
+  const { hand, registers, haywireRegisters, isReady, robot } = player;
   const lockedCount = getLockedRegisterCount(robot.damage);
+
+  // Count damage cards in hand
+  const damageCardsInHand = hand.filter(card => isDamageCard(card.type)).length;
 
   const isRegisterLocked = (index: number) => {
     return index >= REGISTERS_COUNT - lockedCount;
@@ -110,30 +113,37 @@ export function ProgrammingPanel() {
         <div className={styles.registerSlots}>
           {registers.map((card, index) => {
             const locked = isRegisterLocked(index);
+            const haywireCard = haywireRegisters?.[index];
             return (
-              <div
-                key={index}
-                className={`${styles.register} ${card ? styles.filled : ''} ${locked ? styles.locked : ''} ${selectedCard && !isReady && !locked ? styles.clickable : ''}`}
-                onClick={() => handleRegisterClick(index)}
-                onDoubleClick={() => handleRegisterDoubleClick(index)}
-              >
-                {card ? (
-                  <>
-                    <span className={styles.cardIcon}>{getCardIcon(card.type)}</span>
-                    <span className={styles.cardType}>{getCardLabel(card.type)}</span>
-                    <span className={styles.priority}>{card.priority}</span>
-                    {!isReady && !locked && (
-                      <button
-                        className={styles.clearBtn}
-                        onClick={(e) => handleClearRegister(index, e)}
-                      >
-                        ×
-                      </button>
-                    )}
-                    {locked && <span className={styles.lockIcon}>🔒</span>}
-                  </>
-                ) : (
-                  <span className={styles.registerNumber}>{index + 1}</span>
+              <div key={index} className={styles.registerWrapper}>
+                <div
+                  className={`${styles.register} ${card ? styles.filled : ''} ${locked ? styles.locked : ''} ${selectedCard && !isReady && !locked ? styles.clickable : ''} ${card && isDamageCard(card.type) ? styles.damageCard : ''}`}
+                  onClick={() => handleRegisterClick(index)}
+                  onDoubleClick={() => handleRegisterDoubleClick(index)}
+                >
+                  {card ? (
+                    <>
+                      <span className={styles.cardIcon}>{getCardIcon(card.type)}</span>
+                      <span className={styles.cardType}>{getCardLabel(card.type)}</span>
+                      <span className={styles.priority}>{card.priority}</span>
+                      {!isReady && !locked && (
+                        <button
+                          className={styles.clearBtn}
+                          onClick={(e) => handleClearRegister(index, e)}
+                        >
+                          ×
+                        </button>
+                      )}
+                      {locked && <span className={styles.lockIcon}>🔒</span>}
+                    </>
+                  ) : (
+                    <span className={styles.registerNumber}>{index + 1}</span>
+                  )}
+                </div>
+                {haywireCard && (
+                  <div className={styles.haywireIndicator} title="Haywire card (executes next round)">
+                    ⚠️
+                  </div>
                 )}
               </div>
             );
@@ -142,10 +152,16 @@ export function ProgrammingPanel() {
       </div>
 
       <div className={styles.hand}>
-        <span className={styles.label}>Your Cards</span>
+        <span className={styles.label}>
+          Your Cards
+          {damageCardsInHand > 0 && (
+            <span className={styles.damageCount}> ({damageCardsInHand} damage)</span>
+          )}
+        </span>
         <div className={styles.cards}>
           {hand.map((card) => {
             const isInRegister = registers.some(r => r?.id === card.id);
+            const isDamage = isDamageCard(card.type);
             return (
               <div
                 key={card.id}
@@ -154,6 +170,7 @@ export function ProgrammingPanel() {
                   ${selectedCard?.id === card.id ? styles.selected : ''}
                   ${isInRegister ? styles.used : ''}
                   ${isReady ? styles.disabled : ''}
+                  ${isDamage ? styles.damageCard : ''}
                 `}
                 onClick={() => handleCardClick(card)}
                 onDoubleClick={() => handleCardDoubleClick(card)}
@@ -162,7 +179,7 @@ export function ProgrammingPanel() {
               >
                 <span className={styles.cardIcon}>{getCardIcon(card.type)}</span>
                 <span className={styles.cardType}>{getCardLabel(card.type)}</span>
-                <span className={styles.priority}>{card.priority}</span>
+                {!isDamage && <span className={styles.priority}>{card.priority}</span>}
               </div>
             );
           })}

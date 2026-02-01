@@ -249,3 +249,49 @@
   margin-top: 8px;
   font-size: 0.85rem;
 }
+
+/* Damage cards styling */
+.damageCard {
+  background: linear-gradient(135deg, #4a1a1a 0%, #2d1a1a 100%) !important;
+  border-color: #e74c3c !important;
+}
+
+.damageCard:hover:not(.disabled):not(.used) {
+  border-color: #c0392b !important;
+}
+
+.card.damageCard.selected {
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.4), rgba(192, 57, 43, 0.4)) !important;
+  box-shadow: 0 0 12px rgba(231, 76, 60, 0.4);
+}
+
+.register.damageCard {
+  background: rgba(231, 76, 60, 0.2) !important;
+  border-color: #e74c3c !important;
+  border-style: solid;
+}
+
+.damageCount {
+  color: #e74c3c;
+  font-weight: 600;
+  text-transform: none;
+}
+
+/* Haywire indicator under registers */
+.registerWrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 4px;
+}
+
+.haywireIndicator {
+  background: rgba(243, 156, 18, 0.2);
+  border: 1px solid #f39c12;
+  border-radius: 4px;
+  padding: 2px;
+  text-align: center;
+  font-size: 0.7rem;
+  color: #f39c12;
+  cursor: help;
+}
