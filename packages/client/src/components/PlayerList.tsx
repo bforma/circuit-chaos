@@ -68,6 +68,7 @@ function PlayerListItem({ player, isCurrentPlayer, isHost, hasPriority, showVote
       <div className={styles.info}>
         <span className={styles.name}>
           {player.name}
+          {player.isAI && <span className={styles.badge}>AI</span>}
           {isHost && <span className={styles.badge}>Host</span>}
           {isCurrentPlayer && <span className={styles.badge}>You</span>}
           {hasPriority && <span className={styles.priorityBadge} title="Priority Token - moves first">1st</span>}

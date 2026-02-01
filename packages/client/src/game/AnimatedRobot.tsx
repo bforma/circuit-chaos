@@ -1,6 +1,6 @@
-import { Container, Sprite, Text, Graphics } from '@pixi/react';
+import { Container, Sprite, Text } from '@pixi/react';
 import { useTick } from '@pixi/react';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import * as PIXI from 'pixi.js';
 import type { Direction } from '@circuit-chaos/shared';
 import { TILE_SIZE } from '@circuit-chaos/shared';
@@ -123,35 +123,6 @@ export function AnimatedRobot({
     }
   });
 
-  // Draw AI indicator ring
-  const drawAIRing = useCallback(
-    (g: PIXI.Graphics) => {
-      const x = displayX * TILE_SIZE + TILE_SIZE / 2;
-      const y = displayY * TILE_SIZE + TILE_SIZE / 2;
-      const colorInt = parseInt(playerColor.slice(1), 16);
-
-      g.clear();
-      // Outer glow
-      g.lineStyle(4, colorInt, 0.3);
-      g.drawCircle(x, y, TILE_SIZE * 0.5);
-      // Inner ring
-      g.lineStyle(2, colorInt, 0.8);
-      g.drawCircle(x, y, TILE_SIZE * 0.48);
-      // Pulsing effect dots
-      const dotRadius = 3;
-      const ringRadius = TILE_SIZE * 0.5;
-      for (let i = 0; i < 4; i++) {
-        const angle = (i * Math.PI) / 2;
-        const dx = Math.cos(angle) * ringRadius;
-        const dy = Math.sin(angle) * ringRadius;
-        g.beginFill(colorInt, 0.9);
-        g.drawCircle(x + dx, y + dy, dotRadius);
-        g.endFill();
-      }
-    },
-    [displayX, displayY, playerColor]
-  );
-
   if (isDestroyed) {
     return null;
   }
@@ -162,8 +133,6 @@ export function AnimatedRobot({
 
   return (
     <Container>
-      {/* AI indicator ring */}
-      {isAI && <Graphics draw={drawAIRing} />}
       <Sprite
         image={robotSprite}
         x={robotX}
@@ -176,7 +145,7 @@ export function AnimatedRobot({
       />
       {/* Player name label */}
       <Text
-        text={(isAI ? '🤖 ' : '') + playerName.slice(0, 8)}
+        text={playerName.slice(0, 8) + (isAI ? ' (AI)' : '')}
         x={robotX}
         y={displayY * TILE_SIZE + TILE_SIZE + 4}
         anchor={[0.5, 0]}
