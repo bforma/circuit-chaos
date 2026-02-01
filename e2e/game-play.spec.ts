@@ -216,4 +216,42 @@ test.describe('Game Play', () => {
     await hostContext.close();
     await guestContext.close();
   });
+
+  test('Play Again button is not visible during active game', async ({ browser }) => {
+    const hostContext = await browser.newContext();
+    const guestContext = await browser.newContext();
+
+    const hostPage = await hostContext.newPage();
+    const guestPage = await guestContext.newPage();
+
+    // Setup game
+    await hostPage.goto('/');
+    await hostPage.getByRole('button', { name: 'Create Game' }).click();
+    await hostPage.getByPlaceholder('Your name').fill('Host');
+    await hostPage.getByRole('button', { name: 'Create' }).click();
+
+    await expect(hostPage.getByText('Game Lobby')).toBeVisible({ timeout: 5000 });
+    const codeElement = hostPage.locator('text=Code:').locator('xpath=..').locator('span');
+    const gameCode = await codeElement.textContent();
+
+    await guestPage.goto('/');
+    await guestPage.getByRole('button', { name: 'Join Game' }).click();
+    await guestPage.getByPlaceholder('Your name').fill('Guest');
+    await guestPage.getByPlaceholder('Game code').fill(gameCode!);
+    await guestPage.getByRole('button', { name: 'Join' }).click();
+
+    await expect(guestPage.getByText('Game Lobby')).toBeVisible({ timeout: 5000 });
+    await hostPage.getByRole('button', { name: 'Start Game' }).click();
+
+    await expect(hostPage.getByText('Program Your Robot')).toBeVisible({ timeout: 5000 });
+
+    // Play Again button should NOT be visible during active gameplay
+    await expect(hostPage.getByRole('button', { name: 'Play Again' })).not.toBeVisible();
+
+    // Game Over text should also not be visible
+    await expect(hostPage.getByText('Game Over!')).not.toBeVisible();
+
+    await hostContext.close();
+    await guestContext.close();
+  });
 });

@@ -613,4 +613,146 @@ describe('GameManager', () => {
       expect(finalCardIds.size).toBe(initialUniqueCardCount);
     });
   });
+
+  describe('playAgain', () => {
+    it('resets game to lobby when host calls playAgain', () => {
+      const hostSocket = createMockSocket('host-socket');
+      const guestSocket = createMockSocket('guest-socket');
+
+      // Create and start a game
+      gameManager.createGame(hostSocket, 'Host');
+      const createCall = hostSocket.emit.mock.calls.find(
+        (c: any[]) => c[0] === 'game:created'
+      );
+      const gameId = createCall[1].gameId;
+
+      gameManager.joinGame(guestSocket, gameId, 'Guest');
+      gameManager.startGame(hostSocket);
+
+      // Set game to finished state
+      const state = io.getLastState();
+      state.phase = 'finished';
+      state.winnerId = state.players[0].id;
+
+      // Call playAgain
+      gameManager.playAgain(hostSocket);
+
+      const finalState = io.getLastState();
+      expect(finalState.phase).toBe('lobby');
+      expect(finalState.winnerId).toBeUndefined();
+      expect(finalState.turn).toBe(0);
+    });
+
+    it('only allows host to restart the game', () => {
+      const hostSocket = createMockSocket('host-socket');
+      const guestSocket = createMockSocket('guest-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      const createCall = hostSocket.emit.mock.calls.find(
+        (c: any[]) => c[0] === 'game:created'
+      );
+      const gameId = createCall[1].gameId;
+
+      gameManager.joinGame(guestSocket, gameId, 'Guest');
+      gameManager.startGame(hostSocket);
+
+      // Set game to finished
+      const state = io.getLastState();
+      state.phase = 'finished';
+      state.winnerId = state.players[0].id;
+
+      // Guest tries to restart
+      gameManager.playAgain(guestSocket);
+
+      expect(guestSocket.emit).toHaveBeenCalledWith(
+        'game:error',
+        'Only the host can restart the game'
+      );
+    });
+
+    it('only works when game is finished', () => {
+      const hostSocket = createMockSocket('host-socket');
+      const guestSocket = createMockSocket('guest-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      const createCall = hostSocket.emit.mock.calls.find(
+        (c: any[]) => c[0] === 'game:created'
+      );
+      const gameId = createCall[1].gameId;
+
+      gameManager.joinGame(guestSocket, gameId, 'Guest');
+      gameManager.startGame(hostSocket);
+
+      // Game is in programming phase, not finished
+      gameManager.playAgain(hostSocket);
+
+      expect(hostSocket.emit).toHaveBeenCalledWith(
+        'game:error',
+        'Game is not finished'
+      );
+    });
+
+    it('resets all player robots and cards', () => {
+      const hostSocket = createMockSocket('host-socket');
+      const guestSocket = createMockSocket('guest-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      const createCall = hostSocket.emit.mock.calls.find(
+        (c: any[]) => c[0] === 'game:created'
+      );
+      const gameId = createCall[1].gameId;
+
+      gameManager.joinGame(guestSocket, gameId, 'Guest');
+      gameManager.startGame(hostSocket);
+
+      // Set game to finished with some player state
+      const state = io.getLastState();
+      state.phase = 'finished';
+      state.winnerId = state.players[0].id;
+      state.players[0].robot.isDestroyed = true;
+      state.players[0].robot.lastCheckpoint = 3;
+
+      gameManager.playAgain(hostSocket);
+
+      const finalState = io.getLastState();
+
+      // Check robots are reset
+      for (const player of finalState.players) {
+        expect(player.robot.isDestroyed).toBe(false);
+        expect(player.robot.lastCheckpoint).toBe(0);
+        expect(player.hand).toHaveLength(0);
+        expect(player.registers).toEqual([null, null, null, null, null]);
+        expect(player.isReady).toBe(false);
+      }
+    });
+
+    it('keeps the same players after restart', () => {
+      const hostSocket = createMockSocket('host-socket');
+      const guestSocket = createMockSocket('guest-socket');
+
+      gameManager.createGame(hostSocket, 'Host');
+      const createCall = hostSocket.emit.mock.calls.find(
+        (c: any[]) => c[0] === 'game:created'
+      );
+      const gameId = createCall[1].gameId;
+
+      gameManager.joinGame(guestSocket, gameId, 'Guest');
+      gameManager.startGame(hostSocket);
+
+      const stateBefore = io.getLastState();
+      const playerIdsBefore = stateBefore.players.map((p: any) => p.id);
+
+      // Set game to finished
+      stateBefore.phase = 'finished';
+      stateBefore.winnerId = stateBefore.players[0].id;
+
+      gameManager.playAgain(hostSocket);
+
+      const stateAfter = io.getLastState();
+      const playerIdsAfter = stateAfter.players.map((p: any) => p.id);
+
+      expect(playerIdsAfter).toEqual(playerIdsBefore);
+      expect(stateAfter.players).toHaveLength(2);
+    });
+  });
 });
