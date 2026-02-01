@@ -3,9 +3,8 @@ import type {
   Player,
   Board,
   Direction,
-  Position,
 } from '@circuit-chaos/shared';
-import { rotateDirection, getDirectionDelta } from '@circuit-chaos/shared';
+import { rotateDirection, getDirectionDelta, isDamageCard } from '@circuit-chaos/shared';
 
 export interface PreviewPosition {
   x: number;
@@ -30,11 +29,13 @@ export function calculatePreviewPosition(
     isDestroyed: player.robot.isDestroyed,
   };
 
+  let previousCard: Card | null = null;
+
   for (const card of cardsToSimulate) {
     if (!card || position.isDestroyed) continue;
 
-    // Apply card effect
-    position = applyCard(position, card, board);
+    // Apply card effect (pass previous card for Again card handling)
+    position = applyCard(position, card, board, previousCard);
 
     // Apply board effects (conveyors, gears)
     if (!position.isDestroyed) {
@@ -42,6 +43,11 @@ export function calculatePreviewPosition(
     }
     if (!position.isDestroyed) {
       position = applyGears(position, board);
+    }
+
+    // Track previous card for Again (skip damage cards and again cards)
+    if (card.type !== 'again' && !isDamageCard(card.type)) {
+      previousCard = card;
     }
   }
 
@@ -51,11 +57,15 @@ export function calculatePreviewPosition(
 function applyCard(
   pos: PreviewPosition,
   card: Card,
-  board: Board
+  board: Board,
+  previousCard: Card | null
 ): PreviewPosition {
   const result = { ...pos };
 
-  switch (card.type) {
+  // Handle Again card by repeating previous card's effect
+  const effectiveCard = card.type === 'again' && previousCard ? previousCard : card;
+
+  switch (effectiveCard.type) {
     case 'move1':
       movePosition(result, 1, board);
       break;
@@ -77,6 +87,7 @@ function applyCard(
     case 'uturn':
       result.direction = rotateDirection(result.direction, 'uturn');
       break;
+    // again without previous card, or damage cards: no movement effect
   }
 
   return result;
