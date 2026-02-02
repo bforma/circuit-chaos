@@ -149,7 +149,7 @@ function initializeSocket() {
 
     // Update screen based on game phase
     const currentScreen = useGameStore.getState().screen;
-    if (state.phase === 'lobby' && currentScreen === 'menu') {
+    if (state.phase === 'lobby' && currentScreen !== 'lobby') {
       useGameStore.getState().setScreen('lobby');
     } else if (state.phase !== 'lobby' && currentScreen !== 'game') {
       useGameStore.getState().setScreen('game');
