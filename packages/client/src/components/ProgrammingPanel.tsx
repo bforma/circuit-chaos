@@ -1,11 +1,13 @@
 import { useGameStore } from '../stores/gameStore';
 import { useSocket } from '../hooks/useSocket';
 import { getCardLabel, getCardIcon, isDamageCard } from '@circuit-chaos/shared';
+import { useUISounds } from '../audio';
 import styles from './ProgrammingPanel.module.css';
 
 export function ProgrammingPanel() {
   const { gameState, getCurrentPlayer, selectedCard, setSelectedCard, setHoveredCard } = useGameStore();
   const { programRegister, submitProgram, shutdownRobot } = useSocket();
+  const { playCardPlace, playCardRemove, playSubmit, playClick } = useUISounds();
 
   const cardPreviewEnabled = gameState?.cardPreviewEnabled ?? false;
 
@@ -19,6 +21,7 @@ export function ProgrammingPanel() {
 
   const handleCardClick = (card: typeof hand[0]) => {
     if (isReady) return;
+    playClick();
     if (selectedCard?.id === card.id) {
       setSelectedCard(null);
     } else {
@@ -39,6 +42,7 @@ export function ProgrammingPanel() {
       programRegister(existingIndex, null);
     }
 
+    playCardPlace();
     programRegister(emptyIndex, card);
     setSelectedCard(null);
     setHoveredCard(null);
@@ -54,6 +58,7 @@ export function ProgrammingPanel() {
       programRegister(existingIndex, null);
     }
 
+    playCardPlace();
     programRegister(index, selectedCard);
     setSelectedCard(null);
     setHoveredCard(null);
@@ -62,18 +67,21 @@ export function ProgrammingPanel() {
   const handleClearRegister = (index: number, e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (isReady) return;
+    playCardRemove();
     programRegister(index, null);
   };
 
   const handleRegisterDoubleClick = (index: number) => {
     if (isReady) return;
     if (registers[index]) {
+      playCardRemove();
       programRegister(index, null);
     }
   };
 
   const handleSubmit = () => {
     if (registers.every(r => r !== null)) {
+      playSubmit();
       submitProgram();
     }
   };

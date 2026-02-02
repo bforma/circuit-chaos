@@ -24,7 +24,7 @@ import {
   createLogEntry,
 } from '@circuit-chaos/shared';
 
-type Screen = 'menu' | 'lobby' | 'game';
+type Screen = 'menu' | 'lobby' | 'game' | 'soundTest';
 
 interface GameStore {
   // UI State

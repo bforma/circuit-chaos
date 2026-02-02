@@ -11,6 +11,7 @@ import type {
   LaserFireEvent,
 } from '@circuit-chaos/shared';
 import { useGameStore } from './gameStore';
+import { playAnimationEventSound } from '../audio';
 
 // Robot visual state (interpolated position and rotation)
 export interface RobotVisual {
@@ -231,6 +232,9 @@ function handleAnimationEvent(
 
   // Add log entry for this event (at the correct time)
   useGameStore.getState().addLogEntryFromEvent(event);
+
+  // Play sound for this event
+  playAnimationEventSound(event.type);
 
   switch (event.type) {
     case 'player_card': {

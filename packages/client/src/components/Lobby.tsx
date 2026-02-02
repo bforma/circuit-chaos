@@ -2,13 +2,20 @@ import { useState } from 'react';
 import { useGameStore } from '../stores/gameStore';
 import { useSocket } from '../hooks/useSocket';
 import { ThemeSelector } from './ThemeSelector';
+import { useGameSounds } from '../audio';
 import type { AIDifficulty } from '@circuit-chaos/shared';
 import styles from './Lobby.module.css';
 
 export function Lobby() {
   const { gameState, playerId } = useGameStore();
   const { startGame, leaveGame, setTheme, setCardPreview, addAIPlayer, removeAIPlayer } = useSocket();
+  const { playGameStart } = useGameSounds();
   const [selectedDifficulty, setSelectedDifficulty] = useState<AIDifficulty>('medium');
+
+  const handleStartGame = () => {
+    playGameStart();
+    startGame();
+  };
 
   if (!gameState) {
     return <div className={styles.container}>Loading...</div>;
@@ -105,7 +112,7 @@ export function Lobby() {
         {isHost ? (
           <button
             className="btn btn-primary"
-            onClick={startGame}
+            onClick={handleStartGame}
             disabled={!canStart}
           >
             {canStart ? 'Start Game' : 'Need at least 2 players'}

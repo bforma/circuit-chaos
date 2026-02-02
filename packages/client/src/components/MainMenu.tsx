@@ -29,7 +29,7 @@ export function MainMenu() {
   const [gameCode, setGameCode] = useState('');
   const [mode, setMode] = useState<'menu' | 'create' | 'join'>('menu');
 
-  const { gameIdToJoin, setGameIdToJoin, error, setError } = useGameStore();
+  const { gameIdToJoin, setGameIdToJoin, error, setError, setScreen } = useGameStore();
   const { createGame, joinGame } = useSocket();
 
   // Auto-switch to join mode if there's a game ID in the URL
@@ -89,6 +89,13 @@ export function MainMenu() {
           </button>
           <button className="btn btn-secondary" onClick={() => setMode('join')}>
             Join Game
+          </button>
+          <button
+            className="btn"
+            style={{ marginTop: '20px', opacity: 0.7 }}
+            onClick={() => setScreen('soundTest')}
+          >
+            Sound Test
           </button>
         </div>
       )}

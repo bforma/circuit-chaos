@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useGameStore } from '../stores/gameStore';
 import { useSocket } from '../hooks/useSocket';
 import { GameBoard } from '../game/GameBoard';
@@ -6,13 +7,24 @@ import { PlayerHUD } from './PlayerHUD';
 import { PlayerList } from './PlayerList';
 import { DisconnectVoteModal } from './DisconnectVoteModal';
 import { GameLog } from './GameLog';
+import { useGameSounds } from '../audio';
 import styles from './Game.module.css';
 
 export function Game() {
   const { gameState, getCurrentPlayer, playerId } = useGameStore();
   const { playAgain } = useSocket();
+  const { playGameWin } = useGameSounds();
   const currentPlayer = getCurrentPlayer();
   const isHost = playerId === gameState?.hostId;
+  const prevPhaseRef = useRef<string | null>(null);
+
+  // Play game win sound when game finishes
+  useEffect(() => {
+    if (gameState?.phase === 'finished' && prevPhaseRef.current !== 'finished') {
+      playGameWin();
+    }
+    prevPhaseRef.current = gameState?.phase ?? null;
+  }, [gameState?.phase, playGameWin]);
 
   if (!gameState || !currentPlayer) {
     return <div className={styles.loading}>Loading game...</div>;
